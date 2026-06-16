@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  OWNER
+  MECHANIC
+}
+
+enum WorkOrderStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ServiceItemType {
+  REPAIR
+  MAINTENANCE
+  UPGRADE
+  OTHER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          Role      @default(OWNER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts   Account[]
+  sessions   Session[]
+  vehicles   Vehicle[]   @relation("VehicleOwner")
+  workOrders WorkOrder[] @relation("MechanicWorkOrders")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Vehicle {
+  id        String   @id @default(cuid())
+  make      String
+  model     String
+  year      Int
+  vin       String?  @unique
+  plate     String?
+  ownerId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner      User        @relation("VehicleOwner", fields: [ownerId], references: [id])
+  workOrders WorkOrder[]
+}
+
+model WorkOrder {
+  id          String          @id @default(cuid())
+  title       String
+  description String?         @db.Text
+  status      WorkOrderStatus @default(PENDING)
+  startDate   DateTime?
+  endDate     DateTime?
+  vehicleId   String
+  mechanicId  String
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  vehicle      Vehicle       @relation(fields: [vehicleId], references: [id])
+  mechanic     User          @relation("MechanicWorkOrders", fields: [mechanicId], references: [id])
+  serviceItems ServiceItem[]
+}
+
+model ServiceItem {
+  id          String          @id @default(cuid())
+  type        ServiceItemType
+  description String          @db.Text
+  laborHours  Float?
+  partsCost   Float?
+  notes       String?         @db.Text
+  workOrderId String
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  workOrder WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+}
