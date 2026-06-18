@@ -33,17 +33,23 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id
         token.role = user.role
+        token.workshopId = user.workshopId ?? null
+      }
+      if (trigger === 'update') {
+        const dbUser = await prisma.user.findUnique({ where: { id: token.id } })
+        if (dbUser) token.workshopId = dbUser.workshopId ?? null
       }
       return token
     },
     async session({ session, token }) {
       if (token) {
-        session.user.id = token.id as string
-        session.user.role = token.role as string
+        session.user.id = token.id
+        session.user.role = token.role
+        session.user.workshopId = token.workshopId ?? null
       }
       return session
     },
