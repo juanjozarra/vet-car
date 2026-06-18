@@ -33,13 +33,27 @@ model User {
   image         String?
   password      String?
   role          Role      @default(OWNER)
+  workshopId    String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  workshop   Workshop?   @relation(fields: [workshopId], references: [id])
   accounts   Account[]
   sessions   Session[]
   vehicles   Vehicle[]   @relation("VehicleOwner")
   workOrders WorkOrder[] @relation("MechanicWorkOrders")
+}
+
+model Workshop {
+  id        String   @id @default(cuid())
+  name      String
+  address   String
+  phone     String
+  email     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  mechanics User[]
 }
 
 model Account {
