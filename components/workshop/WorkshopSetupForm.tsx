@@ -15,28 +15,33 @@ export function WorkshopSetupForm() {
     setError('')
     setLoading(true)
 
-    const form = e.currentTarget
-    const name = (form.elements.namedItem('name') as HTMLInputElement).value
-    const address = (form.elements.namedItem('address') as HTMLInputElement).value
-    const phone = (form.elements.namedItem('phone') as HTMLInputElement).value
-    const email = (form.elements.namedItem('email') as HTMLInputElement).value
+    try {
+      const form = e.currentTarget
+      const name = (form.elements.namedItem('name') as HTMLInputElement).value
+      const address = (form.elements.namedItem('address') as HTMLInputElement).value
+      const phone = (form.elements.namedItem('phone') as HTMLInputElement).value
+      const email = (form.elements.namedItem('email') as HTMLInputElement).value
 
-    const res = await fetch('/api/workshop', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, address, phone, email }),
-    })
+      const res = await fetch('/api/workshop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, address, phone, email }),
+      })
 
-    if (!res.ok) {
-      const data = await res.json()
-      setError(data.error ?? 'Failed to create workshop')
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setError((data as { error?: string }).error ?? 'Failed to create workshop')
+        return
+      }
+
+      await update()
+      router.push('/mechanic')
+      router.refresh()
+    } catch {
+      setError('Failed to create workshop')
+    } finally {
       setLoading(false)
-      return
     }
-
-    await update()
-    router.push('/mechanic')
-    router.refresh()
   }
 
   return (

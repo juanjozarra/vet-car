@@ -6,6 +6,7 @@ jest.mock('@/lib/prisma', () => ({
   prisma: {
     workshop: { create: jest.fn() },
     user: { update: jest.fn() },
+    $transaction: jest.fn(),
   },
 }))
 
@@ -16,6 +17,7 @@ import { prisma } from '@/lib/prisma'
 const mockGetServerSession = getServerSession as jest.Mock
 const mockWorkshopCreate = prisma.workshop.create as jest.Mock
 const mockUserUpdate = prisma.user.update as jest.Mock
+const mockTransaction = prisma.$transaction as jest.Mock
 
 function makeRequest(body: object) {
   return new Request('http://localhost/api/workshop', {
@@ -28,7 +30,10 @@ function makeRequest(body: object) {
 const validBody = { name: 'AutoShop', address: '123 Main St', phone: '555-0100', email: 'shop@example.com' }
 
 describe('POST /api/workshop', () => {
-  beforeEach(() => jest.clearAllMocks())
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockTransaction.mockImplementation(async (cb: (tx: typeof prisma) => Promise<unknown>) => cb(prisma))
+  })
 
   it('returns 401 when not authenticated', async () => {
     mockGetServerSession.mockResolvedValue(null)

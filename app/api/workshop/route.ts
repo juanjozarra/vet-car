@@ -21,13 +21,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const workshop = await prisma.workshop.create({
-      data: { name, address, phone, email },
-    })
-
-    await prisma.user.update({
-      where: { id: session.user.id },
-      data: { workshopId: workshop.id },
+    const workshop = await prisma.$transaction(async (tx) => {
+      const ws = await tx.workshop.create({
+        data: { name, address, phone, email },
+      })
+      await tx.user.update({
+        where: { id: session.user.id },
+        data: { workshopId: ws.id },
+      })
+      return ws
     })
 
     return NextResponse.json(workshop, { status: 201 })
