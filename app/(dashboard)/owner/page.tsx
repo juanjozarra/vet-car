@@ -129,6 +129,7 @@ function TimelineStep({ step, total }: { step: Step; index: number; total: numbe
 export default async function OwnerDashboard() {
   const session = await getServerSession(authOptions)
   if (!session) redirect('/login')
+  if (session.user.role !== 'OWNER') redirect('/mechanic')
 
   const userName = session.user.name ?? 'there'
   const completedCount = ACTIVE_REPAIR.steps.filter(s => s.state === 'done').length
