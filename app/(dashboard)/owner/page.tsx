@@ -11,10 +11,11 @@ export default async function OwnerDashboard() {
   if (session.user.role !== 'OWNER') redirect('/mechanic')
 
   const userName = session.user.name ?? 'there'
+  const userEmail = session.user.email ?? undefined
 
   return (
     <div className="flex flex-col min-h-screen">
-      <DashboardNav userName={userName} />
+      <DashboardNav userName={userName} userEmail={userEmail} />
       <DashboardContent userName={userName} />
       <DashboardFooter />
     </div>

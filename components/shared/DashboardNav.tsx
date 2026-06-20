@@ -1,15 +1,7 @@
-import { BellIcon, GearIcon, PlusIcon } from '@/components/ui/icons'
+import { BellIcon, GearIcon } from '@/components/ui/icons'
+import { AvatarMenu } from './AvatarMenu'
 
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map(w => w[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase()
-}
-
-export function DashboardNav({ userName }: { userName: string }) {
+export function DashboardNav({ userName, userEmail }: { userName: string; userEmail?: string }) {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-[#060e20] border-b border-[#434655] flex items-center justify-between px-8">
       {/* Logo + nav links */}
@@ -46,12 +38,7 @@ export function DashboardNav({ userName }: { userName: string }) {
             <GearIcon />
           </button>
         </div>
-        {/* Avatar */}
-        <div className="size-8 rounded-full border border-[#434655] bg-[#222a3d] flex items-center justify-center">
-          <span className="text-[10px] font-semibold text-[#b4c5ff]">
-            {getInitials(userName)}
-          </span>
-        </div>
+        <AvatarMenu userName={userName} userEmail={userEmail} />
       </div>
     </header>
   )
