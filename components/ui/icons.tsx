@@ -121,3 +121,40 @@ export function CalendarIcon() {
     </svg>
   )
 }
+
+export function UploadIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="#8d90a0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M17 8L12 3L7 8" stroke="#8d90a0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M12 3v12" stroke="#8d90a0" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
+export function OdometerIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="8" cy="8" r="6.25" stroke="#8d90a0" strokeWidth="1.5"/>
+      <path d="M5 11L8 8" stroke="#8d90a0" strokeWidth="1.5" strokeLinecap="round"/>
+      <circle cx="8" cy="8" r="1" fill="#8d90a0"/>
+    </svg>
+  )
+}
+
+export function ChevronDownIcon() {
+  return (
+    <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M1 1.5L6 6.5L11 1.5" stroke="#8d90a0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+}
+
+export function ScanIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M1 5V2a1 1 0 0 1 1-1h3M15 5V2a1 1 0 0 0-1-1h-3M1 11v3a1 1 0 0 0 1 1h3M15 11v3a1 1 0 0 1-1 1h-3" stroke="#8d90a0" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M1 8h14" stroke="#8d90a0" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  )
+}
