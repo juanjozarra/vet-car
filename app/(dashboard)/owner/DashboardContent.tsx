@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { motion, MotionConfig } from 'motion/react'
 import {
   PlusIcon,
@@ -9,57 +10,56 @@ import {
 } from '@/components/ui/icons'
 import { motionTokens } from '@/lib/motionTokens'
 
-// ── Mock data ────────────────────────────────────────────────────────────────
+// ── Types ─────────────────────────────────────────────────────────────────────
 
-const VEHICLES = [
-  {
-    id: 'v1',
-    label: '2019 Honda CR-V',
-    vin: 'JHLRW2H5XKC123456',
-    plate: 'ABC-1234',
-    status: 'active' as const,
-    statusLabel: 'Active Repair',
-    accentColor: '#3a4a5f',
-    badgeBg: '#dbe1ff',
-    badgeText: '#00174b',
-  },
-  {
-    id: 'v2',
-    label: '2015 Ford F-150',
-    vin: '1FTEW1EF7FF123456',
-    plate: 'XYZ-9876',
-    status: 'ok' as const,
-    statusLabel: 'Up to date',
-    accentColor: '#434655',
-    badgeBg: '#2d3449',
-    badgeText: '#c3c6d7',
-  },
-]
+type VehicleSummary = {
+  id: string
+  label: string
+  vin: string | null
+  plate: string | null
+  hasActiveRepair: boolean
+}
 
-const APPOINTMENTS = [
-  {
-    id: 'a1',
-    month: 'OCT',
-    day: '24',
-    title: 'Routine Maintenance',
-    vehicle: '2015 Ford F-150',
-  },
-]
+type ActiveRepairSummary = {
+  id: string
+  vehicle: string
+  workOrder: string
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
+}
 
-const ACTIVE_REPAIR = {
-  vehicle: '2019 Honda CR-V',
-  workOrder: 'Work Order #WO-4921',
-  steps: [
-    { label: 'Checked In', state: 'done' as const },
-    { label: 'Inspection', state: 'done' as const },
-    { label: 'Repairing', state: 'current' as const },
-    { label: 'Ready', state: 'pending' as const },
-  ],
+type AppointmentSummary = {
+  id: string
+  month: string
+  day: string
+  title: string
+  vehicle: string
+}
+
+interface DashboardContentProps {
+  userName: string
+  vehicles: VehicleSummary[]
+  activeRepairs: ActiveRepairSummary[]
+  upcomingAppointments: AppointmentSummary[]
+}
+
+// ── Timeline helpers ──────────────────────────────────────────────────────────
+
+const TIMELINE_STEPS = ['Checked In', 'Inspection', 'Repairing', 'Ready'] as const
+
+function timelineCurrentStep(status: ActiveRepairSummary['status']): number {
+  if (status === 'PENDING') return 0
+  if (status === 'IN_PROGRESS') return 2
+  return 3
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function VehicleCard({ v, index }: { v: typeof VEHICLES[0]; index: number }) {
+function VehicleCard({ v, index }: { v: VehicleSummary; index: number }) {
+  const accentColor = v.hasActiveRepair ? '#3a4a5f' : '#434655'
+  const badgeBg = v.hasActiveRepair ? '#dbe1ff' : '#2d3449'
+  const badgeText = v.hasActiveRepair ? '#00174b' : '#c3c6d7'
+  const statusLabel = v.hasActiveRepair ? 'Active Repair' : 'Up to date'
+
   return (
     <motion.div
       initial={{ opacity: 0, y: motionTokens.distance.md }}
@@ -75,26 +75,22 @@ function VehicleCard({ v, index }: { v: typeof VEHICLES[0]; index: number }) {
       }}
       className="relative flex flex-col justify-between h-48 bg-[#060e20] border border-[#434655] hover:border-[#8d90a0] rounded-lg p-4 overflow-hidden flex-1 min-w-0 cursor-pointer transition-colors"
     >
-      {/* Top accent bar */}
-      <div
-        className="absolute top-0 left-0 right-0 h-1"
-        style={{ background: v.accentColor }}
-      />
-      {/* Info */}
+      <div className="absolute top-0 left-0 right-0 h-1" style={{ background: accentColor }} />
       <div className="flex flex-col gap-1 pt-1">
-        <div className="flex items-start justify-between">
-          <span className="text-2xl font-semibold text-[#dae2fd] leading-8">{v.label}</span>
-        </div>
-        <span className="text-xs font-medium text-[#c3c6d7] tracking-[0.6px]">VIN: {v.vin}</span>
-        <span className="text-sm text-[#c3c6d7]">License: {v.plate}</span>
+        <span className="text-2xl font-semibold text-[#dae2fd] leading-8">{v.label}</span>
+        {v.vin && (
+          <span className="text-xs font-medium text-[#c3c6d7] tracking-[0.6px]">VIN: {v.vin}</span>
+        )}
+        {v.plate && (
+          <span className="text-sm text-[#c3c6d7]">License: {v.plate}</span>
+        )}
       </div>
-      {/* Footer */}
       <div className="flex items-center justify-between">
         <span
           className="text-xs font-medium tracking-[0.6px] px-2 py-1 rounded"
-          style={{ background: v.badgeBg, color: v.badgeText }}
+          style={{ background: badgeBg, color: badgeText }}
         >
-          {v.statusLabel}
+          {statusLabel}
         </span>
         <button className="text-xs font-medium text-[#b4c5ff] tracking-[0.6px]">
           View Details
@@ -141,7 +137,11 @@ function TimelineStep({ step, total, index }: { step: Step; total: number; index
       )}
       <span
         className={`text-xs tracking-[0.6px] text-center whitespace-nowrap ${
-          isCurrent ? 'font-bold text-[#b4c5ff]' : isDone ? 'font-medium text-[#dae2fd]' : 'font-medium text-[#c3c6d7]'
+          isCurrent
+            ? 'font-bold text-[#b4c5ff]'
+            : isDone
+            ? 'font-medium text-[#dae2fd]'
+            : 'font-medium text-[#c3c6d7]'
         }`}
       >
         {step.label}
@@ -150,11 +150,15 @@ function TimelineStep({ step, total, index }: { step: Step; total: number; index
   )
 }
 
-// ── Main content ─────────────────────────────────────────────────────────────
+// ── Main content ──────────────────────────────────────────────────────────────
 
-export function DashboardContent({ userName }: { userName: string }) {
-  const completedCount = ACTIVE_REPAIR.steps.filter(s => s.state === 'done').length
-  const progressPct = (completedCount / (ACTIVE_REPAIR.steps.length - 1)) * 100
+export function DashboardContent({
+  userName,
+  vehicles,
+  activeRepairs,
+  upcomingAppointments,
+}: DashboardContentProps) {
+  const router = useRouter()
 
   return (
     <MotionConfig reducedMotion="user">
@@ -177,6 +181,7 @@ export function DashboardContent({ userName }: { userName: string }) {
               </span>
             </div>
             <motion.button
+              onClick={() => router.push('/owner/vehicles/new')}
               whileHover={{
                 scale: 1.02,
                 transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp },
@@ -203,28 +208,56 @@ export function DashboardContent({ userName }: { userName: string }) {
             {/* My Vehicles — 8 cols */}
             <div className="col-span-8 flex flex-col gap-4">
               <h2 className="text-2xl font-semibold text-[#dae2fd]">My Vehicles</h2>
-              <div className="flex gap-4">
-                {VEHICLES.map((v, i) => <VehicleCard key={v.id} v={v} index={i} />)}
-              </div>
+              {vehicles.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-48 bg-[#060e20] border border-dashed border-[#434655] rounded-lg p-6 gap-3">
+                  <span className="text-sm text-[#c3c6d7]">No vehicles registered yet.</span>
+                  <button
+                    onClick={() => router.push('/owner/vehicles/new')}
+                    className="flex items-center gap-2 h-9 px-3 rounded bg-[#2563eb] text-[#002a78] text-xs font-medium tracking-[0.6px]"
+                  >
+                    <PlusIcon color="#002a78" />
+                    Register your first vehicle
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-4">
+                  {vehicles.map((v, i) => (
+                    <VehicleCard key={v.id} v={v} index={i} />
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Upcoming Appointments — 4 cols */}
             <div className="col-span-4 flex flex-col gap-4">
               <h2 className="text-2xl font-semibold text-[#dae2fd]">Upcoming Appointments</h2>
               <div className="bg-[#060e20] border border-[#434655] rounded-lg p-4 flex flex-col gap-2">
-                {APPOINTMENTS.map(appt => (
-                  <div key={appt.id} className="border-l-2 border-[#b4c5ff] rounded flex items-center gap-4 pl-2.5 pr-2 py-2">
-                    <div className="bg-[#2d3449] rounded min-w-12 flex flex-col items-center px-2 py-1 shrink-0">
-                      <span className="text-xs font-medium text-[#c3c6d7] tracking-[0.6px] uppercase">{appt.month}</span>
-                      <span className="text-2xl font-semibold text-[#dae2fd] leading-8">{appt.day}</span>
-                    </div>
-                    <div className="flex-1 min-w-0 flex flex-col">
-                      <span className="text-base font-semibold text-[#dae2fd]">{appt.title}</span>
-                      <span className="text-sm text-[#c3c6d7]">{appt.vehicle}</span>
-                    </div>
-                    <ChevronRightIcon />
+                {upcomingAppointments.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-6 gap-1">
+                    <span className="text-sm text-[#c3c6d7]">No upcoming appointments.</span>
                   </div>
-                ))}
+                ) : (
+                  upcomingAppointments.map(appt => (
+                    <div
+                      key={appt.id}
+                      className="border-l-2 border-[#b4c5ff] rounded flex items-center gap-4 pl-2.5 pr-2 py-2"
+                    >
+                      <div className="bg-[#2d3449] rounded min-w-12 flex flex-col items-center px-2 py-1 shrink-0">
+                        <span className="text-xs font-medium text-[#c3c6d7] tracking-[0.6px] uppercase">
+                          {appt.month}
+                        </span>
+                        <span className="text-2xl font-semibold text-[#dae2fd] leading-8">
+                          {appt.day}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0 flex flex-col">
+                        <span className="text-base font-semibold text-[#dae2fd]">{appt.title}</span>
+                        <span className="text-sm text-[#c3c6d7]">{appt.vehicle}</span>
+                      </div>
+                      <ChevronRightIcon />
+                    </div>
+                  ))
+                )}
 
                 {/* Schedule Service CTA */}
                 <div className="mt-4 pt-2">
@@ -243,59 +276,71 @@ export function DashboardContent({ userName }: { userName: string }) {
             </div>
           </motion.div>
 
-          {/* ── Active Repairs Timeline ─────────────────────────────────── */}
-          <motion.div
-            initial={{ opacity: 0, y: motionTokens.distance.md }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: motionTokens.duration.normal,
-              ease: motionTokens.easing.smooth,
-              delay: 0.16,
-            }}
-            className="flex flex-col gap-4"
-          >
-            <h2 className="text-2xl font-semibold text-[#dae2fd]">Active Repairs Tracking</h2>
-            <div className="bg-[rgba(23,31,51,0.9)] backdrop-blur-sm border border-[#434655] rounded-lg p-6 flex flex-col gap-4">
-              {/* Repair header */}
-              <div className="flex items-center justify-between border-b border-[#434655] pb-3">
-                <div className="flex flex-col">
-                  <span className="text-base font-semibold text-[#dae2fd]">{ACTIVE_REPAIR.vehicle}</span>
-                  <span className="text-sm text-[#c3c6d7]">{ACTIVE_REPAIR.workOrder}</span>
-                </div>
-                <div className="flex items-center gap-1 bg-[#dbe1ff] px-2 py-1 rounded text-xs font-medium text-[#00174b] tracking-[0.6px]">
-                  In Progress
-                </div>
-              </div>
+          {/* ── Active Repairs — only when there are repairs ───────────── */}
+          {activeRepairs.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: motionTokens.distance.md }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: motionTokens.duration.normal,
+                ease: motionTokens.easing.smooth,
+                delay: 0.16,
+              }}
+              className="flex flex-col gap-4"
+            >
+              <h2 className="text-2xl font-semibold text-[#dae2fd]">Active Repairs Tracking</h2>
+              {activeRepairs.map(repair => {
+                const currentStep = timelineCurrentStep(repair.status)
+                const progressPct = (currentStep / (TIMELINE_STEPS.length - 1)) * 100
+                const steps: Step[] = TIMELINE_STEPS.map((label, i) => ({
+                  label,
+                  state:
+                    i < currentStep ? 'done' : i === currentStep ? 'current' : 'pending',
+                }))
 
-              {/* Timeline */}
-              <div className="relative py-8">
-                {/* Track background */}
-                <div className="absolute top-1/2 left-0 right-0 h-1 -translate-y-1/2 bg-[#2d3449] rounded-full" />
-                {/* Track filled — animates from 0 to progressPct */}
-                <motion.div
-                  className="absolute top-1/2 left-0 h-1 -translate-y-1/2 bg-[#b4c5ff] rounded-full"
-                  initial={{ width: '0%' }}
-                  animate={{ width: `${progressPct}%` }}
-                  transition={{
-                    duration: motionTokens.duration.slow,
-                    ease: motionTokens.easing.smooth,
-                    delay: 0.5,
-                  }}
-                />
-                {/* Steps */}
-                <div className="relative flex items-start justify-between">
-                  {ACTIVE_REPAIR.steps.map((step, i) => (
-                    <TimelineStep
-                      key={step.label}
-                      step={step}
-                      index={i}
-                      total={ACTIVE_REPAIR.steps.length}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </motion.div>
+                return (
+                  <div
+                    key={repair.id}
+                    className="bg-[rgba(23,31,51,0.9)] backdrop-blur-sm border border-[#434655] rounded-lg p-6 flex flex-col gap-4"
+                  >
+                    <div className="flex items-center justify-between border-b border-[#434655] pb-3">
+                      <div className="flex flex-col">
+                        <span className="text-base font-semibold text-[#dae2fd]">{repair.vehicle}</span>
+                        <span className="text-sm text-[#c3c6d7]">{repair.workOrder}</span>
+                      </div>
+                      <div className="flex items-center gap-1 bg-[#dbe1ff] px-2 py-1 rounded text-xs font-medium text-[#00174b] tracking-[0.6px]">
+                        In Progress
+                      </div>
+                    </div>
+
+                    <div className="relative py-8">
+                      <div className="absolute top-1/2 left-0 right-0 h-1 -translate-y-1/2 bg-[#2d3449] rounded-full" />
+                      <motion.div
+                        className="absolute top-1/2 left-0 h-1 -translate-y-1/2 bg-[#b4c5ff] rounded-full"
+                        initial={{ width: '0%' }}
+                        animate={{ width: `${progressPct}%` }}
+                        transition={{
+                          duration: motionTokens.duration.slow,
+                          ease: motionTokens.easing.smooth,
+                          delay: 0.5,
+                        }}
+                      />
+                      <div className="relative flex items-start justify-between">
+                        {steps.map((step, i) => (
+                          <TimelineStep
+                            key={step.label}
+                            step={step}
+                            index={i}
+                            total={steps.length}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </motion.div>
+          )}
 
         </div>
       </main>

@@ -16,6 +16,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Auth**: NextAuth.js v4 (credentials-based, JWT sessions)
 - **Package manager**: npm
 
+# Design System
+This project uses a design system defined in `DESIGN.md`  
+
 ## Local development database
 
 PostgreSQL runs in Docker. Start it with:
@@ -77,8 +80,8 @@ User (role: MECHANIC | OWNER)
 
 ## Auth Roles
 
-- **MECHANIC**: creates vehicles, creates work orders, adds service items
-- **OWNER**: reads their vehicles and all associated work orders / service items
+- **MECHANIC**: creates work orders, adds service items
+- **OWNER**: registers their own vehicles (`POST /api/vehicles`), reads vehicles, work orders, and service items
 
 ## Environment Setup
 
