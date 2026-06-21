@@ -25,6 +25,12 @@ enum ServiceItemType {
   OTHER
 }
 
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -93,18 +99,23 @@ model VerificationToken {
 }
 
 model Vehicle {
-  id        String   @id @default(cuid())
-  make      String
-  model     String
-  year      Int
-  vin       String?  @unique
-  plate     String?
-  ownerId   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  make       String
+  model      String
+  year       Int
+  vin        String?  @unique
+  plate      String?
+  nickname   String?
+  mileage    Int?
+  photoUrl   String?
+  plateState String?
+  ownerId    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  owner      User        @relation("VehicleOwner", fields: [ownerId], references: [id])
-  workOrders WorkOrder[]
+  owner        User          @relation("VehicleOwner", fields: [ownerId], references: [id])
+  workOrders   WorkOrder[]
+  appointments Appointment[]
 }
 
 model WorkOrder {
@@ -136,4 +147,17 @@ model ServiceItem {
   updatedAt   DateTime        @updatedAt
 
   workOrder WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+}
+
+model Appointment {
+  id          String            @id @default(cuid())
+  title       String
+  scheduledAt DateTime
+  notes       String?           @db.Text
+  status      AppointmentStatus @default(SCHEDULED)
+  vehicleId   String
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
 }
