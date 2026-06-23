@@ -11,7 +11,7 @@ export default async function NewVehiclePage() {
   if (session.user.role !== 'OWNER') redirect('/mechanic')
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#131314]">
+    <div className="flex flex-col min-h-screen bg-[#121414]">
       <DashboardNav
         userName={session.user.name ?? 'there'}
         userEmail={session.user.email ?? undefined}
