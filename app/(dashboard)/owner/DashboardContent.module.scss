@@ -192,7 +192,7 @@
   transition: border-color 150ms ease;
   @include font-mono;
 
-  &:hover { border-color: $color-outline; }
+  &:hover { border-color: $color-primary; }
 }
 
 // ── Timeline ─────────────────────────────────────────────────────────

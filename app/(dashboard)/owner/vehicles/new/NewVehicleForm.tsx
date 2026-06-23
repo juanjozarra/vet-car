@@ -50,9 +50,9 @@ type FormValues = {
 // ── Shared input/label styles ─────────────────────────────────────────────────
 
 const inputCls =
-  'bg-[#060e20] border border-[#434655] rounded px-4 py-3 text-sm text-[#dae2fd] placeholder-[#8d90a0] focus:border-[#2563eb] focus:outline-none w-full'
+  'bg-[#201f20] border border-[#5c403c] rounded px-4 py-3 text-sm text-[#e5e2e3] placeholder-[#ab8984] focus:border-[#0055ff] focus:outline-none w-full transition-colors'
 
-const labelCls = 'text-sm font-medium text-[#c3c6d7]'
+const labelCls = 'text-sm font-medium text-[#e5beb8]'
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -115,23 +115,23 @@ export function NewVehicleForm() {
     >
       {/* Page title */}
       <div className="mb-8 flex flex-col gap-1">
-        <h1 className="text-4xl font-bold text-[#dae2fd] tracking-tight">Register New Vehicle</h1>
-        <p className="text-base text-[#c3c6d7]">Add a vehicle to track its service history.</p>
+        <h1 className="text-4xl font-bold text-[#e5e2e3] tracking-tight" style={{ fontFamily: 'var(--font-vietnam)' }}>Register New Vehicle</h1>
+        <p className="text-base text-[#e5beb8]">Add a vehicle to track its service history.</p>
       </div>
 
       {/* Form card — 600px centered */}
       <div className="max-w-[600px] mx-auto">
         <form onSubmit={handleSubmit}>
-          <div className="relative bg-[#0b1326] border border-[#434655] rounded-lg overflow-hidden">
+          <div className="relative bg-[#1c1b1c] border border-[#5c403c] rounded-lg overflow-hidden">
             {/* Subtle top accent */}
-            <div className="absolute top-0 left-0 right-0 h-px bg-[#2563eb] opacity-40" />
+            <div className="absolute top-0 left-0 right-0 h-px bg-[#ff5544] opacity-40" />
 
             <div className="p-8 flex flex-col gap-8">
 
               {/* ── Identification ─────────────────────────────────────────── */}
               <section className="flex flex-col gap-4">
-                <div className="pb-2 border-b border-[#434655]">
-                  <h2 className="text-xs font-medium text-[#c3c6d7] tracking-[0.05em] uppercase">Identification</h2>
+                <div className="pb-2 border-b border-[#5c403c]">
+                  <h2 className="text-xs font-medium text-[#e5beb8] tracking-[0.05em] uppercase" style={{ fontFamily: 'var(--font-vietnam)' }}>Identification</h2>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
@@ -163,7 +163,7 @@ export function NewVehicleForm() {
                       type="button"
                       disabled
                       aria-label="Scan VIN barcode (coming soon)"
-                      className="shrink-0 flex items-center gap-2 px-4 py-3 bg-[#131b2e] border border-[#434655] rounded text-xs font-medium text-[#8d90a0] tracking-[0.05em] cursor-not-allowed"
+                      className="shrink-0 flex items-center gap-2 px-4 py-3 bg-[#201f20] border border-[#5c403c] rounded text-xs font-medium text-[#ab8984] tracking-[0.05em] cursor-not-allowed"
                     >
                       <ScanIcon />
                       Scan
@@ -174,8 +174,8 @@ export function NewVehicleForm() {
 
               {/* ── Details ────────────────────────────────────────────────── */}
               <section className="flex flex-col gap-4">
-                <div className="pb-2 border-b border-[#434655]">
-                  <h2 className="text-xs font-medium text-[#c3c6d7] tracking-[0.05em] uppercase">Details</h2>
+                <div className="pb-2 border-b border-[#5c403c]">
+                  <h2 className="text-xs font-medium text-[#e5beb8] tracking-[0.05em] uppercase" style={{ fontFamily: 'var(--font-vietnam)' }}>Details</h2>
                 </div>
 
                 {/* Make / Model / Year */}
@@ -189,7 +189,7 @@ export function NewVehicleForm() {
                         value={values.make}
                         onChange={handleChange}
                         required
-                        className="w-full appearance-none bg-[#060e20] border border-[#434655] rounded px-4 py-3 pr-8 text-sm text-[#dae2fd] focus:border-[#2563eb] focus:outline-none"
+                        className="w-full appearance-none bg-[#201f20] border border-[#5c403c] rounded px-4 py-3 pr-8 text-sm text-[#e5e2e3] focus:border-[#0055ff] focus:outline-none transition-colors"
                       >
                         <option value="" disabled>Select</option>
                         {CAR_MAKES.map(m => <option key={m} value={m}>{m}</option>)}
@@ -223,7 +223,7 @@ export function NewVehicleForm() {
                         value={values.year}
                         onChange={handleChange}
                         required
-                        className="w-full appearance-none bg-[#060e20] border border-[#434655] rounded px-4 py-3 pr-8 text-sm text-[#dae2fd] focus:border-[#2563eb] focus:outline-none"
+                        className="w-full appearance-none bg-[#201f20] border border-[#5c403c] rounded px-4 py-3 pr-8 text-sm text-[#e5e2e3] focus:border-[#0055ff] focus:outline-none transition-colors"
                       >
                         <option value="" disabled>Year</option>
                         {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
@@ -258,7 +258,7 @@ export function NewVehicleForm() {
                         name="plateState"
                         value={values.plateState}
                         onChange={handleChange}
-                        className="w-full appearance-none bg-[#060e20] border border-[#434655] rounded px-4 py-3 pr-8 text-sm text-[#dae2fd] focus:border-[#2563eb] focus:outline-none"
+                        className="w-full appearance-none bg-[#201f20] border border-[#5c403c] rounded px-4 py-3 pr-8 text-sm text-[#e5e2e3] focus:border-[#0055ff] focus:outline-none transition-colors"
                       >
                         <option value="">Select</option>
                         {STATES.map(s => <option key={s} value={s}>{s}</option>)}
@@ -285,9 +285,9 @@ export function NewVehicleForm() {
                       placeholder="0"
                       value={values.mileage}
                       onChange={handleChange}
-                      className="w-full bg-[#060e20] border border-[#434655] rounded pl-10 pr-12 py-3 text-sm text-[#dae2fd] placeholder-[#8d90a0] focus:border-[#2563eb] focus:outline-none"
+                      className="w-full bg-[#201f20] border border-[#5c403c] rounded pl-10 pr-12 py-3 text-sm text-[#e5e2e3] placeholder-[#ab8984] focus:border-[#0055ff] focus:outline-none transition-colors"
                     />
-                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[#8d90a0]">
+                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[#ab8984]">
                       km
                     </span>
                   </div>
@@ -296,8 +296,8 @@ export function NewVehicleForm() {
 
               {/* ── Media ──────────────────────────────────────────────────── */}
               <section className="flex flex-col gap-4">
-                <div className="pb-2 border-b border-[#434655]">
-                  <h2 className="text-xs font-medium text-[#c3c6d7] tracking-[0.05em] uppercase">Media</h2>
+                <div className="pb-2 border-b border-[#5c403c]">
+                  <h2 className="text-xs font-medium text-[#e5beb8] tracking-[0.05em] uppercase" style={{ fontFamily: 'var(--font-vietnam)' }}>Media</h2>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
@@ -305,7 +305,7 @@ export function NewVehicleForm() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="relative flex flex-col items-center justify-center gap-3 h-36 border border-dashed border-[#434655] rounded hover:border-[#8d90a0] transition-colors overflow-hidden"
+                    className="relative flex flex-col items-center justify-center gap-3 h-36 border border-dashed border-[#5c403c] rounded hover:border-[#ab8984] transition-colors overflow-hidden"
                   >
                     {photoPreview ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -314,8 +314,8 @@ export function NewVehicleForm() {
                       <>
                         <UploadIcon />
                         <div className="flex flex-col items-center gap-1">
-                          <span className="text-sm font-medium text-[#b4c5ff]">Click to upload</span>
-                          <span className="text-xs text-[#8d90a0]">PNG, JPG or WEBP, max 5MB</span>
+                          <span className="text-sm font-medium text-[#b6c4ff]">Click to upload</span>
+                          <span className="text-xs text-[#ab8984]">PNG, JPG or WEBP, max 5MB</span>
                         </div>
                       </>
                     )}
@@ -336,11 +336,11 @@ export function NewVehicleForm() {
               )}
 
               {/* ── Actions ────────────────────────────────────────────────── */}
-              <div className="flex items-center justify-end gap-3 pt-2 border-t border-[#434655]">
+              <div className="flex items-center justify-end gap-3 pt-2 border-t border-[#5c403c]">
                 <button
                   type="button"
                   onClick={() => router.push('/owner')}
-                  className="px-4 py-2 text-sm font-medium text-[#c3c6d7] hover:text-[#dae2fd] transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-[#e5beb8] hover:text-[#e5e2e3] transition-colors"
                 >
                   Cancel
                 </button>
@@ -353,9 +353,10 @@ export function NewVehicleForm() {
                       : undefined
                   }
                   whileTap={!submitting ? { scale: 0.97, transition: { duration: 0.1 } } : undefined}
-                  className="flex items-center gap-2 h-10 px-4 rounded bg-[#2563eb] text-[#002a78] text-xs font-medium tracking-[0.6px] disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 h-10 px-4 rounded bg-[#ff5544] text-[#5c0001] text-xs font-medium tracking-[0.6px] hover:bg-[#e03d30] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                  style={{ fontFamily: 'var(--font-vietnam)' }}
                 >
-                  <PlusIcon color="#002a78" />
+                  <PlusIcon color="#5c0001" />
                   {submitting ? 'Registering…' : 'Register Vehicle'}
                 </motion.button>
               </div>

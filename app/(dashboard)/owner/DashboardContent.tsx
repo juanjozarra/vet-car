@@ -188,7 +188,6 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
                 )}
                 <div className="mt-4 pt-2">
                   <motion.button
-                    whileHover={{ borderColor: '#55d8e1', transition: { duration: motionTokens.duration.fast } }}
                     className={styles.scheduleBtn}
                   >
                     <CalendarIcon />
