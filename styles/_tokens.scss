@@ -1,0 +1,35 @@
+// styles/_tokens.scss — Midnight Tech design tokens (DESIGN3.md)
+
+// ── Surfaces ──────────────────────────────────────────────────
+$color-bg:                #121414;
+$color-surface:           #1a1c1c;
+$color-surface-elevated:  #1e2020;
+$color-surface-high:      #282a2b;
+$color-surface-bright:    #38393a;
+
+// ── Text ──────────────────────────────────────────────────────
+$color-text:              #e2e2e2;
+$color-text-muted:        #bbc9ca;
+
+// ── Borders ───────────────────────────────────────────────────
+$color-border:            #3c494a;
+$color-outline:           #869394;
+
+// ── Primary (Cyan) ────────────────────────────────────────────
+$color-primary:           #55d8e1;
+$color-primary-dark:      #00adb5;
+$color-on-primary:        #003739;
+
+// ── Error ─────────────────────────────────────────────────────
+$color-error:             #ffb4ab;
+$color-error-bg:          rgba(#93000a, 0.3);
+$color-error-border:      #93000a;
+
+// ── Typography ────────────────────────────────────────────────
+$font-mono: var(--font-mono);
+$font-body: var(--font-inter), system-ui, sans-serif;
+
+// ── Radii ─────────────────────────────────────────────────────
+$radius:    0.5rem;
+$radius-lg: 1rem;
+$radius-xl: 1.5rem;
