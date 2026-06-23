@@ -9,8 +9,7 @@ import {
   CalendarIcon,
 } from '@/components/ui/icons'
 import { motionTokens } from '@/lib/motionTokens'
-
-// ── Types ─────────────────────────────────────────────────────────────────────
+import styles from './DashboardContent.module.scss'
 
 type VehicleSummary = {
   id: string
@@ -42,8 +41,6 @@ interface DashboardContentProps {
   upcomingAppointments: AppointmentSummary[]
 }
 
-// ── Timeline helpers ──────────────────────────────────────────────────────────
-
 const TIMELINE_STEPS = ['Checked In', 'Inspection', 'Repairing', 'Ready'] as const
 
 function timelineCurrentStep(status: ActiveRepairSummary['status']): number {
@@ -52,55 +49,32 @@ function timelineCurrentStep(status: ActiveRepairSummary['status']): number {
   return 3
 }
 
-// ── Sub-components ────────────────────────────────────────────────────────────
+type Step = { label: string; state: 'done' | 'current' | 'pending' }
 
 function VehicleCard({ v, index }: { v: VehicleSummary; index: number }) {
-  const accentColor = v.hasActiveRepair ? '#3a4a5f' : '#434655'
-  const badgeBg = v.hasActiveRepair ? '#dbe1ff' : '#2d3449'
-  const badgeText = v.hasActiveRepair ? '#00174b' : '#c3c6d7'
-  const statusLabel = v.hasActiveRepair ? 'Active Repair' : 'Up to date'
-
   return (
     <motion.div
       initial={{ opacity: 0, y: motionTokens.distance.md }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: motionTokens.duration.normal,
-        ease: motionTokens.easing.smooth,
-        delay: index * 0.08,
-      }}
-      whileHover={{
-        y: -4,
-        transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp },
-      }}
-      className="relative flex flex-col justify-between h-48 bg-[#060e20] border border-[#434655] hover:border-[#8d90a0] rounded-lg p-4 overflow-hidden flex-1 min-w-0 cursor-pointer transition-colors"
+      transition={{ duration: motionTokens.duration.normal, ease: motionTokens.easing.smooth, delay: index * 0.08 }}
+      whileHover={{ y: -4, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } }}
+      className={`${styles.vehicleCard} flex flex-col justify-between h-48 p-4 flex-1 min-w-0`}
     >
-      <div className="absolute top-0 left-0 right-0 h-1" style={{ background: accentColor }} />
+      <div className={v.hasActiveRepair ? styles.accentActive : styles.accentIdle} />
       <div className="flex flex-col gap-1 pt-1">
-        <span className="text-2xl font-semibold text-[#dae2fd] leading-8">{v.label}</span>
-        {v.vin && (
-          <span className="text-xs font-medium text-[#c3c6d7] tracking-[0.6px]">VIN: {v.vin}</span>
-        )}
-        {v.plate && (
-          <span className="text-sm text-[#c3c6d7]">License: {v.plate}</span>
-        )}
+        <span className={styles.vehicleName}>{v.label}</span>
+        {v.vin && <span className={styles.vehicleMeta}>VIN: {v.vin}</span>}
+        {v.plate && <span className={`${styles.vehicleMeta} text-sm`}>License: {v.plate}</span>}
       </div>
       <div className="flex items-center justify-between">
-        <span
-          className="text-xs font-medium tracking-[0.6px] px-2 py-1 rounded"
-          style={{ background: badgeBg, color: badgeText }}
-        >
-          {statusLabel}
+        <span className={v.hasActiveRepair ? styles.badgeActive : styles.badgeIdle}>
+          {v.hasActiveRepair ? 'Active Repair' : 'Up to date'}
         </span>
-        <button className="text-xs font-medium text-[#b4c5ff] tracking-[0.6px]">
-          View Details
-        </button>
+        <button className={styles.vehicleDetailBtn}>View Details</button>
       </div>
     </motion.div>
   )
 }
-
-type Step = { label: string; state: 'done' | 'current' | 'pending' }
 
 function TimelineStep({ step, total, index }: { step: Step; total: number; index: number }) {
   const isDone = step.state === 'done'
@@ -110,16 +84,12 @@ function TimelineStep({ step, total, index }: { step: Step; total: number; index
     <motion.div
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{
-        duration: motionTokens.duration.fast,
-        ease: motionTokens.easing.smooth,
-        delay: 0.6 + index * 0.08,
-      }}
+      transition={{ duration: motionTokens.duration.fast, ease: motionTokens.easing.smooth, delay: 0.6 + index * 0.08 }}
       className="flex flex-col items-center gap-2 relative z-10"
       style={{ width: `${100 / total}%` }}
     >
       {isDone && (
-        <div className="size-6 rounded-full bg-[#b4c5ff] border-2 border-[#060e20] flex items-center justify-center shrink-0">
+        <div className={`${styles.stepDone} size-6 rounded-full flex items-center justify-center shrink-0`}>
           <CheckIcon />
         </div>
       )}
@@ -127,37 +97,22 @@ function TimelineStep({ step, total, index }: { step: Step; total: number; index
         <motion.div
           animate={{ scale: [1, 1.18, 1] }}
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          className="size-8 rounded-full bg-[#060e20] border-4 border-[#b4c5ff] flex items-center justify-center shrink-0 -mt-1"
+          className={`${styles.stepCurrent} size-8 rounded-full flex items-center justify-center shrink-0 -mt-1`}
         >
-          <div className="size-2 rounded-full bg-[#b4c5ff]" />
+          <div className="size-2 rounded-full bg-[#55d8e1]" />
         </motion.div>
       )}
       {step.state === 'pending' && (
-        <div className="size-6 rounded-full bg-[#2d3449] border-2 border-[#060e20] shrink-0" />
+        <div className={`${styles.stepPending} size-6 rounded-full shrink-0`} />
       )}
-      <span
-        className={`text-xs tracking-[0.6px] text-center whitespace-nowrap ${
-          isCurrent
-            ? 'font-bold text-[#b4c5ff]'
-            : isDone
-            ? 'font-medium text-[#dae2fd]'
-            : 'font-medium text-[#c3c6d7]'
-        }`}
-      >
+      <span className={isCurrent ? styles.stepLabelCurrent : isDone ? styles.stepLabelDone : styles.stepLabelPending}>
         {step.label}
       </span>
     </motion.div>
   )
 }
 
-// ── Main content ──────────────────────────────────────────────────────────────
-
-export function DashboardContent({
-  userName,
-  vehicles,
-  activeRepairs,
-  upcomingAppointments,
-}: DashboardContentProps) {
+export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAppointments }: DashboardContentProps) {
   const router = useRouter()
 
   return (
@@ -165,7 +120,6 @@ export function DashboardContent({
       <main className="flex-1 pt-16">
         <div className="max-w-[1280px] mx-auto px-8 py-8 flex flex-col gap-8">
 
-          {/* ── Header ─────────────────────────────────────────────────── */}
           <motion.div
             initial={{ opacity: 0, y: motionTokens.distance.md }}
             animate={{ opacity: 1, y: 0 }}
@@ -173,100 +127,69 @@ export function DashboardContent({
             className="flex items-end justify-between"
           >
             <div className="flex flex-col gap-1">
-              <span className="text-base font-normal text-[#dae2fd]">
-                Welcome back, {userName}
-              </span>
-              <span className="text-base text-[#c3c6d7]">
-                Here&apos;s the status of your vehicles and upcoming appointments.
-              </span>
+              <span className={styles.welcomeText}>Welcome back, {userName}</span>
+              <span className={styles.welcomeSub}>Here&apos;s the status of your vehicles and upcoming appointments.</span>
             </div>
             <motion.button
               onClick={() => router.push('/owner/vehicles/new')}
-              whileHover={{
-                scale: 1.02,
-                transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp },
-              }}
+              whileHover={{ scale: 1.02, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } }}
               whileTap={{ scale: 0.97, transition: { duration: 0.1 } }}
-              className="flex items-center gap-2 h-10 px-4 rounded bg-[#2563eb] text-[#002a78] text-xs font-medium tracking-[0.6px]"
+              className={styles.btnRegister}
             >
-              <PlusIcon color="#002a78" />
+              <PlusIcon color="#003739" />
               Register New Vehicle
             </motion.button>
           </motion.div>
 
-          {/* ── Vehicles + Appointments grid ───────────────────────────── */}
           <motion.div
             initial={{ opacity: 0, y: motionTokens.distance.md }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: motionTokens.duration.normal,
-              ease: motionTokens.easing.smooth,
-              delay: 0.08,
-            }}
+            transition={{ duration: motionTokens.duration.normal, ease: motionTokens.easing.smooth, delay: 0.08 }}
             className="grid grid-cols-12 gap-4"
           >
-            {/* My Vehicles — 8 cols */}
             <div className="col-span-8 flex flex-col gap-4">
-              <h2 className="text-2xl font-semibold text-[#dae2fd]">My Vehicles</h2>
+              <h2 className={styles.sectionHeading}>My Vehicles</h2>
               {vehicles.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-48 bg-[#060e20] border border-dashed border-[#434655] rounded-lg p-6 gap-3">
-                  <span className="text-sm text-[#c3c6d7]">No vehicles registered yet.</span>
-                  <button
-                    onClick={() => router.push('/owner/vehicles/new')}
-                    className="flex items-center gap-2 h-9 px-3 rounded bg-[#2563eb] text-[#002a78] text-xs font-medium tracking-[0.6px]"
-                  >
-                    <PlusIcon color="#002a78" />
+                <div className={styles.emptyState}>
+                  <span className={styles.emptyText}>No vehicles registered yet.</span>
+                  <button onClick={() => router.push('/owner/vehicles/new')} className={styles.btnRegisterSm}>
+                    <PlusIcon color="#003739" />
                     Register your first vehicle
                   </button>
                 </div>
               ) : (
                 <div className="flex gap-4">
-                  {vehicles.map((v, i) => (
-                    <VehicleCard key={v.id} v={v} index={i} />
-                  ))}
+                  {vehicles.map((v, i) => <VehicleCard key={v.id} v={v} index={i} />)}
                 </div>
               )}
             </div>
 
-            {/* Upcoming Appointments — 4 cols */}
             <div className="col-span-4 flex flex-col gap-4">
-              <h2 className="text-2xl font-semibold text-[#dae2fd]">Upcoming Appointments</h2>
-              <div className="bg-[#060e20] border border-[#434655] rounded-lg p-4 flex flex-col gap-2">
+              <h2 className={styles.sectionHeading}>Upcoming Appointments</h2>
+              <div className={`${styles.appointmentsCard} p-4 flex flex-col gap-2`}>
                 {upcomingAppointments.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-6 gap-1">
-                    <span className="text-sm text-[#c3c6d7]">No upcoming appointments.</span>
+                    <span className={styles.noAppts}>No upcoming appointments.</span>
                   </div>
                 ) : (
                   upcomingAppointments.map(appt => (
-                    <div
-                      key={appt.id}
-                      className="border-l-2 border-[#b4c5ff] rounded flex items-center gap-4 pl-2.5 pr-2 py-2"
-                    >
-                      <div className="bg-[#2d3449] rounded min-w-12 flex flex-col items-center px-2 py-1 shrink-0">
-                        <span className="text-xs font-medium text-[#c3c6d7] tracking-[0.6px] uppercase">
-                          {appt.month}
-                        </span>
-                        <span className="text-2xl font-semibold text-[#dae2fd] leading-8">
-                          {appt.day}
-                        </span>
+                    <div key={appt.id} className={`${styles.appointmentItem} flex items-center gap-4 pl-2.5 pr-2 py-2`}>
+                      <div className={`${styles.apptDateBox} flex flex-col items-center px-2 py-1`}>
+                        <span className={styles.apptMonth}>{appt.month}</span>
+                        <span className={styles.apptDay}>{appt.day}</span>
                       </div>
                       <div className="flex-1 min-w-0 flex flex-col">
-                        <span className="text-base font-semibold text-[#dae2fd]">{appt.title}</span>
-                        <span className="text-sm text-[#c3c6d7]">{appt.vehicle}</span>
+                        <span className={styles.apptTitle}>{appt.title}</span>
+                        <span className={styles.apptVehicle}>{appt.vehicle}</span>
                       </div>
                       <ChevronRightIcon />
                     </div>
                   ))
                 )}
-
-                {/* Schedule Service CTA */}
                 <div className="mt-4 pt-2">
                   <motion.button
-                    whileHover={{
-                      borderColor: '#8d90a0',
-                      transition: { duration: motionTokens.duration.fast },
-                    }}
-                    className="w-full flex items-center justify-center gap-2 py-2 rounded border border-dashed border-[#434655] text-xs font-medium text-[#c3c6d7] tracking-[0.6px]"
+                    whileHover={{ borderColor: '#55d8e1', transition: { duration: motionTokens.duration.fast } }}
+                    className={styles.scheduleBtn}
                   >
                     <CalendarIcon />
                     Schedule Service
@@ -276,63 +199,42 @@ export function DashboardContent({
             </div>
           </motion.div>
 
-          {/* ── Active Repairs — only when there are repairs ───────────── */}
           {activeRepairs.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: motionTokens.distance.md }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: motionTokens.duration.normal,
-                ease: motionTokens.easing.smooth,
-                delay: 0.16,
-              }}
+              transition={{ duration: motionTokens.duration.normal, ease: motionTokens.easing.smooth, delay: 0.16 }}
               className="flex flex-col gap-4"
             >
-              <h2 className="text-2xl font-semibold text-[#dae2fd]">Active Repairs Tracking</h2>
+              <h2 className={styles.sectionHeading}>Active Repairs Tracking</h2>
               {activeRepairs.map(repair => {
                 const currentStep = timelineCurrentStep(repair.status)
                 const progressPct = (currentStep / (TIMELINE_STEPS.length - 1)) * 100
                 const steps: Step[] = TIMELINE_STEPS.map((label, i) => ({
                   label,
-                  state:
-                    i < currentStep ? 'done' : i === currentStep ? 'current' : 'pending',
+                  state: i < currentStep ? 'done' : i === currentStep ? 'current' : 'pending',
                 }))
 
                 return (
-                  <div
-                    key={repair.id}
-                    className="bg-[rgba(23,31,51,0.9)] backdrop-blur-sm border border-[#434655] rounded-lg p-6 flex flex-col gap-4"
-                  >
-                    <div className="flex items-center justify-between border-b border-[#434655] pb-3">
+                  <div key={repair.id} className={`${styles.repairCard} p-6 flex flex-col gap-4`}>
+                    <div className={`${styles.repairCardHeader} flex items-center justify-between pb-3`}>
                       <div className="flex flex-col">
-                        <span className="text-base font-semibold text-[#dae2fd]">{repair.vehicle}</span>
-                        <span className="text-sm text-[#c3c6d7]">{repair.workOrder}</span>
+                        <span className={styles.repairVehicle}>{repair.vehicle}</span>
+                        <span className={styles.repairOrder}>{repair.workOrder}</span>
                       </div>
-                      <div className="flex items-center gap-1 bg-[#dbe1ff] px-2 py-1 rounded text-xs font-medium text-[#00174b] tracking-[0.6px]">
-                        In Progress
-                      </div>
+                      <div className={styles.repairStatusBadge}>In Progress</div>
                     </div>
-
                     <div className="relative py-8">
-                      <div className="absolute top-1/2 left-0 right-0 h-1 -translate-y-1/2 bg-[#2d3449] rounded-full" />
+                      <div className={`${styles.progressTrack} absolute top-1/2 left-0 right-0 h-1 -translate-y-1/2 rounded-full`} />
                       <motion.div
-                        className="absolute top-1/2 left-0 h-1 -translate-y-1/2 bg-[#b4c5ff] rounded-full"
+                        className={`${styles.progressBar} absolute top-1/2 left-0 h-1 -translate-y-1/2 rounded-full`}
                         initial={{ width: '0%' }}
                         animate={{ width: `${progressPct}%` }}
-                        transition={{
-                          duration: motionTokens.duration.slow,
-                          ease: motionTokens.easing.smooth,
-                          delay: 0.5,
-                        }}
+                        transition={{ duration: motionTokens.duration.slow, ease: motionTokens.easing.smooth, delay: 0.5 }}
                       />
                       <div className="relative flex items-start justify-between">
                         {steps.map((step, i) => (
-                          <TimelineStep
-                            key={step.label}
-                            step={step}
-                            index={i}
-                            total={steps.length}
-                          />
+                          <TimelineStep key={step.label} step={step} index={i} total={steps.length} />
                         ))}
                       </div>
                     </div>
