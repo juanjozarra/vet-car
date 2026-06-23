@@ -1,0 +1,93 @@
+// app/(auth)/login/login.module.scss
+
+.page {
+  background: $color-bg;
+}
+
+.card {
+  @include card;
+  border-radius: $radius-xl;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+}
+
+.glow {
+  @include glow-blob;
+  top: -8rem;
+  left: -8rem;
+  width: 16rem;
+  height: 16rem;
+  position: absolute;
+}
+
+.appName {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: $color-text;
+  @include font-mono;
+}
+
+.tagline {
+  font-size: 0.875rem;
+  color: $color-text-muted;
+}
+
+.errorMsg {
+  font-size: 0.875rem;
+  text-align: center;
+  color: $color-error;
+  background: $color-error-bg;
+  border: 1px solid $color-error-border;
+  border-radius: $radius;
+  padding: 0.5rem 0.75rem;
+}
+
+.label {
+  @include input-label;
+}
+
+.inputIconLeft {
+  @include input-base;
+  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+}
+
+.inputIconBoth {
+  @include input-base;
+  padding: 0.75rem 2.5rem 0.75rem 2.5rem;
+}
+
+.forgotLink {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: $color-primary;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+
+  &:hover { opacity: 0.8; }
+}
+
+.rememberText {
+  font-size: 0.875rem;
+  color: $color-text-muted;
+}
+
+.submitBtn {
+  @include btn-primary;
+  width: 100%;
+  padding: 0.75rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.footerText {
+  font-size: 0.875rem;
+  text-align: center;
+  color: $color-text-muted;
+}
+
+.footerLink {
+  font-weight: 500;
+  color: $color-primary;
+  transition: opacity 150ms ease;
+
+  &:hover { opacity: 0.8; }
+}
