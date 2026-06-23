@@ -1,0 +1,137 @@
+// app/(dashboard)/owner/vehicles/new/NewVehicleForm.module.scss
+
+.pageTitle {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: $color-text;
+  letter-spacing: -0.02em;
+  @include font-mono;
+}
+
+.pageSub {
+  font-size: 1rem;
+  color: $color-text-muted;
+}
+
+.formCard {
+  @include card;
+  border-radius: $radius;
+  overflow: hidden;
+}
+
+.topAccent {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: $color-primary;
+  opacity: 0.5;
+}
+
+.sectionLabel {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: $color-text-muted;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  @include font-mono;
+}
+
+.sectionDivider {
+  border-bottom: 1px solid $color-border;
+  padding-bottom: 0.5rem;
+}
+
+.fieldLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $color-text-muted;
+}
+
+.input {
+  @include input-base;
+  padding: 0.75rem 1rem;
+}
+
+.inputIconLeft {
+  @include input-base;
+  padding: 0.75rem 3rem 0.75rem 2.5rem;
+}
+
+.select {
+  @include input-base;
+  padding: 0.75rem 2rem 0.75rem 1rem;
+  appearance: none;
+}
+
+.scanBtn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: $color-surface-elevated;
+  border: 1px solid $color-border;
+  border-radius: $radius;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: $color-text-muted;
+  letter-spacing: 0.05em;
+  cursor: not-allowed;
+  @include font-mono;
+}
+
+.uploadArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  height: 9rem;
+  border: 1px dashed $color-border;
+  border-radius: $radius;
+  overflow: hidden;
+  transition: border-color 150ms ease;
+  cursor: pointer;
+
+  &:hover { border-color: $color-outline; }
+}
+
+.uploadLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $color-primary;
+}
+
+.uploadHint {
+  font-size: 0.75rem;
+  color: $color-text-muted;
+}
+
+.mileageUnit {
+  font-size: 0.875rem;
+  color: $color-text-muted;
+  pointer-events: none;
+}
+
+.errorMsg {
+  font-size: 0.875rem;
+  color: $color-error;
+}
+
+.actionsDivider {
+  border-top: 1px solid $color-border;
+}
+
+.cancelBtn {
+  @include btn-secondary;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.submitBtn {
+  @include btn-primary;
+  height: 2.5rem;
+  padding: 0 1rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.037em;
+}
