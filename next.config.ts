@@ -1,10 +1,14 @@
 import type { NextConfig } from "next";
+import fs from "fs";
 import path from "path";
+
+const stylesDir = path.join(process.cwd(), "styles");
+const tokens = fs.readFileSync(path.join(stylesDir, "_tokens.scss"), "utf8");
+const mixins = fs.readFileSync(path.join(stylesDir, "_mixins.scss"), "utf8");
 
 const nextConfig: NextConfig = {
   sassOptions: {
-    includePaths: [path.join(process.cwd(), "styles")],
-    additionalData: `@import "tokens"; @import "mixins";`,
+    additionalData: `${tokens}\n${mixins}`,
   },
 };
 
