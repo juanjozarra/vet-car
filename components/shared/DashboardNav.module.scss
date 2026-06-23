@@ -1,0 +1,36 @@
+// components/shared/DashboardNav.module.scss
+
+.nav {
+  background: $color-surface;
+  border-bottom: 1px solid $color-border;
+}
+
+.logo {
+  color: $color-primary;
+  @include font-mono;
+}
+
+.navLinkActive {
+  color: $color-primary;
+  border-bottom: 2px solid $color-primary;
+  padding-bottom: 0.375rem;
+  cursor: pointer;
+}
+
+.navLink {
+  color: $color-text-muted;
+  transition: color 150ms ease;
+  cursor: pointer;
+
+  &:hover {
+    color: $color-text;
+  }
+}
+
+.btnNewOrder {
+  @include btn-primary;
+  height: 2.5rem;
+  padding: 0 1rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.037em;
+}
