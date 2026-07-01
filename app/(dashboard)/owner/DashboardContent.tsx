@@ -41,7 +41,7 @@ interface DashboardContentProps {
   upcomingAppointments: AppointmentSummary[]
 }
 
-const TIMELINE_STEPS = ['Checked In', 'Inspection', 'Repairing', 'Ready'] as const
+const TIMELINE_STEPS = ['Ingresado', 'Inspección', 'Reparando', 'Listo'] as const
 
 function timelineCurrentStep(status: ActiveRepairSummary['status']): number {
   if (status === 'PENDING') return 0
@@ -64,13 +64,13 @@ function VehicleCard({ v, index }: { v: VehicleSummary; index: number }) {
       <div className="flex flex-col gap-1 pt-1">
         <span className={styles.vehicleName}>{v.label}</span>
         {v.vin && <span className={styles.vehicleMeta}>VIN: {v.vin}</span>}
-        {v.plate && <span className={`${styles.vehicleMeta} text-sm`}>License: {v.plate}</span>}
+        {v.plate && <span className={`${styles.vehicleMeta} text-sm`}>Patente: {v.plate}</span>}
       </div>
       <div className="flex items-center justify-between">
         <span className={v.hasActiveRepair ? styles.badgeActive : styles.badgeIdle}>
-          {v.hasActiveRepair ? 'Active Repair' : 'Up to date'}
+          {v.hasActiveRepair ? 'Reparación activa' : 'Al día'}
         </span>
-        <button className={styles.vehicleDetailBtn}>View Details</button>
+        <button className={styles.vehicleDetailBtn}>Ver detalles</button>
       </div>
     </motion.div>
   )
@@ -127,8 +127,8 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
             className="flex items-end justify-between"
           >
             <div className="flex flex-col gap-1">
-              <span className={styles.welcomeText}>Welcome back, {userName}</span>
-              <span className={styles.welcomeSub}>Here&apos;s the status of your vehicles and upcoming appointments.</span>
+              <span className={styles.welcomeText}>Hola de nuevo, {userName}</span>
+              <span className={styles.welcomeSub}>Acá está el estado de tus vehículos y turnos próximos.</span>
             </div>
             <motion.button
               onClick={() => router.push('/owner/vehicles/new')}
@@ -137,7 +137,7 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
               className={styles.btnRegister}
             >
               <PlusIcon color="#003739" />
-              Register New Vehicle
+              Registrar nuevo vehículo
             </motion.button>
           </motion.div>
 
@@ -148,13 +148,13 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
             className="grid grid-cols-12 gap-4"
           >
             <div className="col-span-8 flex flex-col gap-4">
-              <h2 className={styles.sectionHeading}>My Vehicles</h2>
+              <h2 className={styles.sectionHeading}>Mis vehículos</h2>
               {vehicles.length === 0 ? (
                 <div className={styles.emptyState}>
-                  <span className={styles.emptyText}>No vehicles registered yet.</span>
+                  <span className={styles.emptyText}>Todavía no tenés vehículos registrados.</span>
                   <button onClick={() => router.push('/owner/vehicles/new')} className={styles.btnRegisterSm}>
                     <PlusIcon color="#003739" />
-                    Register your first vehicle
+                    Registrá tu primer vehículo
                   </button>
                 </div>
               ) : (
@@ -165,11 +165,11 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
             </div>
 
             <div className="col-span-4 flex flex-col gap-4">
-              <h2 className={styles.sectionHeading}>Upcoming Appointments</h2>
+              <h2 className={styles.sectionHeading}>Turnos próximos</h2>
               <div className={`${styles.appointmentsCard} p-4 flex flex-col gap-2`}>
                 {upcomingAppointments.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-6 gap-1">
-                    <span className={styles.noAppts}>No upcoming appointments.</span>
+                    <span className={styles.noAppts}>No hay turnos próximos.</span>
                   </div>
                 ) : (
                   upcomingAppointments.map(appt => (
@@ -191,7 +191,7 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
                     className={styles.scheduleBtn}
                   >
                     <CalendarIcon />
-                    Schedule Service
+                    Agendar servicio
                   </motion.button>
                 </div>
               </div>
@@ -205,7 +205,7 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
               transition={{ duration: motionTokens.duration.normal, ease: motionTokens.easing.smooth, delay: 0.16 }}
               className="flex flex-col gap-4"
             >
-              <h2 className={styles.sectionHeading}>Active Repairs Tracking</h2>
+              <h2 className={styles.sectionHeading}>Seguimiento de reparaciones activas</h2>
               {activeRepairs.map(repair => {
                 const currentStep = timelineCurrentStep(repair.status)
                 const progressPct = (currentStep / (TIMELINE_STEPS.length - 1)) * 100
@@ -221,7 +221,7 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
                         <span className={styles.repairVehicle}>{repair.vehicle}</span>
                         <span className={styles.repairOrder}>{repair.workOrder}</span>
                       </div>
-                      <div className={styles.repairStatusBadge}>In Progress</div>
+                      <div className={styles.repairStatusBadge}>En progreso</div>
                     </div>
                     <div className="relative py-8">
                       <div className={`${styles.progressTrack} absolute top-1/2 left-0 right-0 h-1 -translate-y-1/2 rounded-full`} />

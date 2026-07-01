@@ -34,7 +34,7 @@ export function WorkshopSetupForm() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        setError((data as { error?: string }).error ?? 'Failed to create workshop')
+        setError((data as { error?: string }).error ?? 'No se pudo crear el taller')
         return
       }
 
@@ -42,7 +42,7 @@ export function WorkshopSetupForm() {
       router.push('/mechanic')
       router.refresh()
     } catch {
-      setError('Failed to create workshop')
+      setError('No se pudo crear el taller')
     } finally {
       setLoading(false)
     }
@@ -62,8 +62,8 @@ export function WorkshopSetupForm() {
         <div className="flex flex-col items-center gap-3 text-center">
           <div className={styles.iconWrapper}><WrenchIcon /></div>
           <div className="flex flex-col gap-1">
-            <h1 className={styles.heading}>Set up your workshop</h1>
-            <p className={styles.subheading}>Tell us about your workshop to get started.</p>
+            <h1 className={styles.heading}>Configurá tu taller</h1>
+            <p className={styles.subheading}>Contanos sobre tu taller para comenzar.</p>
           </div>
         </div>
 
@@ -83,30 +83,30 @@ export function WorkshopSetupForm() {
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <div className="flex flex-col gap-2">
-                <label htmlFor="ws-name" className={styles.label}>Workshop name</label>
+                <label htmlFor="ws-name" className={styles.label}>Nombre del taller</label>
                 <input id="ws-name" name="name" type="text" required
-                  placeholder="e.g. Smith's Auto Repair" className={styles.input} />
+                  placeholder="p. ej. Taller García" className={styles.input} />
               </div>
               <div className="flex flex-col gap-2">
-                <label htmlFor="ws-address" className={styles.label}>Address</label>
+                <label htmlFor="ws-address" className={styles.label}>Dirección</label>
                 <input id="ws-address" name="address" type="text" required
-                  placeholder="123 Main St, City, State" className={styles.input} />
+                  placeholder="Av. Corrientes 1234, Ciudad, Prov." className={styles.input} />
               </div>
               <div className="flex flex-col gap-2">
-                <label htmlFor="ws-phone" className={styles.label}>Phone</label>
+                <label htmlFor="ws-phone" className={styles.label}>Teléfono</label>
                 <input id="ws-phone" name="phone" type="tel" required
-                  placeholder="+1 (555) 000-0000" className={styles.input} />
+                  placeholder="+54 9 11 0000-0000" className={styles.input} />
               </div>
               <div className="flex flex-col gap-2">
-                <label htmlFor="ws-email" className={styles.label}>Workshop email</label>
+                <label htmlFor="ws-email" className={styles.label}>Email del taller</label>
                 <input id="ws-email" name="email" type="email" required
-                  placeholder="workshop@example.com" className={styles.input} />
+                  placeholder="taller@ejemplo.com" className={styles.input} />
               </div>
               <motion.button type="submit" disabled={loading}
                 whileHover={!loading ? { scale: 1.02, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } } : undefined}
                 whileTap={!loading ? { scale: 0.97, transition: { duration: 0.1 } } : undefined}
                 className={styles.submitBtn}>
-                {loading ? 'Creating workshop…' : 'Create workshop'}
+                {loading ? 'Creando taller…' : 'Crear taller'}
               </motion.button>
             </form>
           </div>

@@ -48,13 +48,13 @@ export default async function OwnerDashboard() {
   const activeRepairs = rawActiveRepairs.map(o => ({
     id: o.id,
     vehicle: `${o.vehicle.year} ${o.vehicle.make} ${o.vehicle.model}`,
-    workOrder: `Work Order #${o.id.slice(-6).toUpperCase()}`,
+    workOrder: `Orden de trabajo #${o.id.slice(-6).toUpperCase()}`,
     status: o.status as 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED',
   }))
 
   const upcomingAppointments = rawAppointments.map(a => ({
     id: a.id,
-    month: a.scheduledAt.toLocaleString('en-US', { month: 'short' }).toUpperCase(),
+    month: a.scheduledAt.toLocaleString('es-AR', { month: 'short' }).toUpperCase(),
     day: a.scheduledAt.getDate().toString(),
     title: a.title,
     vehicle: `${a.vehicle.year} ${a.vehicle.make} ${a.vehicle.model}`,
@@ -63,11 +63,11 @@ export default async function OwnerDashboard() {
   return (
     <div className="flex flex-col min-h-screen">
       <DashboardNav
-        userName={session.user.name ?? 'there'}
+        userName={session.user.name ?? 'usuario'}
         userEmail={session.user.email ?? undefined}
       />
       <DashboardContent
-        userName={session.user.name ?? 'there'}
+        userName={session.user.name ?? 'usuario'}
         vehicles={vehicles}
         activeRepairs={activeRepairs}
         upcomingAppointments={upcomingAppointments}

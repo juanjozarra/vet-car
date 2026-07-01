@@ -39,7 +39,7 @@ export default function SelectRolePage() {
 
     if (!res.ok) {
       const data = await res.json()
-      setError(data.error ?? 'Registration failed')
+      setError(data.error ?? 'El registro falló')
       setLoading(false)
       return
     }
@@ -49,7 +49,7 @@ export default function SelectRolePage() {
     setLoading(false)
 
     if (result?.error) {
-      setError('Account created but sign-in failed. Please sign in manually.')
+      setError('Cuenta creada, pero el inicio de sesión falló. Por favor, iniciá sesión manualmente.')
       router.push('/login')
       return
     }
@@ -71,8 +71,8 @@ export default function SelectRolePage() {
           className="w-full max-w-[600px] flex flex-col items-center gap-8 z-10"
         >
           <div className="flex flex-col items-center gap-3 text-center">
-            <h1 className={styles.heading}>Welcome to AutoStream Pro!</h1>
-            <p className={styles.subheading}>Select your role to complete your registration.</p>
+            <h1 className={styles.heading}>¡Bienvenido/a a VetCar!</h1>
+            <p className={styles.subheading}>Seleccioná tu rol para completar el registro.</p>
           </div>
 
           <AnimatePresence mode="wait">
@@ -83,7 +83,7 @@ export default function SelectRolePage() {
                 className={styles.errorMsg}>
                 {error}{' '}
                 {error.includes('Email already in use') && (
-                  <a href="/register" className={styles.errorLink}>Go back to edit</a>
+                  <a href="/register" className={styles.errorLink}>Volver para editar</a>
                 )}
               </motion.p>
             )}
@@ -96,13 +96,13 @@ export default function SelectRolePage() {
               className={`${styles.roleCard} ${selected === 'MECHANIC' ? styles.roleCardSelected : ''}`}>
               <div className={styles.roleIconWrapper}><WrenchIcon /></div>
               <div className="flex flex-col gap-1">
-                <span className={styles.roleTitle}>Mechanic / Shop Owner</span>
-                <span className={styles.roleDesc}>Manage clients, vehicles, work orders, and service records.</span>
+                <span className={styles.roleTitle}>Mecánico / Dueño de taller</span>
+                <span className={styles.roleDesc}>Administrá clientes, vehículos, órdenes de trabajo y registros de servicio.</span>
               </div>
               {selected === 'MECHANIC' && (
                 <div className={styles.roleSelectedIndicator}>
                   <div className={styles.selectedDot} />
-                  Selected
+                  Seleccionado
                 </div>
               )}
             </motion.button>
@@ -113,13 +113,13 @@ export default function SelectRolePage() {
               className={`${styles.roleCard} ${selected === 'OWNER' ? styles.roleCardSelected : ''}`}>
               <div className={styles.roleIconWrapper}><CarIcon color="#55d8e1" /></div>
               <div className="flex flex-col gap-1">
-                <span className={styles.roleTitle}>Vehicle Owner</span>
-                <span className={styles.roleDesc}>View your vehicle history, track service records, and approve quotes.</span>
+                <span className={styles.roleTitle}>Propietario de vehículo</span>
+                <span className={styles.roleDesc}>Consultá el historial de tu vehículo, seguí los registros de servicio y aprobá presupuestos.</span>
               </div>
               {selected === 'OWNER' && (
                 <div className={styles.roleSelectedIndicator}>
                   <div className={styles.selectedDot} />
-                  Selected
+                  Seleccionado
                 </div>
               )}
             </motion.button>
@@ -130,13 +130,13 @@ export default function SelectRolePage() {
             whileHover={{ scale: 1.02, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } }}
             whileTap={{ scale: 0.97, transition: { duration: 0.1 } }}
             className={styles.continueBtn}>
-            {loading ? 'Creating account…' : 'Complete Registration'}
+            {loading ? 'Creando cuenta…' : 'Completar registro'}
             {!loading && <ArrowRightIcon />}
           </motion.button>
 
           <p className={styles.footerText}>
-            Already have an account?{' '}
-            <a href="/login" className={styles.footerLink}>Sign in</a>
+            ¿Ya tenés una cuenta?{' '}
+            <a href="/login" className={styles.footerLink}>Iniciá sesión</a>
           </p>
         </motion.div>
       </main>

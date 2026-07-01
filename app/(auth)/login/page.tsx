@@ -29,7 +29,7 @@ export default function LoginPage() {
     setLoading(false)
 
     if (result?.error) {
-      setError('Invalid email or password')
+      setError('Email o contraseña incorrectos')
       return
     }
 
@@ -52,9 +52,9 @@ export default function LoginPage() {
           <div className="flex flex-col items-center gap-3 z-10">
             <div className="flex items-center gap-3">
               <CarIcon color="#55d8e1" />
-              <span className={styles.appName}>AutoStream Pro</span>
+              <span className={styles.appName}>VetCar</span>
             </div>
-            <p className={styles.tagline}>Sign in to manage your operations</p>
+            <p className={styles.tagline}>Iniciá sesión para gestionar tus operaciones</p>
           </div>
 
           {/* Form */}
@@ -76,21 +76,21 @@ export default function LoginPage() {
 
             {/* Email */}
             <div className="flex flex-col gap-2">
-              <label htmlFor="email" className={styles.label}>Email Address</label>
+              <label htmlFor="email" className={styles.label}>Correo electrónico</label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
                   <MailIcon />
                 </span>
                 <input id="email" name="email" type="email" required autoComplete="email"
-                  placeholder="admin@autostream.com" className={styles.inputIconLeft} />
+                  placeholder="usuario@ejemplo.com" className={styles.inputIconLeft} />
               </div>
             </div>
 
             {/* Password */}
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <label htmlFor="password" className={styles.label}>Password</label>
-                <span className={styles.forgotLink}>Forgot password?</span>
+                <label htmlFor="password" className={styles.label}>Contraseña</label>
+                <span className={styles.forgotLink}>¿Olvidaste tu contraseña?</span>
               </div>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -101,7 +101,7 @@ export default function LoginPage() {
                   className={styles.inputIconBoth} />
                 <button type="button" onClick={() => setShowPassword(v => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}>
+                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
                   {showPassword ? <EyeOffIcon /> : <EyeIcon />}
                 </button>
               </div>
@@ -111,7 +111,7 @@ export default function LoginPage() {
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input type="checkbox" name="remember"
                 className="w-4 h-4 rounded accent-[#55d8e1]" />
-              <span className={styles.rememberText}>Remember me for 30 days</span>
+              <span className={styles.rememberText}>Recordarme por 30 días</span>
             </label>
 
             {/* Submit */}
@@ -119,15 +119,15 @@ export default function LoginPage() {
               whileHover={{ scale: 1.02, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } }}
               whileTap={{ scale: 0.97, transition: { duration: 0.1 } }}
               className={styles.submitBtn}>
-              {loading ? 'Signing in…' : 'Sign In'}
+              {loading ? 'Iniciando sesión…' : 'Iniciar sesión'}
               {!loading && <ArrowRightIcon />}
             </motion.button>
           </form>
 
           {/* Footer */}
           <p className={`${styles.footerText} z-10`}>
-            Don&apos;t have an account?{' '}
-            <Link href="/register" className={styles.footerLink}>Register now</Link>
+            ¿No tenés cuenta?{' '}
+            <Link href="/register" className={styles.footerLink}>Registrate</Link>
           </p>
         </motion.div>
       </main>

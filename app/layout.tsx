@@ -15,8 +15,8 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'vet-car',
-  description: 'Vehicle service history platform',
+  title: 'VetCar',
+  description: 'Plataforma de historial de servicio vehicular',
 }
 
 export default function RootLayout({
@@ -25,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${jetbrainsMono.variable} ${inter.variable} h-full antialiased`}>
+    <html lang="es" className={`${jetbrainsMono.variable} ${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <SessionProvider>{children}</SessionProvider>
       </body>

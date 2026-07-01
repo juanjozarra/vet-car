@@ -37,7 +37,7 @@ export function AvatarMenu({ userName, userEmail }: { userName: string; userEmai
       <div ref={ref} className="relative">
         <button
           onClick={() => setOpen(v => !v)}
-          aria-label="Open user menu"
+          aria-label="Abrir menú de usuario"
           aria-expanded={open}
           aria-haspopup="true"
           className={`${styles.trigger} size-8 rounded-full flex items-center justify-center cursor-pointer`}
@@ -65,7 +65,7 @@ export function AvatarMenu({ userName, userEmail }: { userName: string; userEmai
                   onClick={() => signOut({ callbackUrl: '/login' })}
                   className={`${styles.signOutBtn} px-4 py-2.5 text-sm`}
                 >
-                  Sign out
+                  Cerrar sesión
                 </button>
               </div>
             </motion.div>

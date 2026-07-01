@@ -14,7 +14,7 @@ const CAR_MAKES = [
   'Chrysler', 'Dodge', 'Ferrari', 'Fiat', 'Ford', 'GMC', 'Honda', 'Hyundai',
   'Infiniti', 'Jaguar', 'Jeep', 'Kia', 'Land Rover', 'Lexus', 'Lincoln',
   'Mazda', 'Mercedes-Benz', 'Mini', 'Mitsubishi', 'Nissan', 'Porsche',
-  'Ram', 'Subaru', 'Tesla', 'Toyota', 'Volkswagen', 'Volvo', 'Other',
+  'Ram', 'Subaru', 'Tesla', 'Toyota', 'Volkswagen', 'Volvo', 'Otro',
 ]
 
 const CURRENT_YEAR = new Date().getFullYear()
@@ -67,12 +67,12 @@ export function NewVehicleForm() {
       })
       if (!res.ok) {
         const data = await res.json()
-        setError(data.error ?? 'Something went wrong')
+        setError(data.error ?? 'Ocurrió un error')
         return
       }
       router.push('/owner')
     } catch {
-      setError('Network error. Please try again.')
+      setError('Error de red. Intentá de nuevo.')
     } finally {
       setSubmitting(false)
     }
@@ -85,8 +85,8 @@ export function NewVehicleForm() {
       transition={{ duration: motionTokens.duration.normal, ease: motionTokens.easing.smooth }}
     >
       <div className="mb-8 flex flex-col gap-1">
-        <h1 className={styles.pageTitle}>Register New Vehicle</h1>
-        <p className={styles.pageSub}>Add a vehicle to track its service history.</p>
+        <h1 className={styles.pageTitle}>Registrar nuevo vehículo</h1>
+        <p className={styles.pageSub}>Agregá un vehículo para registrar su historial de servicio.</p>
       </div>
 
       <div className="max-w-[600px] mx-auto">
@@ -97,21 +97,21 @@ export function NewVehicleForm() {
 
               <section className="flex flex-col gap-4">
                 <div className={styles.sectionDivider}>
-                  <h2 className={styles.sectionLabel}>Identification</h2>
+                  <h2 className={styles.sectionLabel}>Identificación</h2>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="nickname" className={styles.fieldLabel}>Vehicle Nickname</label>
-                  <input id="nickname" name="nickname" type="text" placeholder="e.g. My Honda"
+                  <label htmlFor="nickname" className={styles.fieldLabel}>Apodo del vehículo</label>
+                  <input id="nickname" name="nickname" type="text" placeholder="p. ej. Mi Honda"
                     value={values.nickname} onChange={handleChange} className={styles.input} />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="vin" className={styles.fieldLabel}>VIN</label>
                   <div className="flex gap-2">
-                    <input id="vin" name="vin" type="text" placeholder="17-character VIN"
+                    <input id="vin" name="vin" type="text" placeholder="VIN de 17 caracteres"
                       value={values.vin} onChange={handleChange} className={styles.input} />
-                    <button type="button" disabled aria-label="Scan VIN barcode (coming soon)"
+                    <button type="button" disabled aria-label="Escanear código de barras VIN (próximamente)"
                       className={styles.scanBtn}>
-                      <ScanIcon />Scan
+                      <ScanIcon />Escanear
                     </button>
                   </div>
                 </div>
@@ -119,15 +119,15 @@ export function NewVehicleForm() {
 
               <section className="flex flex-col gap-4">
                 <div className={styles.sectionDivider}>
-                  <h2 className={styles.sectionLabel}>Details</h2>
+                  <h2 className={styles.sectionLabel}>Detalles</h2>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="make" className={styles.fieldLabel}>Make</label>
+                    <label htmlFor="make" className={styles.fieldLabel}>Marca</label>
                     <div className="relative">
                       <select id="make" name="make" value={values.make} onChange={handleChange}
                         required className={styles.select}>
-                        <option value="" disabled>Select</option>
+                        <option value="" disabled>Seleccionar</option>
                         {CAR_MAKES.map(m => <option key={m} value={m}>{m}</option>)}
                       </select>
                       <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
@@ -136,16 +136,16 @@ export function NewVehicleForm() {
                     </div>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="model" className={styles.fieldLabel}>Model</label>
-                    <input id="model" name="model" type="text" placeholder="e.g. CR-V"
+                    <label htmlFor="model" className={styles.fieldLabel}>Modelo</label>
+                    <input id="model" name="model" type="text" placeholder="p. ej. CR-V"
                       value={values.model} onChange={handleChange} required className={styles.input} />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="year" className={styles.fieldLabel}>Year</label>
+                    <label htmlFor="year" className={styles.fieldLabel}>Año</label>
                     <div className="relative">
                       <select id="year" name="year" value={values.year} onChange={handleChange}
                         required className={styles.select}>
-                        <option value="" disabled>Year</option>
+                        <option value="" disabled>Año</option>
                         {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
                       </select>
                       <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
@@ -156,16 +156,16 @@ export function NewVehicleForm() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="plate" className={styles.fieldLabel}>License Plate</label>
+                    <label htmlFor="plate" className={styles.fieldLabel}>Patente</label>
                     <input id="plate" name="plate" type="text" placeholder="ABC-1234"
                       value={values.plate} onChange={handleChange} className={styles.input} />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="plateState" className={styles.fieldLabel}>State / Province</label>
+                    <label htmlFor="plateState" className={styles.fieldLabel}>Provincia / Estado</label>
                     <div className="relative">
                       <select id="plateState" name="plateState" value={values.plateState}
                         onChange={handleChange} className={styles.select}>
-                        <option value="">Select</option>
+                        <option value="">Seleccionar</option>
                         {STATES.map(s => <option key={s} value={s}>{s}</option>)}
                       </select>
                       <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
@@ -175,7 +175,7 @@ export function NewVehicleForm() {
                   </div>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="mileage" className={styles.fieldLabel}>Current Mileage</label>
+                  <label htmlFor="mileage" className={styles.fieldLabel}>Kilometraje actual</label>
                   <div className="relative">
                     <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
                       <OdometerIcon />
@@ -190,21 +190,21 @@ export function NewVehicleForm() {
 
               <section className="flex flex-col gap-4">
                 <div className={styles.sectionDivider}>
-                  <h2 className={styles.sectionLabel}>Media</h2>
+                  <h2 className={styles.sectionLabel}>Fotos</h2>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <span className={styles.fieldLabel}>Vehicle Photo</span>
+                  <span className={styles.fieldLabel}>Foto del vehículo</span>
                   <button type="button" onClick={() => fileInputRef.current?.click()}
                     className={styles.uploadArea}>
                     {photoPreview ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={photoPreview} alt="Preview" className="h-full w-full object-cover" />
+                      <img src={photoPreview} alt="Vista previa" className="h-full w-full object-cover" />
                     ) : (
                       <>
                         <UploadIcon />
                         <div className="flex flex-col items-center gap-1">
-                          <span className={styles.uploadLabel}>Click to upload</span>
-                          <span className={styles.uploadHint}>PNG, JPG or WEBP, max 5MB</span>
+                          <span className={styles.uploadLabel}>Clic para subir</span>
+                          <span className={styles.uploadHint}>PNG, JPG o WEBP, máx. 5 MB</span>
                         </div>
                       </>
                     )}
@@ -218,14 +218,14 @@ export function NewVehicleForm() {
 
               <div className={`${styles.actionsDivider} flex items-center justify-end gap-3 pt-2`}>
                 <button type="button" onClick={() => router.push('/owner')} className={styles.cancelBtn}>
-                  Cancel
+                  Cancelar
                 </button>
                 <motion.button type="submit" disabled={submitting}
                   whileHover={!submitting ? { scale: 1.02, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } } : undefined}
                   whileTap={!submitting ? { scale: 0.97, transition: { duration: 0.1 } } : undefined}
                   className={styles.submitBtn}>
                   <PlusIcon color="#003739" />
-                  {submitting ? 'Registering…' : 'Register Vehicle'}
+                  {submitting ? 'Registrando…' : 'Registrar vehículo'}
                 </motion.button>
               </div>
 

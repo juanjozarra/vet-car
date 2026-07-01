@@ -1,7 +1,7 @@
 export default function MechanicDashboard() {
   return (
     <main>
-      <h1>Mechanic Dashboard</h1>
+      <h1>Panel del mecánico</h1>
     </main>
   )
 }

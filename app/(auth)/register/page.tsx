@@ -26,7 +26,7 @@ export default function RegisterPage() {
     const confirm = (form.elements.namedItem('confirm') as HTMLInputElement).value
 
     if (password !== confirm) {
-      setError('Passwords do not match')
+      setError('Las contraseñas no coinciden')
       return
     }
 
@@ -52,8 +52,8 @@ export default function RegisterPage() {
               <CarIcon color="#55d8e1" />
             </div>
             <div className="flex flex-col gap-1">
-              <h1 className={styles.heading}>Create Account</h1>
-              <p className={styles.subheading}>Fill in your details to get started</p>
+              <h1 className={styles.heading}>Crear cuenta</h1>
+              <p className={styles.subheading}>Completá tus datos para comenzar</p>
             </div>
           </div>
 
@@ -72,48 +72,48 @@ export default function RegisterPage() {
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <div className="flex flex-col gap-2">
-                <label htmlFor="name" className={styles.label}>Full Name</label>
+                <label htmlFor="name" className={styles.label}>Nombre completo</label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"><UserIcon /></span>
                   <input id="name" name="name" type="text" required autoComplete="name"
-                    placeholder="John Doe" className={styles.inputIconLeft} />
+                    placeholder="Juan Pérez" className={styles.inputIconLeft} />
                 </div>
               </div>
 
               <div className="flex flex-col gap-2">
-                <label htmlFor="email" className={styles.label}>Email Address</label>
+                <label htmlFor="email" className={styles.label}>Correo electrónico</label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"><MailIcon /></span>
                   <input id="email" name="email" type="email" required autoComplete="email"
-                    placeholder="you@example.com" className={styles.inputIconLeft} />
+                    placeholder="vos@ejemplo.com" className={styles.inputIconLeft} />
                 </div>
               </div>
 
               <div className="flex flex-col gap-2">
-                <label htmlFor="password" className={styles.label}>Password</label>
+                <label htmlFor="password" className={styles.label}>Contraseña</label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"><LockIcon /></span>
                   <input id="password" name="password" type={showPassword ? 'text' : 'password'}
                     required minLength={8} autoComplete="new-password"
-                    placeholder="Min. 8 characters" className={styles.inputIconBoth} />
+                    placeholder="Mín. 8 caracteres" className={styles.inputIconBoth} />
                   <button type="button" onClick={() => setShowPassword(v => !v)}
                     className="absolute right-3 top-1/2 -translate-y-1/2"
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}>
+                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
                     {showPassword ? <EyeOffIcon /> : <EyeIcon />}
                   </button>
                 </div>
               </div>
 
               <div className="flex flex-col gap-2">
-                <label htmlFor="confirm" className={styles.label}>Confirm Password</label>
+                <label htmlFor="confirm" className={styles.label}>Confirmar contraseña</label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"><LockIcon /></span>
                   <input id="confirm" name="confirm" type={showConfirm ? 'text' : 'password'}
                     required autoComplete="new-password"
-                    placeholder="Repeat your password" className={styles.inputIconBoth} />
+                    placeholder="Repetí tu contraseña" className={styles.inputIconBoth} />
                   <button type="button" onClick={() => setShowConfirm(v => !v)}
                     className="absolute right-3 top-1/2 -translate-y-1/2"
-                    aria-label={showConfirm ? 'Hide password' : 'Show password'}>
+                    aria-label={showConfirm ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
                     {showConfirm ? <EyeOffIcon /> : <EyeIcon />}
                   </button>
                 </div>
@@ -123,10 +123,10 @@ export default function RegisterPage() {
                 <input type="checkbox" required
                   className="mt-0.5 w-4 h-4 rounded accent-[#55d8e1] shrink-0" />
                 <span className={styles.termsText}>
-                  I agree to the{' '}
-                  <span className={styles.termsLink}>Terms of Service</span>
-                  {' '}and{' '}
-                  <span className={styles.termsLink}>Privacy Policy</span>
+                  Acepto los{' '}
+                  <span className={styles.termsLink}>Términos del servicio</span>
+                  {' '}y la{' '}
+                  <span className={styles.termsLink}>Política de privacidad</span>
                 </span>
               </label>
 
@@ -134,20 +134,20 @@ export default function RegisterPage() {
                 whileHover={{ scale: 1.02, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } }}
                 whileTap={{ scale: 0.97, transition: { duration: 0.1 } }}
                 className={styles.submitBtn}>
-                Continue
+                Continuar
                 <ArrowRightIcon />
               </motion.button>
             </form>
           </div>
 
           <p className={styles.footerText}>
-            Already have an account?{' '}
-            <Link href="/login" className={styles.footerLink}>Log in</Link>
+            ¿Ya tenés una cuenta?{' '}
+            <Link href="/login" className={styles.footerLink}>Iniciá sesión</Link>
           </p>
         </motion.div>
 
         <p className={`${styles.copyright} absolute bottom-6`}>
-          © 2024 AutoStream Pro. All rights reserved.
+          © 2024 VetCar. Todos los derechos reservados.
         </p>
       </main>
     </MotionConfig>
