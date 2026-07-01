@@ -1,87 +1,79 @@
 ---
-name: Precision Dark
+name: Midnight Tech
 colors:
-  surface: '#0b1326'
-  surface-dim: '#0b1326'
-  surface-bright: '#31394d'
-  surface-container-lowest: '#060e20'
-  surface-container-low: '#131b2e'
-  surface-container: '#171f33'
-  surface-container-high: '#222a3d'
-  surface-container-highest: '#2d3449'
-  on-surface: '#dae2fd'
-  on-surface-variant: '#c3c6d7'
-  inverse-surface: '#dae2fd'
-  inverse-on-surface: '#283044'
-  outline: '#8d90a0'
-  outline-variant: '#434655'
-  surface-tint: '#b4c5ff'
-  primary: '#b4c5ff'
-  on-primary: '#002a78'
-  primary-container: '#2563eb'
-  on-primary-container: '#eeefff'
-  inverse-primary: '#0053db'
-  secondary: '#b7c8e1'
-  on-secondary: '#213145'
-  secondary-container: '#3a4a5f'
-  on-secondary-container: '#a9bad3'
-  tertiary: '#ffb596'
-  on-tertiary: '#581e00'
-  tertiary-container: '#bc4800'
-  on-tertiary-container: '#ffede6'
+  surface: '#121414'
+  surface-dim: '#121414'
+  surface-bright: '#38393a'
+  surface-container-lowest: '#0c0f0f'
+  surface-container-low: '#1a1c1c'
+  surface-container: '#1e2020'
+  surface-container-high: '#282a2b'
+  surface-container-highest: '#333535'
+  on-surface: '#e2e2e2'
+  on-surface-variant: '#bbc9ca'
+  inverse-surface: '#e2e2e2'
+  inverse-on-surface: '#2f3131'
+  outline: '#869394'
+  outline-variant: '#3c494a'
+  surface-tint: '#55d8e1'
+  primary: '#55d8e1'
+  on-primary: '#003739'
+  primary-container: '#00adb5'
+  on-primary-container: '#003a3d'
+  inverse-primary: '#00696e'
+  secondary: '#c1c7d3'
+  on-secondary: '#2b313a'
+  secondary-container: '#414751'
+  on-secondary-container: '#b0b5c1'
+  tertiary: '#c2c7d0'
+  on-tertiary: '#2c3138'
+  tertiary-container: '#989ca6'
+  on-tertiary-container: '#2f343c'
   error: '#ffb4ab'
   on-error: '#690005'
   error-container: '#93000a'
   on-error-container: '#ffdad6'
-  primary-fixed: '#dbe1ff'
-  primary-fixed-dim: '#b4c5ff'
-  on-primary-fixed: '#00174b'
-  on-primary-fixed-variant: '#003ea8'
-  secondary-fixed: '#d3e4fe'
-  secondary-fixed-dim: '#b7c8e1'
-  on-secondary-fixed: '#0b1c30'
-  on-secondary-fixed-variant: '#38485d'
-  tertiary-fixed: '#ffdbcd'
-  tertiary-fixed-dim: '#ffb596'
-  on-tertiary-fixed: '#360f00'
-  on-tertiary-fixed-variant: '#7d2d00'
-  background: '#0b1326'
-  on-background: '#dae2fd'
-  surface-variant: '#2d3449'
+  primary-fixed: '#75f5fd'
+  primary-fixed-dim: '#55d8e1'
+  on-primary-fixed: '#002022'
+  on-primary-fixed-variant: '#004f53'
+  secondary-fixed: '#dde3ef'
+  secondary-fixed-dim: '#c1c7d3'
+  on-secondary-fixed: '#161c25'
+  on-secondary-fixed-variant: '#414751'
+  tertiary-fixed: '#dee2ed'
+  tertiary-fixed-dim: '#c2c7d0'
+  on-tertiary-fixed: '#171c23'
+  on-tertiary-fixed-variant: '#42474f'
+  background: '#121414'
+  on-background: '#e2e2e2'
+  surface-variant: '#333535'
 typography:
   headline-lg:
-    fontFamily: Inter
+    fontFamily: Jetbrains Mono
     fontSize: 32px
     fontWeight: '700'
-    lineHeight: 40px
-    letterSpacing: -0.02em
-  headline-lg-mobile:
-    fontFamily: Inter
-    fontSize: 24px
-    fontWeight: '700'
-    lineHeight: 32px
-    letterSpacing: -0.01em
+    lineHeight: '1.2'
   headline-md:
-    fontFamily: Inter
+    fontFamily: Jetbrains Mono
     fontSize: 24px
     fontWeight: '600'
-    lineHeight: 32px
+    lineHeight: '1.3'
   body-lg:
     fontFamily: Inter
     fontSize: 16px
     fontWeight: '400'
-    lineHeight: 24px
+    lineHeight: '1.5'
   body-md:
     fontFamily: Inter
     fontSize: 14px
     fontWeight: '400'
-    lineHeight: 20px
+    lineHeight: '1.5'
   label-md:
-    fontFamily: Inter
+    fontFamily: Jetbrains Mono
     fontSize: 12px
     fontWeight: '500'
-    lineHeight: 16px
-    letterSpacing: 0.05em
+    lineHeight: '1.2'
 rounded:
   sm: 0.25rem
   DEFAULT: 0.5rem
@@ -91,55 +83,45 @@ rounded:
   full: 9999px
 spacing:
   base: 8px
-  gutter: 16px
-  margin-mobile: 16px
-  margin-desktop: 32px
-  max-width: 1280px
+  xs: 4px
+  sm: 8px
+  md: 16px
+  lg: 24px
+  xl: 32px
 ---
 
-## Brand & Style
-The design system adopts a **Modern Corporate** aesthetic optimized for deep-focus environments. It prioritizes clarity, technical precision, and a high-performance feel. By utilizing a dark-mode-first approach, it reduces eye strain for long-duration tasks while maintaining an air of sophisticated authority.
+# Design System: Midnight Tech
 
-The style leans into **Minimalism** with a focus on functional hierarchy. It avoids unnecessary decoration, instead using subtle tonal shifts and precise primary accents to guide the user’s eye through complex data structures and service workflows.
+## Brand & Style
+The brand identity has evolved into a sophisticated "Midnight Tech" persona. This style is deeply rooted in modern minimalism with a heavy influence from developer-centric aesthetics (Brutalism-lite), now featuring a vibrant cyan-forward primary palette.
+
+The emotional response should be one of precision, technical authority, and calm focus. By utilizing a dark color mode, prominent cyan actions, and monospaced accents, the UI evokes a high-performance environment suitable for technical tools, coding platforms, or premium hardware interfaces.
 
 ## Colors
-The palette is rooted in a deep navy and charcoal foundation to provide a stable, low-light environment. 
+The palette is built on a high-contrast dark foundation with a vibrant primary highlight.
 
-- **Primary:** A vibrant Blue (#2563EB) used exclusively for interactive elements, progress indicators, and primary actions.
-- **Surface Strategy:** We use a "Leveling" approach. The base background is the darkest (`surface-dim`), while content cards and containers sit on `surface` or `surface-bright` to create a logical stack of importance.
-- **Contrast:** Text is strictly high-contrast light gray or white to ensure WCAG AAA readability against the dark backgrounds.
+*   **Primary (#00ADB5):** The vibrant cyan "Action" color used for main branding, primary buttons, and active states.
+*   **Secondary (#222831):** The deep foundation color used for main surfaces, sidebars, and primary background layers.
+*   **Tertiary (#393E46):** Used for elevated surfaces, component containers, and subtle structural separation.
+*   **Neutral (#EEEEEE):** A near-white off-grey used for high-readability text and primary icons.
 
 ## Typography
-This design system utilizes **Inter** across all levels to maintain a systematic and utilitarian feel. 
+The typography strategy pairs technical precision with human readability.
 
-- **Headlines:** Use Bold weights with slight negative letter-spacing to create a "tight" professional look for headers.
-- **Body:** Standardized on 16px for readability, utilizing a slightly generous line-height to ensure text remains legible against dark backgrounds (where "halation" or light bleed can occur).
-- **Labels:** Use Medium weight and all-caps for utility labels to differentiate them from body copy.
+*   **Headlines & Labels:** **Jetbrains Mono** provides a distinct "code-inspired" character. Headlines are bold and rhythmic, while labels provide a clear, data-heavy feel for metadata.
+*   **Body:** **Inter** is used for all long-form text and interface copy to ensure maximum legibility and a modern, neutral feel.
 
 ## Layout & Spacing
-The system follows a **Fluid Grid** logic within a maximum container width.
-
-- **Grid:** A 12-column system for desktop, collapsing to 4 columns on mobile.
-- **Rhythm:** All margins and paddings must be multiples of the 8px base unit. 
-- **Adaptation:** On mobile, horizontal page margins shrink to 16px, and vertical spacing between stacked cards increases to maintain breathing room.
+The layout follows a strict 8px-based rhythmic grid. The system uses a fluid grid that collapses into a single column for mobile devices, maintaining a consistent gutter and margin profile. Space is used as a functional separator, keeping technical information dense but organized.
 
 ## Elevation & Depth
-In this dark UI, depth is communicated through **Tonal Layers** rather than heavy shadows. 
-
-- **Z-Index Hierarchy:** Higher elevation elements are represented by lighter surface colors (e.g., a modal uses `surface-bright`, while the page background uses `surface-dim`).
-- **Outlines:** Use low-contrast "Ghost Borders" (`#334155`) to define element boundaries without adding visual noise.
-- **Inner Glows:** For primary buttons or active states, a subtle 1px inner border can be used to simulate a slight "lift" against the dark backdrop.
+In this dark theme, depth is communicated through **Tonal Layering**. Surfaces that are "higher" in the stack use progressively lighter shades of grey (utilizing the Tertiary and Secondary palettes). Subtle, low-opacity borders define component boundaries, maintaining a flat, architectural feel.
 
 ## Shapes
-The shape language is strictly defined by an **8px (0.5rem)** base radius. This provides a balance between a friendly modern interface and a structured, professional tool.
-
-- **Standard:** Buttons, Input fields, and Small Cards use the 8px radius.
-- **Large:** Main content containers and Modals use 16px (`rounded-lg`) to anchor the layout.
+The UI features a **Rounded** (Level 2) shape language. Standard components feature an 8px (0.5rem) corner radius. This softening of the corners balances the "harshness" of the monospaced typography and the dark color palette.
 
 ## Components
-- **Buttons:** Primary buttons are solid Blue (#2563EB) with white text. Secondary buttons use an outline style with the `on-surface-variant` color.
-- **Inputs:** Fields use a `container-low` background with a subtle 1px border. On focus, the border transitions to the primary blue.
-- **Chips:** Small, low-contrast capsules used for tagging, utilizing `container-high` backgrounds and `on-surface` text.
-- **Cards:** Cards should not have shadows. Use a solid `surface` background and a 1px border of `container-high` to separate them from the base background.
-- **Lists:** Use subtle dividers (1px, 10% opacity white) between list items to maintain vertical rhythm without breaking the visual flow.
-- **Data Tables:** High-density rows with `surface-dim` headers and `surface` alternating row stripes for maximum data readability.
+*   **Buttons:** Primary buttons use the Primary cyan background with dark Secondary text. Secondary buttons use a Tertiary grey background with Neutral text.
+*   **Inputs:** Dark backgrounds with subtle Tertiary borders. Focus states are highlighted with a Primary cyan border.
+*   **Cards:** Use the Tertiary color to pop against the Secondary background, featuring the 8px rounded corners.
+*   **Code Blocks:** Utilize Jetbrains Mono and appear slightly darker than surrounding containers for distinction.

@@ -17,7 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Package manager**: npm
 
 # Design System
-This project uses a design system defined in `DESIGN3.md`  
+This project uses a design system defined in `DESIGN.md`  
 
 ## Local development database
 
