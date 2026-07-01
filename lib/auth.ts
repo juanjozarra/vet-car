@@ -29,12 +29,25 @@ export const authOptions: NextAuthOptions = {
         const isValid = await bcrypt.compare(credentials.password, user.password)
         if (!isValid) return null
 
-        return user
+        // Return only what the token needs. NEVER include `image`: it holds a
+        // data-URL avatar that NextAuth would map to the JWT `picture` claim,
+        // bloating the session cookie past the header limit (431 errors).
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          workshopId: user.workshopId,
+        }
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user, trigger }) {
+      // Never carry the avatar in the JWT — a data-URL image would blow the
+      // session cookie past the server header limit. It's read from the DB
+      // where it's displayed instead.
+      delete token.picture
       if (user) {
         token.id = user.id
         token.role = user.role
