@@ -1,16 +1,22 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import Link from 'next/link'
 import { signOut } from 'next-auth/react'
 import { motion, AnimatePresence, MotionConfig } from 'motion/react'
 import { motionTokens } from '@/lib/motionTokens'
+import { getInitials } from '@/lib/utils'
 import styles from './AvatarMenu.module.scss'
 
-function getInitials(name: string): string {
-  return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
-}
-
-export function AvatarMenu({ userName, userEmail }: { userName: string; userEmail?: string }) {
+export function AvatarMenu({
+  userName,
+  userEmail,
+  userImage,
+}: {
+  userName: string
+  userEmail?: string
+  userImage?: string | null
+}) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -40,9 +46,14 @@ export function AvatarMenu({ userName, userEmail }: { userName: string; userEmai
           aria-label="Abrir menú de usuario"
           aria-expanded={open}
           aria-haspopup="true"
-          className={`${styles.trigger} size-8 rounded-full flex items-center justify-center cursor-pointer`}
+          className={`${styles.trigger} size-8 rounded-full overflow-hidden flex items-center justify-center cursor-pointer`}
         >
-          <span className={styles.initials}>{getInitials(userName)}</span>
+          {userImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={userImage} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <span className={styles.initials}>{getInitials(userName)}</span>
+          )}
         </button>
 
         <AnimatePresence mode="wait">
@@ -61,6 +72,13 @@ export function AvatarMenu({ userName, userEmail }: { userName: string; userEmai
                 )}
               </div>
               <div className="py-1">
+                <Link
+                  href="/owner/profile"
+                  onClick={() => setOpen(false)}
+                  className={`${styles.menuItem} block px-4 py-2.5 text-sm`}
+                >
+                  Mi perfil
+                </Link>
                 <button
                   onClick={() => signOut({ callbackUrl: '/login' })}
                   className={`${styles.signOutBtn} px-4 py-2.5 text-sm`}

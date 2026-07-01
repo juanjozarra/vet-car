@@ -34,6 +34,17 @@
   color: $color-text-muted;
 }
 
+.menuItem {
+  color: $color-text;
+  transition: background 150ms ease;
+  text-align: left;
+  width: 100%;
+
+  &:hover {
+    background: $color-surface-high;
+  }
+}
+
 .signOutBtn {
   color: $color-error;
   transition: background 150ms ease;

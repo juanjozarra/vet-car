@@ -38,6 +38,8 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String?
+  phone         String?
+  address       String?
   role          Role      @default(OWNER)
   workshopId    String?
   createdAt     DateTime  @default(now())
@@ -59,7 +61,8 @@ model Workshop {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  mechanics User[]
+  mechanics    User[]
+  appointments Appointment[]
 }
 
 model Account {
@@ -156,8 +159,10 @@ model Appointment {
   notes       String?           @db.Text
   status      AppointmentStatus @default(SCHEDULED)
   vehicleId   String
+  workshopId  String?
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 
-  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  vehicle  Vehicle   @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  workshop Workshop? @relation(fields: [workshopId], references: [id])
 }

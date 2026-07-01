@@ -173,7 +173,11 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
                   </div>
                 ) : (
                   upcomingAppointments.map(appt => (
-                    <div key={appt.id} className={`${styles.appointmentItem} flex items-center gap-4 pl-2.5 pr-2 py-2`}>
+                    <button
+                      key={appt.id}
+                      onClick={() => router.push('/owner/schedule')}
+                      className={`${styles.appointmentItem} flex items-center gap-4 pl-2.5 pr-2 py-2 w-full text-left`}
+                    >
                       <div className={`${styles.apptDateBox} flex flex-col items-center px-2 py-1`}>
                         <span className={styles.apptMonth}>{appt.month}</span>
                         <span className={styles.apptDay}>{appt.day}</span>
@@ -183,11 +187,14 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
                         <span className={styles.apptVehicle}>{appt.vehicle}</span>
                       </div>
                       <ChevronRightIcon />
-                    </div>
+                    </button>
                   ))
                 )}
                 <div className="mt-4 pt-2">
                   <motion.button
+                    onClick={() => router.push('/owner/schedule')}
+                    whileHover={{ scale: 1.02, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } }}
+                    whileTap={{ scale: 0.97, transition: { duration: 0.1 } }}
                     className={styles.scheduleBtn}
                   >
                     <CalendarIcon />

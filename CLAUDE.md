@@ -19,6 +19,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Design System
 This project uses a design system defined in `DESIGN.md`  
 
+# System language
+Spanish (Latin American)
+
 ## Local development database
 
 PostgreSQL runs in Docker. Start it with:

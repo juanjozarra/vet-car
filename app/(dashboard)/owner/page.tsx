@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
+import { getUserImage } from '@/lib/user'
 import { DashboardNav } from '@/components/shared/DashboardNav'
 import { DashboardFooter } from '@/components/shared/DashboardFooter'
 import { DashboardContent } from './DashboardContent'
@@ -13,7 +14,7 @@ export default async function OwnerDashboard() {
 
   const userId = session.user.id
 
-  const [rawVehicles, rawActiveRepairs, rawAppointments] = await Promise.all([
+  const [rawVehicles, rawActiveRepairs, rawAppointments, userImage] = await Promise.all([
     prisma.vehicle.findMany({
       where: { ownerId: userId },
       include: { workOrders: { where: { status: 'IN_PROGRESS' } } },
@@ -35,6 +36,7 @@ export default async function OwnerDashboard() {
       orderBy: { scheduledAt: 'asc' },
       take: 5,
     }),
+    getUserImage(userId),
   ])
 
   const vehicles = rawVehicles.map(v => ({
@@ -65,6 +67,7 @@ export default async function OwnerDashboard() {
       <DashboardNav
         userName={session.user.name ?? 'usuario'}
         userEmail={session.user.email ?? undefined}
+        userImage={userImage}
       />
       <DashboardContent
         userName={session.user.name ?? 'usuario'}

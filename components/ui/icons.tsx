@@ -158,3 +158,45 @@ export function ScanIcon() {
     </svg>
   )
 }
+
+export function MapPinIcon({ color = '#6b7280' }: { color?: string }) {
+  return (
+    <svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M7 15S13 9.6 13 5.75A6 6 0 0 0 1 5.75C1 9.6 7 15 7 15Z" stroke={color} strokeWidth="1.5" strokeLinejoin="round"/>
+      <circle cx="7" cy="5.75" r="2" stroke={color} strokeWidth="1.5"/>
+    </svg>
+  )
+}
+
+export function ServiceIcon({ color = '#6b7280' }: { color?: string }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M9.8 4.2a.67.67 0 0 0 0 .94l1.07 1.07a.67.67 0 0 0 .94 0l2.51-2.51a4 4 0 0 1-5.3 5.3l-4.6 4.6a1.41 1.41 0 0 1-2-2l4.6-4.6a4 4 0 0 1 5.3-5.3L9.8 4.2Z" stroke={color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+}
+
+export function FilterIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M1 2h12M3.5 7h7M6 12h2" stroke="#bbc9ca" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
+export function SearchIcon({ color = '#003739' }: { color?: string }) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="6" cy="6" r="4.5" stroke={color} strokeWidth="1.5"/>
+      <path d="M13 13L9.5 9.5" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
+export function CloseIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M1 1L13 13M13 1L1 13" stroke="#bbc9ca" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  )
+}
