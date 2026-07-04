@@ -24,34 +24,38 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Invalid specialty' }, { status: 400 })
   }
 
-  const workshops = await prisma.workshop.findMany({
-    where: {
-      ...(specialty ? { specialties: { has: specialty as WorkshopSpecialty } } : {}),
-      ...(q ? { name: { contains: q, mode: 'insensitive' as const } } : {}),
-    },
-    orderBy: { name: 'asc' },
-  })
+  try {
+    const workshops = await prisma.workshop.findMany({
+      where: {
+        ...(specialty ? { specialties: { has: specialty as WorkshopSpecialty } } : {}),
+        ...(q ? { name: { contains: q, mode: 'insensitive' as const } } : {}),
+      },
+      orderBy: { name: 'asc' },
+    })
 
-  const withDistance = workshops.map(w => ({
-    id: w.id,
-    name: w.name,
-    address: w.address,
-    phone: w.phone,
-    specialties: w.specialties,
-    latitude: w.latitude,
-    longitude: w.longitude,
-    distanceKm:
-      userLat !== null && userLng !== null && w.latitude !== null && w.longitude !== null
-        ? haversineDistanceKm({ lat: userLat, lng: userLng }, { lat: w.latitude, lng: w.longitude })
-        : null,
-  }))
+    const withDistance = workshops.map(w => ({
+      id: w.id,
+      name: w.name,
+      address: w.address,
+      phone: w.phone,
+      specialties: w.specialties,
+      latitude: w.latitude,
+      longitude: w.longitude,
+      distanceKm:
+        userLat !== null && userLng !== null && w.latitude !== null && w.longitude !== null
+          ? haversineDistanceKm({ lat: userLat, lng: userLng }, { lat: w.latitude, lng: w.longitude })
+          : null,
+    }))
 
-  withDistance.sort((a, b) => {
-    if (a.distanceKm === null && b.distanceKm === null) return a.name.localeCompare(b.name)
-    if (a.distanceKm === null) return 1
-    if (b.distanceKm === null) return -1
-    return a.distanceKm - b.distanceKm
-  })
+    withDistance.sort((a, b) => {
+      if (a.distanceKm === null && b.distanceKm === null) return a.name.localeCompare(b.name)
+      if (a.distanceKm === null) return 1
+      if (b.distanceKm === null) return -1
+      return a.distanceKm - b.distanceKm
+    })
 
-  return NextResponse.json(withDistance)
+    return NextResponse.json(withDistance)
+  } catch {
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }
