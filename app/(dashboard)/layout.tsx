@@ -6,7 +6,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const session = await getServerSession(authOptions)
   if (!session) redirect('/login')
   return (
-    <div className="min-h-screen bg-[#121414]">
+    <div className="min-h-screen bg-background">
       {children}
     </div>
   )

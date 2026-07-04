@@ -5,9 +5,14 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'motion/react'
 import { motionTokens } from '@/lib/motionTokens'
 import {
-  UploadIcon, OdometerIcon, ChevronDownIcon, ScanIcon, PlusIcon,
+  UploadIcon, OdometerIcon, ScanIcon, PlusIcon,
 } from '@/components/ui/icons'
-import styles from './NewVehicleForm.module.scss'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
+const MotionButton = motion.create(Button)
 
 const CAR_MAKES = [
   'Acura', 'Alfa Romeo', 'Audi', 'BMW', 'Buick', 'Cadillac', 'Chevrolet',
@@ -34,6 +39,9 @@ type FormValues = {
   year: string; plate: string; plateState: string; mileage: string
 }
 
+const fieldLabel = 'text-sm font-medium text-muted-foreground'
+const sectionLabel = 'text-xs font-medium text-muted-foreground tracking-[0.05em] uppercase font-mono'
+
 export function NewVehicleForm() {
   const router = useRouter()
   const [values, setValues] = useState<FormValues>({
@@ -44,9 +52,13 @@ export function NewVehicleForm() {
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  function handleChange(e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
+  function handleChange(e: ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target
     setValues(prev => ({ ...prev, [name]: value }))
+  }
+
+  function setField(name: keyof FormValues) {
+    return (value: string) => setValues(prev => ({ ...prev, [name]: value }))
   }
 
   function handlePhotoChange(e: ChangeEvent<HTMLInputElement>) {
@@ -85,117 +97,112 @@ export function NewVehicleForm() {
       transition={{ duration: motionTokens.duration.normal, ease: motionTokens.easing.smooth }}
     >
       <div className="mb-8 flex flex-col gap-1">
-        <h1 className={styles.pageTitle}>Registrar nuevo vehículo</h1>
-        <p className={styles.pageSub}>Agregá un vehículo para registrar su historial de servicio.</p>
+        <h1 className="text-[2.25rem] font-bold text-foreground tracking-[-0.02em] font-mono">Registrar nuevo vehículo</h1>
+        <p className="text-base text-muted-foreground">Agregá un vehículo para registrar su historial de servicio.</p>
       </div>
 
       <div className="max-w-[600px] mx-auto">
         <form onSubmit={handleSubmit}>
-          <div className={`${styles.formCard} relative`}>
-            <div className={styles.topAccent} />
+          <div className="relative rounded-lg border border-border bg-card overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-px bg-primary opacity-50" />
             <div className="p-8 flex flex-col gap-8">
 
               <section className="flex flex-col gap-4">
-                <div className={styles.sectionDivider}>
-                  <h2 className={styles.sectionLabel}>Identificación</h2>
+                <div className="border-b border-border pb-2">
+                  <h2 className={sectionLabel}>Identificación</h2>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="nickname" className={styles.fieldLabel}>Apodo del vehículo</label>
-                  <input id="nickname" name="nickname" type="text" placeholder="p. ej. Mi Honda"
-                    value={values.nickname} onChange={handleChange} className={styles.input} />
+                  <Label htmlFor="nickname" className={fieldLabel}>Apodo del vehículo</Label>
+                  <Input id="nickname" name="nickname" type="text" placeholder="p. ej. Mi Honda"
+                    value={values.nickname} onChange={handleChange} className="h-11" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="vin" className={styles.fieldLabel}>VIN</label>
+                  <Label htmlFor="vin" className={fieldLabel}>VIN</Label>
                   <div className="flex gap-2">
-                    <input id="vin" name="vin" type="text" placeholder="VIN de 17 caracteres"
-                      value={values.vin} onChange={handleChange} className={styles.input} />
-                    <button type="button" disabled aria-label="Escanear código de barras VIN (próximamente)"
-                      className={styles.scanBtn}>
+                    <Input id="vin" name="vin" type="text" placeholder="VIN de 17 caracteres"
+                      value={values.vin} onChange={handleChange} className="h-11" />
+                    <Button type="button" variant="outline" disabled
+                      aria-label="Escanear código de barras VIN (próximamente)"
+                      className="h-11 shrink-0 font-mono text-xs tracking-[0.05em] cursor-not-allowed">
                       <ScanIcon />Escanear
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </section>
 
               <section className="flex flex-col gap-4">
-                <div className={styles.sectionDivider}>
-                  <h2 className={styles.sectionLabel}>Detalles</h2>
+                <div className="border-b border-border pb-2">
+                  <h2 className={sectionLabel}>Detalles</h2>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="make" className={styles.fieldLabel}>Marca</label>
-                    <div className="relative">
-                      <select id="make" name="make" value={values.make} onChange={handleChange}
-                        required className={styles.select}>
-                        <option value="" disabled>Seleccionar</option>
-                        {CAR_MAKES.map(m => <option key={m} value={m}>{m}</option>)}
-                      </select>
-                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
-                        <ChevronDownIcon />
-                      </span>
-                    </div>
+                    <Label htmlFor="make" className={fieldLabel}>Marca</Label>
+                    <Select value={values.make} onValueChange={setField('make')} required>
+                      <SelectTrigger id="make" className="h-11 w-full">
+                        <SelectValue placeholder="Seleccionar" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CAR_MAKES.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="model" className={styles.fieldLabel}>Modelo</label>
-                    <input id="model" name="model" type="text" placeholder="p. ej. CR-V"
-                      value={values.model} onChange={handleChange} required className={styles.input} />
+                    <Label htmlFor="model" className={fieldLabel}>Modelo</Label>
+                    <Input id="model" name="model" type="text" placeholder="p. ej. CR-V"
+                      value={values.model} onChange={handleChange} required className="h-11" />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="year" className={styles.fieldLabel}>Año</label>
-                    <div className="relative">
-                      <select id="year" name="year" value={values.year} onChange={handleChange}
-                        required className={styles.select}>
-                        <option value="" disabled>Año</option>
-                        {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
-                      </select>
-                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
-                        <ChevronDownIcon />
-                      </span>
-                    </div>
+                    <Label htmlFor="year" className={fieldLabel}>Año</Label>
+                    <Select value={values.year} onValueChange={setField('year')} required>
+                      <SelectTrigger id="year" className="h-11 w-full">
+                        <SelectValue placeholder="Año" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {YEARS.map(y => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="plate" className={styles.fieldLabel}>Patente</label>
-                    <input id="plate" name="plate" type="text" placeholder="ABC-1234"
-                      value={values.plate} onChange={handleChange} className={styles.input} />
+                    <Label htmlFor="plate" className={fieldLabel}>Patente</Label>
+                    <Input id="plate" name="plate" type="text" placeholder="ABC-1234"
+                      value={values.plate} onChange={handleChange} className="h-11" />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="plateState" className={styles.fieldLabel}>Provincia / Estado</label>
-                    <div className="relative">
-                      <select id="plateState" name="plateState" value={values.plateState}
-                        onChange={handleChange} className={styles.select}>
-                        <option value="">Seleccionar</option>
-                        {STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                      </select>
-                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
-                        <ChevronDownIcon />
-                      </span>
-                    </div>
+                    <Label htmlFor="plateState" className={fieldLabel}>Provincia / Estado</Label>
+                    <Select value={values.plateState} onValueChange={setField('plateState')}>
+                      <SelectTrigger id="plateState" className="h-11 w-full">
+                        <SelectValue placeholder="Seleccionar" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {STATES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="mileage" className={styles.fieldLabel}>Kilometraje actual</label>
+                  <Label htmlFor="mileage" className={fieldLabel}>Kilometraje actual</Label>
                   <div className="relative">
                     <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
                       <OdometerIcon />
                     </span>
-                    <input id="mileage" name="mileage" type="number" min="0" placeholder="0"
+                    <Input id="mileage" name="mileage" type="number" min="0" placeholder="0"
                       value={values.mileage} onChange={handleChange}
-                      className={styles.inputIconLeft} />
-                    <span className={`${styles.mileageUnit} absolute right-4 top-1/2 -translate-y-1/2`}>km</span>
+                      className="h-11 pl-10 pr-12" />
+                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">km</span>
                   </div>
                 </div>
               </section>
 
               <section className="flex flex-col gap-4">
-                <div className={styles.sectionDivider}>
-                  <h2 className={styles.sectionLabel}>Fotos</h2>
+                <div className="border-b border-border pb-2">
+                  <h2 className={sectionLabel}>Fotos</h2>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <span className={styles.fieldLabel}>Foto del vehículo</span>
+                  <span className={fieldLabel}>Foto del vehículo</span>
                   <button type="button" onClick={() => fileInputRef.current?.click()}
-                    className={styles.uploadArea}>
+                    className="flex flex-col items-center justify-center gap-3 h-36 rounded-lg border border-dashed border-border overflow-hidden transition-colors cursor-pointer hover:border-[#869394]">
                     {photoPreview ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={photoPreview} alt="Vista previa" className="h-full w-full object-cover" />
@@ -203,8 +210,8 @@ export function NewVehicleForm() {
                       <>
                         <UploadIcon />
                         <div className="flex flex-col items-center gap-1">
-                          <span className={styles.uploadLabel}>Clic para subir</span>
-                          <span className={styles.uploadHint}>PNG, JPG o WEBP, máx. 5 MB</span>
+                          <span className="text-sm font-medium text-primary">Clic para subir</span>
+                          <span className="text-xs text-muted-foreground">PNG, JPG o WEBP, máx. 5 MB</span>
                         </div>
                       </>
                     )}
@@ -214,19 +221,19 @@ export function NewVehicleForm() {
                 </div>
               </section>
 
-              {error && <p className={styles.errorMsg}>{error}</p>}
+              {error && <p className="text-sm text-destructive-foreground">{error}</p>}
 
-              <div className={`${styles.actionsDivider} flex items-center justify-end gap-3 pt-2`}>
-                <button type="button" onClick={() => router.push('/owner')} className={styles.cancelBtn}>
+              <div className="border-t border-border flex items-center justify-end gap-3 pt-2">
+                <Button type="button" variant="ghost" onClick={() => router.push('/owner')} className="px-4 py-2 text-sm">
                   Cancelar
-                </button>
-                <motion.button type="submit" disabled={submitting}
+                </Button>
+                <MotionButton type="submit" disabled={submitting}
                   whileHover={!submitting ? { scale: 1.02, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } } : undefined}
                   whileTap={!submitting ? { scale: 0.97, transition: { duration: 0.1 } } : undefined}
-                  className={styles.submitBtn}>
+                  className="h-10 px-4 text-xs tracking-[0.037em]">
                   <PlusIcon color="#003739" />
                   {submitting ? 'Registrando…' : 'Registrar vehículo'}
-                </motion.button>
+                </MotionButton>
               </div>
 
             </div>

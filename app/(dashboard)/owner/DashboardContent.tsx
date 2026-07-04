@@ -9,7 +9,11 @@ import {
   CalendarIcon,
 } from '@/components/ui/icons'
 import { motionTokens } from '@/lib/motionTokens'
-import styles from './DashboardContent.module.scss'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Card } from '@/components/ui/card'
+
+const MotionButton = motion.create(Button)
 
 type VehicleSummary = {
   id: string
@@ -58,20 +62,22 @@ function VehicleCard({ v, index }: { v: VehicleSummary; index: number }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: motionTokens.duration.normal, ease: motionTokens.easing.smooth, delay: index * 0.08 }}
       whileHover={{ y: -4, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } }}
-      className={`${styles.vehicleCard} flex flex-col justify-between h-48 p-4 flex-1 min-w-0`}
+      className="flex-1 min-w-0"
     >
-      <div className={v.hasActiveRepair ? styles.accentActive : styles.accentIdle} />
-      <div className="flex flex-col gap-1 pt-1">
-        <span className={styles.vehicleName}>{v.label}</span>
-        {v.vin && <span className={styles.vehicleMeta}>VIN: {v.vin}</span>}
-        {v.plate && <span className={`${styles.vehicleMeta} text-sm`}>Patente: {v.plate}</span>}
-      </div>
-      <div className="flex items-center justify-between">
-        <span className={v.hasActiveRepair ? styles.badgeActive : styles.badgeIdle}>
-          {v.hasActiveRepair ? 'Reparación activa' : 'Al día'}
-        </span>
-        <button className={styles.vehicleDetailBtn}>Ver detalles</button>
-      </div>
+      <Card className="relative h-48 p-4 flex-col justify-between gap-0 cursor-pointer transition-colors hover:border-[#869394]">
+        <div className={`absolute top-0 left-0 right-0 h-1 ${v.hasActiveRepair ? 'bg-primary' : 'bg-border'}`} />
+        <div className="flex flex-col gap-1 pt-1">
+          <span className="text-2xl font-semibold text-foreground leading-8 font-mono">{v.label}</span>
+          {v.vin && <span className="text-xs font-medium text-muted-foreground tracking-[0.037em]">VIN: {v.vin}</span>}
+          {v.plate && <span className="text-sm font-medium text-muted-foreground tracking-[0.037em]">Patente: {v.plate}</span>}
+        </div>
+        <div className="flex items-center justify-between">
+          <Badge variant={v.hasActiveRepair ? 'active' : 'idle'}>
+            {v.hasActiveRepair ? 'Reparación activa' : 'Al día'}
+          </Badge>
+          <button className="text-xs font-medium text-primary tracking-[0.037em]">Ver detalles</button>
+        </div>
+      </Card>
     </motion.div>
   )
 }
@@ -89,7 +95,7 @@ function TimelineStep({ step, total, index }: { step: Step; total: number; index
       style={{ width: `${100 / total}%` }}
     >
       {isDone && (
-        <div className={`${styles.stepDone} size-6 rounded-full flex items-center justify-center shrink-0`}>
+        <div className="size-6 rounded-full flex items-center justify-center shrink-0 bg-primary border-2 border-card">
           <CheckIcon />
         </div>
       )}
@@ -97,15 +103,21 @@ function TimelineStep({ step, total, index }: { step: Step; total: number; index
         <motion.div
           animate={{ scale: [1, 1.18, 1] }}
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          className={`${styles.stepCurrent} size-8 rounded-full flex items-center justify-center shrink-0 -mt-1`}
+          className="size-8 rounded-full flex items-center justify-center shrink-0 -mt-1 bg-card border-4 border-primary"
         >
           <div className="size-2 rounded-full bg-[#55d8e1]" />
         </motion.div>
       )}
       {step.state === 'pending' && (
-        <div className={`${styles.stepPending} size-6 rounded-full shrink-0`} />
+        <div className="size-6 rounded-full shrink-0 bg-muted border-2 border-card" />
       )}
-      <span className={isCurrent ? styles.stepLabelCurrent : isDone ? styles.stepLabelDone : styles.stepLabelPending}>
+      <span className={
+        isCurrent
+          ? 'text-xs font-bold tracking-[0.037em] text-center whitespace-nowrap text-primary font-mono'
+          : isDone
+            ? 'text-xs font-medium tracking-[0.037em] text-center whitespace-nowrap text-foreground font-mono'
+            : 'text-xs font-medium tracking-[0.037em] text-center whitespace-nowrap text-muted-foreground font-mono'
+      }>
         {step.label}
       </span>
     </motion.div>
@@ -127,18 +139,18 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
             className="flex items-end justify-between"
           >
             <div className="flex flex-col gap-1">
-              <span className={styles.welcomeText}>Hola de nuevo, {userName}</span>
-              <span className={styles.welcomeSub}>Acá está el estado de tus vehículos y turnos próximos.</span>
+              <span className="text-base text-foreground">Hola de nuevo, {userName}</span>
+              <span className="text-base text-muted-foreground">Acá está el estado de tus vehículos y turnos próximos.</span>
             </div>
-            <motion.button
+            <MotionButton
               onClick={() => router.push('/owner/vehicles/new')}
               whileHover={{ scale: 1.02, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } }}
               whileTap={{ scale: 0.97, transition: { duration: 0.1 } }}
-              className={styles.btnRegister}
+              className="h-10 px-4 text-xs tracking-[0.037em]"
             >
               <PlusIcon color="#003739" />
               Registrar nuevo vehículo
-            </motion.button>
+            </MotionButton>
           </motion.div>
 
           <motion.div
@@ -148,14 +160,14 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
             className="grid grid-cols-12 gap-4"
           >
             <div className="col-span-8 flex flex-col gap-4">
-              <h2 className={styles.sectionHeading}>Mis vehículos</h2>
+              <h2 className="text-2xl font-semibold text-foreground font-mono">Mis vehículos</h2>
               {vehicles.length === 0 ? (
-                <div className={styles.emptyState}>
-                  <span className={styles.emptyText}>Todavía no tenés vehículos registrados.</span>
-                  <button onClick={() => router.push('/owner/vehicles/new')} className={styles.btnRegisterSm}>
+                <div className="flex flex-col items-center justify-center h-48 gap-3 bg-card border border-dashed border-border rounded-lg">
+                  <span className="text-sm text-muted-foreground">Todavía no tenés vehículos registrados.</span>
+                  <Button onClick={() => router.push('/owner/vehicles/new')} className="h-9 px-3 text-xs tracking-[0.037em]">
                     <PlusIcon color="#003739" />
                     Registrá tu primer vehículo
-                  </button>
+                  </Button>
                 </div>
               ) : (
                 <div className="flex gap-4">
@@ -165,43 +177,44 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
             </div>
 
             <div className="col-span-4 flex flex-col gap-4">
-              <h2 className={styles.sectionHeading}>Turnos próximos</h2>
-              <div className={`${styles.appointmentsCard} p-4 flex flex-col gap-2`}>
+              <h2 className="text-2xl font-semibold text-foreground font-mono">Turnos próximos</h2>
+              <Card className="p-4 gap-2">
                 {upcomingAppointments.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-6 gap-1">
-                    <span className={styles.noAppts}>No hay turnos próximos.</span>
+                    <span className="text-sm text-muted-foreground">No hay turnos próximos.</span>
                   </div>
                 ) : (
                   upcomingAppointments.map(appt => (
                     <button
                       key={appt.id}
                       onClick={() => router.push('/owner/schedule')}
-                      className={`${styles.appointmentItem} flex items-center gap-4 pl-2.5 pr-2 py-2 w-full text-left`}
+                      className="flex items-center gap-4 pl-2.5 pr-2 py-2 w-full text-left border-l-2 border-primary rounded-r-lg"
                     >
-                      <div className={`${styles.apptDateBox} flex flex-col items-center px-2 py-1`}>
-                        <span className={styles.apptMonth}>{appt.month}</span>
-                        <span className={styles.apptDay}>{appt.day}</span>
+                      <div className="flex flex-col items-center px-2 py-1 bg-muted rounded-lg min-w-12 shrink-0">
+                        <span className="text-xs font-medium text-muted-foreground tracking-[0.037em] uppercase font-mono">{appt.month}</span>
+                        <span className="text-2xl font-semibold text-foreground leading-8 font-mono">{appt.day}</span>
                       </div>
                       <div className="flex-1 min-w-0 flex flex-col">
-                        <span className={styles.apptTitle}>{appt.title}</span>
-                        <span className={styles.apptVehicle}>{appt.vehicle}</span>
+                        <span className="text-base font-semibold text-foreground">{appt.title}</span>
+                        <span className="text-sm text-muted-foreground">{appt.vehicle}</span>
                       </div>
                       <ChevronRightIcon />
                     </button>
                   ))
                 )}
                 <div className="mt-4 pt-2">
-                  <motion.button
+                  <MotionButton
                     onClick={() => router.push('/owner/schedule')}
                     whileHover={{ scale: 1.02, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } }}
                     whileTap={{ scale: 0.97, transition: { duration: 0.1 } }}
-                    className={styles.scheduleBtn}
+                    variant="outline"
+                    className="w-full border-dashed font-mono text-xs tracking-[0.037em] text-muted-foreground hover:border-primary hover:bg-transparent hover:text-muted-foreground"
                   >
                     <CalendarIcon />
                     Agendar servicio
-                  </motion.button>
+                  </MotionButton>
                 </div>
-              </div>
+              </Card>
             </div>
           </motion.div>
 
@@ -212,7 +225,7 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
               transition={{ duration: motionTokens.duration.normal, ease: motionTokens.easing.smooth, delay: 0.16 }}
               className="flex flex-col gap-4"
             >
-              <h2 className={styles.sectionHeading}>Seguimiento de reparaciones activas</h2>
+              <h2 className="text-2xl font-semibold text-foreground font-mono">Seguimiento de reparaciones activas</h2>
               {activeRepairs.map(repair => {
                 const currentStep = timelineCurrentStep(repair.status)
                 const progressPct = (currentStep / (TIMELINE_STEPS.length - 1)) * 100
@@ -222,18 +235,18 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
                 }))
 
                 return (
-                  <div key={repair.id} className={`${styles.repairCard} p-6 flex flex-col gap-4`}>
-                    <div className={`${styles.repairCardHeader} flex items-center justify-between pb-3`}>
+                  <Card key={repair.id} className="p-6 gap-4 bg-card/90 backdrop-blur-sm">
+                    <div className="flex items-center justify-between pb-3 border-b border-border">
                       <div className="flex flex-col">
-                        <span className={styles.repairVehicle}>{repair.vehicle}</span>
-                        <span className={styles.repairOrder}>{repair.workOrder}</span>
+                        <span className="text-base font-semibold text-foreground">{repair.vehicle}</span>
+                        <span className="text-sm text-muted-foreground">{repair.workOrder}</span>
                       </div>
-                      <div className={styles.repairStatusBadge}>En progreso</div>
+                      <Badge variant="active">En progreso</Badge>
                     </div>
                     <div className="relative py-8">
-                      <div className={`${styles.progressTrack} absolute top-1/2 left-0 right-0 h-1 -translate-y-1/2 rounded-full`} />
+                      <div className="absolute top-1/2 left-0 right-0 h-1 -translate-y-1/2 rounded-full bg-muted" />
                       <motion.div
-                        className={`${styles.progressBar} absolute top-1/2 left-0 h-1 -translate-y-1/2 rounded-full`}
+                        className="absolute top-1/2 left-0 h-1 -translate-y-1/2 rounded-full bg-primary"
                         initial={{ width: '0%' }}
                         animate={{ width: `${progressPct}%` }}
                         transition={{ duration: motionTokens.duration.slow, ease: motionTokens.easing.smooth, delay: 0.5 }}
@@ -244,7 +257,7 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
                         ))}
                       </div>
                     </div>
-                  </div>
+                  </Card>
                 )
               })}
             </motion.div>

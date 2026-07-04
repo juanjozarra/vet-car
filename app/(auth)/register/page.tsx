@@ -7,7 +7,11 @@ import { useState } from 'react'
 import { motion, AnimatePresence, MotionConfig } from 'motion/react'
 import { ArrowRightIcon, CarIcon, EyeIcon, EyeOffIcon, LockIcon, MailIcon, UserIcon } from '@/components/ui/icons'
 import { motionTokens } from '@/lib/motionTokens'
-import styles from './register.module.scss'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+
+const MotionButton = motion.create(Button)
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -36,9 +40,9 @@ export default function RegisterPage() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <main className={`${styles.page} min-h-screen flex flex-col items-center justify-center px-4 py-12`}>
-        <div className={styles.glowTopRight} />
-        <div className={styles.glowBottomLeft} />
+      <main className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+        <div className="absolute top-[-10%] right-[-5%] w-96 h-96 rounded-full bg-primary opacity-[0.08] blur-[80px] pointer-events-none" />
+        <div className="absolute bottom-[-10%] left-[-5%] w-80 h-80 rounded-full bg-primary opacity-[0.08] blur-[80px] pointer-events-none" />
 
         <motion.div
           initial={{ opacity: 0, y: motionTokens.distance.lg }}
@@ -48,23 +52,23 @@ export default function RegisterPage() {
         >
           {/* Header */}
           <div className="flex flex-col items-center gap-3 text-center">
-            <div className={styles.iconWrapper}>
+            <div className="flex items-center justify-center size-12 rounded-lg border border-border bg-muted">
               <CarIcon color="#55d8e1" />
             </div>
             <div className="flex flex-col gap-1">
-              <h1 className={styles.heading}>Crear cuenta</h1>
-              <p className={styles.subheading}>Completá tus datos para comenzar</p>
+              <h1 className="text-2xl font-semibold text-foreground font-mono">Crear cuenta</h1>
+              <p className="text-sm text-muted-foreground">Completá tus datos para comenzar</p>
             </div>
           </div>
 
           {/* Card */}
-          <div className={`${styles.card} p-8 flex flex-col gap-5`}>
+          <div className="p-8 flex flex-col gap-5 rounded-[1.5rem] border border-border bg-card">
             <AnimatePresence mode="wait">
               {error && (
                 <motion.p key="error"
                   initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: motionTokens.duration.fast, ease: motionTokens.easing.smooth }}
-                  className={styles.errorMsg}>
+                  className="text-sm text-center text-destructive-foreground bg-destructive/30 border border-destructive rounded-md px-3 py-2">
                   {error}
                 </motion.p>
               )}
@@ -72,30 +76,30 @@ export default function RegisterPage() {
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <div className="flex flex-col gap-2">
-                <label htmlFor="name" className={styles.label}>Nombre completo</label>
+                <Label htmlFor="name" className="text-[0.6875rem] font-medium tracking-[0.08em] uppercase text-foreground font-mono">Nombre completo</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"><UserIcon /></span>
-                  <input id="name" name="name" type="text" required autoComplete="name"
-                    placeholder="Juan Pérez" className={styles.inputIconLeft} />
+                  <Input id="name" name="name" type="text" required autoComplete="name"
+                    placeholder="Juan Pérez" className="h-11 pl-10" />
                 </div>
               </div>
 
               <div className="flex flex-col gap-2">
-                <label htmlFor="email" className={styles.label}>Correo electrónico</label>
+                <Label htmlFor="email" className="text-[0.6875rem] font-medium tracking-[0.08em] uppercase text-foreground font-mono">Correo electrónico</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"><MailIcon /></span>
-                  <input id="email" name="email" type="email" required autoComplete="email"
-                    placeholder="vos@ejemplo.com" className={styles.inputIconLeft} />
+                  <Input id="email" name="email" type="email" required autoComplete="email"
+                    placeholder="vos@ejemplo.com" className="h-11 pl-10" />
                 </div>
               </div>
 
               <div className="flex flex-col gap-2">
-                <label htmlFor="password" className={styles.label}>Contraseña</label>
+                <Label htmlFor="password" className="text-[0.6875rem] font-medium tracking-[0.08em] uppercase text-foreground font-mono">Contraseña</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"><LockIcon /></span>
-                  <input id="password" name="password" type={showPassword ? 'text' : 'password'}
+                  <Input id="password" name="password" type={showPassword ? 'text' : 'password'}
                     required minLength={8} autoComplete="new-password"
-                    placeholder="Mín. 8 caracteres" className={styles.inputIconBoth} />
+                    placeholder="Mín. 8 caracteres" className="h-11 pl-10 pr-10" />
                   <button type="button" onClick={() => setShowPassword(v => !v)}
                     className="absolute right-3 top-1/2 -translate-y-1/2"
                     aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
@@ -105,12 +109,12 @@ export default function RegisterPage() {
               </div>
 
               <div className="flex flex-col gap-2">
-                <label htmlFor="confirm" className={styles.label}>Confirmar contraseña</label>
+                <Label htmlFor="confirm" className="text-[0.6875rem] font-medium tracking-[0.08em] uppercase text-foreground font-mono">Confirmar contraseña</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"><LockIcon /></span>
-                  <input id="confirm" name="confirm" type={showConfirm ? 'text' : 'password'}
+                  <Input id="confirm" name="confirm" type={showConfirm ? 'text' : 'password'}
                     required autoComplete="new-password"
-                    placeholder="Repetí tu contraseña" className={styles.inputIconBoth} />
+                    placeholder="Repetí tu contraseña" className="h-11 pl-10 pr-10" />
                   <button type="button" onClick={() => setShowConfirm(v => !v)}
                     className="absolute right-3 top-1/2 -translate-y-1/2"
                     aria-label={showConfirm ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
@@ -122,31 +126,31 @@ export default function RegisterPage() {
               <label className="flex items-start gap-2 cursor-pointer select-none">
                 <input type="checkbox" required
                   className="mt-0.5 w-4 h-4 rounded accent-[#55d8e1] shrink-0" />
-                <span className={styles.termsText}>
+                <span className="text-sm text-muted-foreground">
                   Acepto los{' '}
-                  <span className={styles.termsLink}>Términos del servicio</span>
+                  <span className="font-medium text-primary cursor-pointer">Términos del servicio</span>
                   {' '}y la{' '}
-                  <span className={styles.termsLink}>Política de privacidad</span>
+                  <span className="font-medium text-primary cursor-pointer">Política de privacidad</span>
                 </span>
               </label>
 
-              <motion.button type="submit"
+              <MotionButton type="submit"
                 whileHover={{ scale: 1.02, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } }}
                 whileTap={{ scale: 0.97, transition: { duration: 0.1 } }}
-                className={styles.submitBtn}>
+                className="w-full h-11 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]">
                 Continuar
                 <ArrowRightIcon />
-              </motion.button>
+              </MotionButton>
             </form>
           </div>
 
-          <p className={styles.footerText}>
+          <p className="text-sm text-center text-muted-foreground">
             ¿Ya tenés una cuenta?{' '}
-            <Link href="/login" className={styles.footerLink}>Iniciá sesión</Link>
+            <Link href="/login" className="font-medium text-primary transition-opacity hover:opacity-80">Iniciá sesión</Link>
           </p>
         </motion.div>
 
-        <p className={`${styles.copyright} absolute bottom-6`}>
+        <p className="absolute bottom-6 text-xs text-muted-foreground/50">
           © 2024 VetCar. Todos los derechos reservados.
         </p>
       </main>

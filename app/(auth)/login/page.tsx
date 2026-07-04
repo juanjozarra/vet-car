@@ -8,7 +8,11 @@ import { useState } from 'react'
 import { motion, AnimatePresence, MotionConfig } from 'motion/react'
 import { ArrowRightIcon, CarIcon, EyeIcon, EyeOffIcon, LockIcon, MailIcon } from '@/components/ui/icons'
 import { motionTokens } from '@/lib/motionTokens'
-import styles from './login.module.scss'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+
+const MotionButton = motion.create(Button)
 
 export default function LoginPage() {
   const router = useRouter()
@@ -39,22 +43,22 @@ export default function LoginPage() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <main className={`${styles.page} min-h-screen flex items-center justify-center px-4`}>
+      <main className="min-h-screen flex items-center justify-center px-4">
         <motion.div
           initial={{ opacity: 0, y: motionTokens.distance.lg }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: motionTokens.duration.normal, ease: motionTokens.easing.smooth }}
-          className={`${styles.card} relative w-full max-w-[448px] p-10 flex flex-col gap-8 overflow-hidden`}
+          className="relative w-full max-w-[448px] p-10 flex flex-col gap-8 overflow-hidden rounded-[1.5rem] border border-border bg-card shadow-[0_25px_50px_-12px_rgba(0,0,0,0.6)]"
         >
-          <div className={styles.glow} />
+          <div className="absolute -top-32 -left-32 size-64 rounded-full bg-primary opacity-[0.08] blur-[80px] pointer-events-none" />
 
           {/* Logo */}
           <div className="flex flex-col items-center gap-3 z-10">
             <div className="flex items-center gap-3">
               <CarIcon color="#55d8e1" />
-              <span className={styles.appName}>VetCar</span>
+              <span className="text-[1.75rem] font-bold tracking-[-0.03em] text-foreground font-mono">VetCar</span>
             </div>
-            <p className={styles.tagline}>Iniciá sesión para gestionar tus operaciones</p>
+            <p className="text-sm text-muted-foreground">Iniciá sesión para gestionar tus operaciones</p>
           </div>
 
           {/* Form */}
@@ -67,7 +71,7 @@ export default function LoginPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: motionTokens.duration.fast, ease: motionTokens.easing.smooth }}
-                  className={styles.errorMsg}
+                  className="text-sm text-center text-destructive-foreground bg-destructive/30 border border-destructive rounded-md px-3 py-2"
                 >
                   {error}
                 </motion.p>
@@ -76,29 +80,35 @@ export default function LoginPage() {
 
             {/* Email */}
             <div className="flex flex-col gap-2">
-              <label htmlFor="email" className={styles.label}>Correo electrónico</label>
+              <Label htmlFor="email" className="text-[0.6875rem] font-medium tracking-[0.08em] uppercase text-foreground font-mono">
+                Correo electrónico
+              </Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
                   <MailIcon />
                 </span>
-                <input id="email" name="email" type="email" required autoComplete="email"
-                  placeholder="usuario@ejemplo.com" className={styles.inputIconLeft} />
+                <Input id="email" name="email" type="email" required autoComplete="email"
+                  placeholder="usuario@ejemplo.com" className="h-11 pl-10" />
               </div>
             </div>
 
             {/* Password */}
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <label htmlFor="password" className={styles.label}>Contraseña</label>
-                <span className={styles.forgotLink}>¿Olvidaste tu contraseña?</span>
+                <Label htmlFor="password" className="text-[0.6875rem] font-medium tracking-[0.08em] uppercase text-foreground font-mono">
+                  Contraseña
+                </Label>
+                <span className="text-[0.6875rem] font-medium text-primary cursor-pointer transition-opacity hover:opacity-80">
+                  ¿Olvidaste tu contraseña?
+                </span>
               </div>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
                   <LockIcon />
                 </span>
-                <input id="password" name="password" type={showPassword ? 'text' : 'password'}
+                <Input id="password" name="password" type={showPassword ? 'text' : 'password'}
                   required autoComplete="current-password" placeholder="••••••••"
-                  className={styles.inputIconBoth} />
+                  className="h-11 pl-10 pr-10" />
                 <button type="button" onClick={() => setShowPassword(v => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2"
                   aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
@@ -111,23 +121,23 @@ export default function LoginPage() {
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input type="checkbox" name="remember"
                 className="w-4 h-4 rounded accent-[#55d8e1]" />
-              <span className={styles.rememberText}>Recordarme por 30 días</span>
+              <span className="text-sm text-muted-foreground">Recordarme por 30 días</span>
             </label>
 
             {/* Submit */}
-            <motion.button type="submit" disabled={loading}
+            <MotionButton type="submit" disabled={loading}
               whileHover={{ scale: 1.02, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } }}
               whileTap={{ scale: 0.97, transition: { duration: 0.1 } }}
-              className={styles.submitBtn}>
+              className="w-full h-11 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]">
               {loading ? 'Iniciando sesión…' : 'Iniciar sesión'}
               {!loading && <ArrowRightIcon />}
-            </motion.button>
+            </MotionButton>
           </form>
 
           {/* Footer */}
-          <p className={`${styles.footerText} z-10`}>
+          <p className="text-sm text-center text-muted-foreground z-10">
             ¿No tenés cuenta?{' '}
-            <Link href="/register" className={styles.footerLink}>Registrate</Link>
+            <Link href="/register" className="font-medium text-primary transition-opacity hover:opacity-80">Registrate</Link>
           </p>
         </motion.div>
       </main>

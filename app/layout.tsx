@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { JetBrains_Mono, Inter } from 'next/font/google'
 import './globals.css'
 import { SessionProvider } from '@/components/shared/SessionProvider'
+import { cn } from '@/lib/utils'
 
 const jetbrainsMono = JetBrains_Mono({
   weight: ['500', '600', '700'],
@@ -25,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className={`${jetbrainsMono.variable} ${inter.variable} h-full antialiased`}>
+    <html lang="es" className={cn('h-full', 'antialiased', jetbrainsMono.variable, inter.variable)}>
       <body className="min-h-full flex flex-col">
         <SessionProvider>{children}</SessionProvider>
       </body>

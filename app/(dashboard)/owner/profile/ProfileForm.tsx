@@ -6,7 +6,12 @@ import { motion } from 'motion/react'
 import { motionTokens } from '@/lib/motionTokens'
 import { getInitials } from '@/lib/utils'
 import { UploadIcon } from '@/components/ui/icons'
-import styles from './ProfileForm.module.scss'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+
+const MotionButton = motion.create(Button)
 
 const MAX_AVATAR_SIZE = 256
 
@@ -48,6 +53,9 @@ type ProfileFormProps = {
   address: string
   image: string | null
 }
+
+const fieldLabel = 'text-sm font-medium text-muted-foreground'
+const sectionLabel = 'text-xs font-medium text-muted-foreground tracking-[0.05em] uppercase font-mono'
 
 export function ProfileForm({ name, email, phone, address, image }: ProfileFormProps) {
   const router = useRouter()
@@ -104,40 +112,41 @@ export function ProfileForm({ name, email, phone, address, image }: ProfileFormP
       transition={{ duration: motionTokens.duration.normal, ease: motionTokens.easing.smooth }}
     >
       <div className="mb-8 flex flex-col gap-1">
-        <h1 className={styles.pageTitle}>Mi perfil</h1>
-        <p className={styles.pageSub}>Actualizá tu foto y tus datos personales.</p>
+        <h1 className="text-[2.25rem] font-bold text-foreground tracking-[-0.02em] font-mono">Mi perfil</h1>
+        <p className="text-base text-muted-foreground">Actualizá tu foto y tus datos personales.</p>
       </div>
 
       <div className="max-w-[600px] mx-auto">
         <form onSubmit={handleSubmit}>
-          <div className={`${styles.formCard} relative`}>
-            <div className={styles.topAccent} />
+          <div className="relative rounded-lg border border-border bg-card overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-px bg-primary opacity-50" />
             <div className="p-8 flex flex-col gap-8">
 
               <section className="flex flex-col gap-4">
-                <div className={styles.sectionDivider}>
-                  <h2 className={styles.sectionLabel}>Foto de perfil</h2>
+                <div className="border-b border-border pb-2">
+                  <h2 className={sectionLabel}>Foto de perfil</h2>
                 </div>
                 <div className="flex items-center gap-4">
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className={styles.avatarBtn}
                     aria-label="Cambiar foto de perfil"
+                    className="shrink-0 rounded-full transition-colors hover:opacity-90"
                   >
-                    {photo ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={photo} alt="Foto de perfil" className="h-full w-full object-cover" />
-                    ) : (
-                      <span className={styles.avatarInitials}>{getInitials(name || email)}</span>
-                    )}
+                    <Avatar size="lg" className="size-[4.5rem] border border-border bg-muted">
+                      {photo && <AvatarImage src={photo} alt="Foto de perfil" />}
+                      <AvatarFallback className="text-xl font-semibold text-primary font-mono bg-muted">
+                        {getInitials(name || email)}
+                      </AvatarFallback>
+                    </Avatar>
                   </button>
                   <div className="flex flex-col gap-1">
-                    <button type="button" onClick={() => fileInputRef.current?.click()} className={styles.changePhotoBtn}>
+                    <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}
+                      className="w-fit h-9 px-3 text-xs tracking-[0.037em]">
                       <UploadIcon />
                       Cambiar foto
-                    </button>
-                    <span className={styles.uploadHint}>PNG, JPG o WEBP. Se ajusta automáticamente.</span>
+                    </Button>
+                    <span className="text-xs text-muted-foreground">PNG, JPG o WEBP. Se ajusta automáticamente.</span>
                   </div>
                   <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp"
                     onChange={handlePhotoChange} className="sr-only" />
@@ -145,43 +154,43 @@ export function ProfileForm({ name, email, phone, address, image }: ProfileFormP
               </section>
 
               <section className="flex flex-col gap-4">
-                <div className={styles.sectionDivider}>
-                  <h2 className={styles.sectionLabel}>Datos personales</h2>
+                <div className="border-b border-border pb-2">
+                  <h2 className={sectionLabel}>Datos personales</h2>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="name" className={styles.fieldLabel}>Nombre</label>
-                  <input id="name" name="name" type="text" placeholder="Tu nombre completo"
-                    value={values.name} onChange={handleChange} className={styles.input} />
+                  <Label htmlFor="name" className={fieldLabel}>Nombre</Label>
+                  <Input id="name" name="name" type="text" placeholder="Tu nombre completo"
+                    value={values.name} onChange={handleChange} className="h-11" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="email" className={styles.fieldLabel}>Correo electrónico</label>
-                  <input id="email" type="email" value={email} disabled readOnly
-                    className={styles.inputDisabled} />
+                  <Label htmlFor="email" className={fieldLabel}>Correo electrónico</Label>
+                  <Input id="email" type="email" value={email} disabled readOnly
+                    className="h-11 text-muted-foreground opacity-60 cursor-not-allowed" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="phone" className={styles.fieldLabel}>Teléfono</label>
-                  <input id="phone" name="phone" type="tel" placeholder="p. ej. 11 5555-5555"
-                    value={values.phone} onChange={handleChange} className={styles.input} />
+                  <Label htmlFor="phone" className={fieldLabel}>Teléfono</Label>
+                  <Input id="phone" name="phone" type="tel" placeholder="p. ej. 11 5555-5555"
+                    value={values.phone} onChange={handleChange} className="h-11" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="address" className={styles.fieldLabel}>Dirección</label>
-                  <input id="address" name="address" type="text" placeholder="Calle, número, ciudad"
-                    value={values.address} onChange={handleChange} className={styles.input} />
+                  <Label htmlFor="address" className={fieldLabel}>Dirección</Label>
+                  <Input id="address" name="address" type="text" placeholder="Calle, número, ciudad"
+                    value={values.address} onChange={handleChange} className="h-11" />
                 </div>
               </section>
 
-              {error && <p className={styles.errorMsg}>{error}</p>}
+              {error && <p className="text-sm text-destructive-foreground">{error}</p>}
 
-              <div className={`${styles.actionsDivider} flex items-center justify-end gap-3 pt-2`}>
-                <button type="button" onClick={() => router.push('/owner')} className={styles.cancelBtn}>
+              <div className="border-t border-border flex items-center justify-end gap-3 pt-2">
+                <Button type="button" variant="ghost" onClick={() => router.push('/owner')} className="px-4 py-2 text-sm">
                   Cancelar
-                </button>
-                <motion.button type="submit" disabled={submitting}
+                </Button>
+                <MotionButton type="submit" disabled={submitting}
                   whileHover={!submitting ? { scale: 1.02, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } } : undefined}
                   whileTap={!submitting ? { scale: 0.97, transition: { duration: 0.1 } } : undefined}
-                  className={styles.submitBtn}>
+                  className="h-10 px-4 text-xs tracking-[0.037em]">
                   {submitting ? 'Guardando…' : 'Guardar cambios'}
-                </motion.button>
+                </MotionButton>
               </div>
 
             </div>

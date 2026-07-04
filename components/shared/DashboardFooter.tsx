@@ -1,15 +1,13 @@
-import styles from './DashboardFooter.module.scss'
-
 export function DashboardFooter() {
   return (
-    <footer className={`${styles.footer} flex items-center justify-between px-8 py-8`}>
-      <span className={`${styles.logo} text-2xl font-bold`}>VetCar</span>
-      <span className={`${styles.copyright} text-xs font-medium`}>
+    <footer className="flex items-center justify-between px-8 py-8 bg-card border-t border-border">
+      <span className="text-2xl font-bold text-foreground font-mono tracking-[0.037em]">VetCar</span>
+      <span className="text-xs font-medium text-muted-foreground tracking-[0.037em]">
         © 2024 VetCar. Todos los derechos reservados.
       </span>
       <nav className="flex items-center gap-4">
         {['Política de privacidad', 'Términos del servicio', 'Contactar soporte', 'Soluciones para flotas'].map(link => (
-          <span key={link} className={`${styles.link} text-xs font-medium`}>{link}</span>
+          <span key={link} className="text-xs font-medium text-muted-foreground tracking-[0.037em] transition-colors cursor-pointer hover:text-foreground">{link}</span>
         ))}
       </nav>
     </footer>

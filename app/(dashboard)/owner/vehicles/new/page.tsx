@@ -14,7 +14,7 @@ export default async function NewVehiclePage() {
   const userImage = await getUserImage(session.user.id)
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#121414]">
+    <div className="flex flex-col min-h-screen bg-background">
       <DashboardNav
         userName={session.user.name ?? 'there'}
         userEmail={session.user.email ?? undefined}
