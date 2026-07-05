@@ -51,6 +51,18 @@ describe('getAvailableSlots', () => {
     expect(slots.map(s => s.getHours())).toEqual([10, 11, 12])
   })
 
+  it('returns no slots and does not hang for a non-positive slotDurationMinutes', () => {
+    const slots = getAvailableSlots({
+      hours: [{ dayOfWeek: 1, opensMinute: 540, closesMinute: 780 }],
+      slotDurationMinutes: 0,
+      bookedTimes: [],
+      now: monday,
+      daysAhead: 1,
+      minLeadMinutes: 0,
+    })
+    expect(slots).toEqual([])
+  })
+
   it('projects slots across multiple days honoring day-of-week', () => {
     const slots = getAvailableSlots({
       hours: [

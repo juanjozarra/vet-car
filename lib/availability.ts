@@ -21,6 +21,8 @@ export function getAvailableSlots({
   daysAhead = 14,
   minLeadMinutes = 120,
 }: GetAvailableSlotsParams): Date[] {
+  if (slotDurationMinutes <= 0) return []
+
   const bookedTimestamps = new Set(bookedTimes.map(d => d.getTime()))
   const earliestAllowed = new Date(now.getTime() + minLeadMinutes * 60_000)
   const slots: Date[] = []

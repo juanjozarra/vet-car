@@ -59,6 +59,12 @@ export async function PATCH(request: Request) {
     }
   }
 
+  if (slotDurationMinutes !== undefined) {
+    if (typeof slotDurationMinutes !== 'number' || slotDurationMinutes <= 0) {
+      return NextResponse.json({ error: 'slotDurationMinutes must be a positive number' }, { status: 400 })
+    }
+  }
+
   if (hours !== undefined) {
     if (!Array.isArray(hours)) {
       return NextResponse.json({ error: 'hours must be an array' }, { status: 400 })
