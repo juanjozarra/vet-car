@@ -4,8 +4,8 @@ import { useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { MotionConfig } from 'motion/react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
+import { TimePicker } from '@/components/ui/time-picker'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { WORKSHOP_SPECIALTY_OPTIONS } from '@/lib/workshopSpecialty'
 import { PlaceLocationInput, type PlaceLocationValue } from '@/components/shared/PlaceLocationInput'
@@ -195,20 +195,16 @@ export function WorkshopSettingsForm({
                   />
                   {DAY_LABELS[day.dayOfWeek]}
                 </label>
-                <Input
-                  type="time"
+                <TimePicker
                   value={day.opensTime}
                   disabled={!day.enabled}
-                  onChange={e => updateDay(day.dayOfWeek, { opensTime: e.target.value })}
-                  className="h-9 w-32"
+                  onChange={time => updateDay(day.dayOfWeek, { opensTime: time })}
                 />
                 <span className="text-muted-foreground text-sm">a</span>
-                <Input
-                  type="time"
+                <TimePicker
                   value={day.closesTime}
                   disabled={!day.enabled}
-                  onChange={e => updateDay(day.dayOfWeek, { closesTime: e.target.value })}
-                  className="h-9 w-32"
+                  onChange={time => updateDay(day.dayOfWeek, { closesTime: time })}
                 />
               </div>
             ))}

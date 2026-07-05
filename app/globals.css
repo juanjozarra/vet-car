@@ -131,16 +131,4 @@
     -webkit-appearance: none;
     margin: 0;
   }
-
-  /* The native time-picker icon renders dark-on-transparent by default and
-     disappears against the app's dark fields; invert it to stay visible. */
-  input[type="time"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-    opacity: 0.6;
-    cursor: pointer;
-    transition: opacity 0.15s ease;
-  }
-  input[type="time"]::-webkit-calendar-picker-indicator:hover {
-    opacity: 1;
-  }
 }
