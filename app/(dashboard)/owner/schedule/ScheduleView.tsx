@@ -292,7 +292,7 @@ function BookingModal({
   }
 
   return (
-    <DialogContent className="w-full max-w-[480px] p-6 gap-4 rounded-2xl">
+    <DialogContent className="w-full sm:max-w-[720px] p-6 gap-4 rounded-2xl">
       <DialogHeader>
         <DialogTitle className="text-xl font-bold text-foreground">Agendar turno</DialogTitle>
         <span className="text-sm text-muted-foreground">{workshop.name}</span>
@@ -361,7 +361,7 @@ function BookingModal({
             {selectedDaySlots.length === 0 ? (
               <p className="text-xs text-muted-foreground">No hay horarios disponibles ese día.</p>
             ) : (
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                 {selectedDaySlots.map(slot => {
                   const isSelected = selectedSlot?.getTime() === slot.getTime()
                   return (
