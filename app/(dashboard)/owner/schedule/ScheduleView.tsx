@@ -314,7 +314,7 @@ function BookingModal({
           </span>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 min-w-0">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="vehicleId" className="text-sm font-medium text-muted-foreground">Vehículo</Label>
             <Select value={vehicleId} onValueChange={setVehicleId} required>
