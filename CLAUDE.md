@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Stack
 
-- **Framework**: Next.js 15 (App Router, TypeScript)
+- **Framework**: Next.js 16 (App Router, TypeScript)
 - **Styling**: Tailwind CSS v4
 - **Database**: PostgreSQL via Prisma ORM v7 (adapter-based via `@prisma/adapter-pg`)
 - **Auth**: NextAuth.js v4 (credentials-based, JWT sessions)
@@ -39,6 +39,7 @@ Credentials (local only): `postgresql://vetcar:vetcar@localhost:5432/vetcar`
 npm run dev                                    # Start dev server (http://localhost:3000)
 npm run build                                  # Build for production
 npm run lint                                   # Run ESLint
+npm test                                       # Run the Jest suite (pure logic + API route tests)
 npx prisma migrate dev --name <name>           # Create and apply a migration
 npx prisma generate                            # Regenerate Prisma client after schema changes
 npx prisma studio                              # Open Prisma DB GUI
@@ -66,6 +67,8 @@ lib/
   auth.ts          # NextAuth options and configuration
   prisma.ts        # Prisma client singleton
   utils.ts         # Shared utility functions
+  geo.ts           # Haversine distance calculation
+  availability.ts  # Workshop time-slot availability computation (shared by the availability and booking APIs)
 prisma/
   schema.prisma    # Database schema
 types/
@@ -76,15 +79,21 @@ types/
 
 ```
 User (role: MECHANIC | OWNER)
+  ├── Workshop (a MECHANIC belongs to one; has location, specialties, slot duration)
+  │     ├── WorkshopHours (weekly business hours: dayOfWeek, opensMinute, closesMinute)
+  │     └── specialties: WorkshopSpecialty[]
   └── Vehicle (owned by OWNER)
-        └── WorkOrder (created by MECHANIC — status: PENDING | IN_PROGRESS | COMPLETED | CANCELLED)
-              └── ServiceItem (type: REPAIR | MAINTENANCE | UPGRADE | OTHER)
+        ├── WorkOrder (created by MECHANIC — status: PENDING | IN_PROGRESS | COMPLETED | CANCELLED)
+        │     └── ServiceItem (type: REPAIR | MAINTENANCE | UPGRADE | OTHER)
+        └── Appointment (booked by OWNER against a Workshop's available slots — status: SCHEDULED | COMPLETED | CANCELLED)
 ```
+
+`Appointment` has a `@@unique([workshopId, scheduledAt])` constraint — the source of truth against double-booking. `lib/availability.ts`'s `getAvailableSlots` computes valid slots from `WorkshopHours` minus existing appointments; both the availability API and the booking API call it so they can never disagree.
 
 ## Auth Roles
 
-- **MECHANIC**: creates work orders, adds service items
-- **OWNER**: registers their own vehicles (`POST /api/vehicles`), reads vehicles, work orders, and service items
+- **MECHANIC**: creates work orders, adds service items; configures their workshop's location, specialties, business hours, and appointment slot duration (`PATCH /api/workshop`)
+- **OWNER**: registers their own vehicles (`POST /api/vehicles`), reads vehicles, work orders, and service items; searches workshops by distance/specialty and books appointments into a workshop's available slots (`GET /api/workshops/search`, `POST /api/appointments`)
 
 ## Environment Setup
 
@@ -94,4 +103,5 @@ Copy `.env.example` to `.env.local` and fill in the values:
 DATABASE_URL="postgresql://username:password@localhost:5432/vetcar"
 NEXTAUTH_SECRET=""   # generate: openssl rand -base64 32
 NEXTAUTH_URL="http://localhost:3000"
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=""   # optional — enables the real map and Places Autocomplete; degrades gracefully to manual inputs without it
 ```
