@@ -312,6 +312,7 @@ export function ScheduleView({ workshops: initialWorkshops, vehicles }: Schedule
   }, [])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch-on-dependency-change; fetchWorkshops itself calls setWorkshops
     fetchWorkshops(userLocation)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [specialty, userLocation])

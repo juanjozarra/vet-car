@@ -27,6 +27,7 @@ export function useAutocompleteSuggestions(
     }
 
     if (inputString === '') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: clearing suggestions when input is emptied, part of the fetch-on-dependency-change effect
       setSuggestions([])
       return
     }

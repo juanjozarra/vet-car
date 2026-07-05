@@ -157,7 +157,7 @@ function ManualLocationInput({
       </div>
       <p className="text-xs text-muted-foreground">
         Google Maps no está configurado. Ingresá la dirección y las coordenadas manualmente (podés obtenerlas
-        haciendo clic derecho en Google Maps y copiando "Latitud, Longitud").
+        haciendo clic derecho en Google Maps y copiando &quot;Latitud, Longitud&quot;).
       </p>
     </div>
   )
