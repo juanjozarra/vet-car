@@ -26,6 +26,10 @@ export default async function SchedulePage() {
     name: w.name,
     address: w.address,
     phone: w.phone,
+    specialties: w.specialties as string[],
+    latitude: w.latitude,
+    longitude: w.longitude,
+    distanceKm: null as number | null,
   }))
 
   const vehicles = rawVehicles.map(v => ({

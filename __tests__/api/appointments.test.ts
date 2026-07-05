@@ -1,13 +1,16 @@
 import { POST } from '@/app/api/appointments/route'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
+import { getAvailableSlots } from '@/lib/availability'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@/lib/auth', () => ({ authOptions: {} }))
+jest.mock('@/lib/availability', () => ({ getAvailableSlots: jest.fn() }))
 jest.mock('@/lib/prisma', () => ({
   prisma: {
     vehicle: { findUnique: jest.fn() },
-    appointment: { create: jest.fn() },
+    workshop: { findUnique: jest.fn() },
+    appointment: { create: jest.fn(), findMany: jest.fn() },
   },
 }))
 
@@ -70,6 +73,9 @@ describe('POST /api/appointments', () => {
   it('returns 201 with appointment data on success', async () => {
     ;(getServerSession as jest.Mock).mockResolvedValue(mockSession)
     ;(prisma.vehicle.findUnique as jest.Mock).mockResolvedValue({ id: 'v1', ownerId: 'u1' })
+    ;(prisma.workshop.findUnique as jest.Mock).mockResolvedValue({ id: 'w1', hours: [], slotDurationMinutes: 60 })
+    ;(prisma.appointment.findMany as jest.Mock).mockResolvedValue([])
+    ;(getAvailableSlots as jest.Mock).mockReturnValue([new Date(validBody.scheduledAt)])
     const mockAppointment = { id: 'a1', ...validBody }
     ;(prisma.appointment.create as jest.Mock).mockResolvedValue(mockAppointment)
     const res = await POST(makeRequest(validBody))

@@ -31,6 +31,17 @@ enum AppointmentStatus {
   CANCELLED
 }
 
+enum WorkshopSpecialty {
+  MECANICA_GENERAL
+  ELECTRICIDAD_AUTOMOTRIZ
+  CHAPA_Y_PINTURA
+  NEUMATICOS_Y_LLANTAS
+  DIAGNOSTICO_ELECTRONICO
+  TRANSMISION
+  AIRE_ACONDICIONADO
+  OTRO
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -53,16 +64,36 @@ model User {
 }
 
 model Workshop {
-  id        String   @id @default(cuid())
-  name      String
-  address   String
-  phone     String
-  email     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                  String              @id @default(cuid())
+  name                String
+  address             String
+  phone               String
+  email               String
+  latitude            Float?
+  longitude           Float?
+  googlePlaceId       String?             @unique
+  specialties         WorkshopSpecialty[] @default([])
+  slotDurationMinutes Int                 @default(60)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
 
   mechanics    User[]
   appointments Appointment[]
+  hours        WorkshopHours[]
+}
+
+model WorkshopHours {
+  id           String   @id @default(cuid())
+  workshopId   String
+  dayOfWeek    Int
+  opensMinute  Int
+  closesMinute Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  workshop Workshop @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+
+  @@index([workshopId])
 }
 
 model Account {
@@ -165,4 +196,6 @@ model Appointment {
 
   vehicle  Vehicle   @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
   workshop Workshop? @relation(fields: [workshopId], references: [id])
+
+  @@unique([workshopId, scheduledAt])
 }
