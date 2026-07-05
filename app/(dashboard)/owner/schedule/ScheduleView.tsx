@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Map, Marker, useMapsLibrary } from '@vis.gl/react-google-maps'
 import { GoogleMapsProvider, hasGoogleMapsKey } from '@/components/shared/GoogleMapsProvider'
 import { WORKSHOP_SPECIALTY_LABELS, WORKSHOP_SPECIALTY_OPTIONS } from '@/lib/workshopSpecialty'
@@ -200,7 +201,6 @@ function groupSlotsByDate(slots: string[]): Record<string, Date[]> {
   return grouped
 }
 
-const DATE_LABEL_FORMATTER = new Intl.DateTimeFormat('es-AR', { weekday: 'short', day: 'numeric', month: 'short' })
 const TIME_LABEL_FORMATTER = new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit' })
 
 function BookingModal({
@@ -218,26 +218,8 @@ function BookingModal({
 
   const [loadingSlots, setLoadingSlots] = useState(true)
   const [slotsByDate, setSlotsByDate] = useState<Record<string, Date[]>>({})
-  const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedSlot, setSelectedSlot] = useState<Date | null>(null)
-
-  const loadAvailability = useCallback(async () => {
-    setLoadingSlots(true)
-    try {
-      const res = await fetch(`/api/workshops/${workshop.id}/availability`)
-      const data = await res.json()
-      const grouped = groupSlotsByDate((data.slots ?? []) as string[])
-      setSlotsByDate(grouped)
-      setSelectedDate(prev => prev ?? Object.keys(grouped)[0] ?? null)
-    } finally {
-      setLoadingSlots(false)
-    }
-  }, [workshop.id])
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch-on-mount; loadAvailability itself calls setState
-    loadAvailability()
-  }, [loadAvailability])
 
   const next14Days = useMemo(() => {
     const days: Date[] = []
@@ -248,8 +230,26 @@ function BookingModal({
     return days
   }, [])
 
+  const loadAvailability = useCallback(async () => {
+    setLoadingSlots(true)
+    try {
+      const res = await fetch(`/api/workshops/${workshop.id}/availability`)
+      const data = await res.json()
+      const grouped = groupSlotsByDate((data.slots ?? []) as string[])
+      setSlotsByDate(grouped)
+      setSelectedDate(prev => prev ?? next14Days.find(d => (grouped[dateKey(d)] ?? []).length > 0) ?? null)
+    } finally {
+      setLoadingSlots(false)
+    }
+  }, [workshop.id, next14Days])
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch-on-mount; loadAvailability itself calls setState
+    loadAvailability()
+  }, [loadAvailability])
+
   const hasAnyAvailability = Object.keys(slotsByDate).length > 0
-  const selectedDaySlots = selectedDate ? slotsByDate[selectedDate] ?? [] : []
+  const selectedDaySlots = selectedDate ? slotsByDate[dateKey(selectedDate)] ?? [] : []
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -329,31 +329,14 @@ function BookingModal({
 
           <div className="flex flex-col gap-1.5">
             <Label className="text-sm font-medium text-muted-foreground">Fecha</Label>
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              {next14Days.map(day => {
-                const key = dateKey(day)
-                const daySlots = slotsByDate[key] ?? []
-                const isSelected = selectedDate === key
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    disabled={daySlots.length === 0}
-                    onClick={() => { setSelectedDate(key); setSelectedSlot(null) }}
-                    className={cn(
-                      'shrink-0 flex flex-col items-center gap-0.5 rounded-lg border px-3 py-2 text-xs uppercase tracking-[0.05em]',
-                      daySlots.length === 0
-                        ? 'border-border text-muted-foreground/40 cursor-not-allowed'
-                        : isSelected
-                          ? 'border-primary bg-primary/10 text-primary'
-                          : 'border-border text-foreground hover:border-primary/60'
-                    )}
-                  >
-                    {DATE_LABEL_FORMATTER.format(day)}
-                  </button>
-                )
-              })}
-            </div>
+            <DatePicker
+              selected={selectedDate}
+              onSelect={date => { setSelectedDate(date); setSelectedSlot(null) }}
+              isDayDisabled={date => (slotsByDate[dateKey(date)] ?? []).length === 0}
+              minMonth={next14Days[0]}
+              maxMonth={next14Days[next14Days.length - 1]}
+              className="w-56"
+            />
           </div>
 
           <div className="flex flex-col gap-1.5">
