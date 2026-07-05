@@ -43,6 +43,7 @@ export default async function MechanicSettingsPage() {
             initialAddress={workshop.address}
             initialLatitude={workshop.latitude}
             initialLongitude={workshop.longitude}
+            initialGooglePlaceId={workshop.googlePlaceId}
             initialHours={workshop.hours.map(h => ({
               dayOfWeek: h.dayOfWeek,
               opensMinute: h.opensMinute,

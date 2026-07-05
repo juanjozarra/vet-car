@@ -39,6 +39,7 @@ interface WorkshopSettingsFormProps {
   initialAddress: string
   initialLatitude: number | null
   initialLongitude: number | null
+  initialGooglePlaceId: string | null
   initialHours: { dayOfWeek: number; opensMinute: number; closesMinute: number }[]
 }
 
@@ -48,6 +49,7 @@ export function WorkshopSettingsForm({
   initialAddress,
   initialLatitude,
   initialLongitude,
+  initialGooglePlaceId,
   initialHours,
 }: WorkshopSettingsFormProps) {
   const router = useRouter()
@@ -57,7 +59,7 @@ export function WorkshopSettingsForm({
     address: initialAddress,
     latitude: initialLatitude ?? 0,
     longitude: initialLongitude ?? 0,
-    googlePlaceId: null,
+    googlePlaceId: initialGooglePlaceId,
   })
   const [hasLocation, setHasLocation] = useState(initialLatitude !== null && initialLongitude !== null)
   const [days, setDays] = useState<DayRow[]>(() =>
