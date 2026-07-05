@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion, MotionConfig } from 'motion/react'
@@ -185,6 +185,24 @@ function ShopCard({
   )
 }
 
+function dateKey(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
+
+function groupSlotsByDate(slots: string[]): Record<string, Date[]> {
+  const grouped: Record<string, Date[]> = {}
+  for (const iso of slots) {
+    const date = new Date(iso)
+    const key = dateKey(date)
+    if (!grouped[key]) grouped[key] = []
+    grouped[key].push(date)
+  }
+  return grouped
+}
+
+const DATE_LABEL_FORMATTER = new Intl.DateTimeFormat('es-AR', { weekday: 'short', day: 'numeric', month: 'short' })
+const TIME_LABEL_FORMATTER = new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit' })
+
 function BookingModal({
   workshop, vehicles, onClose,
 }: {
@@ -194,13 +212,51 @@ function BookingModal({
 }) {
   const router = useRouter()
   const [vehicleId, setVehicleId] = useState(vehicles[0]?.id ?? '')
-  const [scheduledAt, setScheduledAt] = useState('')
   const [notes, setNotes] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const [loadingSlots, setLoadingSlots] = useState(true)
+  const [slotsByDate, setSlotsByDate] = useState<Record<string, Date[]>>({})
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  const [selectedSlot, setSelectedSlot] = useState<Date | null>(null)
+
+  const loadAvailability = useCallback(async () => {
+    setLoadingSlots(true)
+    try {
+      const res = await fetch(`/api/workshops/${workshop.id}/availability`)
+      const data = await res.json()
+      const grouped = groupSlotsByDate((data.slots ?? []) as string[])
+      setSlotsByDate(grouped)
+      setSelectedDate(prev => prev ?? Object.keys(grouped)[0] ?? null)
+    } finally {
+      setLoadingSlots(false)
+    }
+  }, [workshop.id])
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch-on-mount; loadAvailability itself calls setState
+    loadAvailability()
+  }, [loadAvailability])
+
+  const next14Days = useMemo(() => {
+    const days: Date[] = []
+    const today = new Date()
+    for (let i = 0; i < 14; i++) {
+      days.push(new Date(today.getFullYear(), today.getMonth(), today.getDate() + i))
+    }
+    return days
+  }, [])
+
+  const hasAnyAvailability = Object.keys(slotsByDate).length > 0
+  const selectedDaySlots = selectedDate ? slotsByDate[selectedDate] ?? [] : []
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
+    if (!selectedSlot) {
+      setError('Elegí un horario disponible.')
+      return
+    }
     setError(null)
     setSubmitting(true)
     try {
@@ -211,10 +267,16 @@ function BookingModal({
           vehicleId,
           workshopId: workshop.id,
           title: `Turno en ${workshop.name}`,
-          scheduledAt,
+          scheduledAt: selectedSlot.toISOString(),
           notes: notes || undefined,
         }),
       })
+      if (res.status === 409) {
+        setError('Ese horario ya fue reservado. Elegí otro.')
+        setSelectedSlot(null)
+        await loadAvailability()
+        return
+      }
       if (!res.ok) {
         const data = await res.json()
         setError(data.error ?? 'Ocurrió un error')
@@ -230,7 +292,7 @@ function BookingModal({
   }
 
   return (
-    <DialogContent className="w-full max-w-[420px] p-6 gap-4 rounded-2xl">
+    <DialogContent className="w-full max-w-[480px] p-6 gap-4 rounded-2xl">
       <DialogHeader>
         <DialogTitle className="text-xl font-bold text-foreground">Agendar turno</DialogTitle>
         <span className="text-sm text-muted-foreground">{workshop.name}</span>
@@ -242,6 +304,14 @@ function BookingModal({
           <Link href="/owner/vehicles/new">
             <Button className="h-10 px-4 text-xs tracking-[0.037em]">Registrar vehículo</Button>
           </Link>
+        </div>
+      ) : loadingSlots ? (
+        <p className="text-sm text-muted-foreground py-4">Buscando horarios disponibles…</p>
+      ) : !hasAnyAvailability ? (
+        <div className="flex flex-col gap-2 py-2">
+          <span className="text-sm text-muted-foreground">
+            Este taller todavía no configuró su disponibilidad. Contactalo al {workshop.phone} para coordinar un turno.
+          </span>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -256,11 +326,62 @@ function BookingModal({
               </SelectContent>
             </Select>
           </div>
+
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="scheduledAt" className="text-sm font-medium text-muted-foreground">Fecha y hora</Label>
-            <Input id="scheduledAt" type="datetime-local" value={scheduledAt}
-              onChange={e => setScheduledAt(e.target.value)} required className="h-11" />
+            <Label className="text-sm font-medium text-muted-foreground">Fecha</Label>
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {next14Days.map(day => {
+                const key = dateKey(day)
+                const daySlots = slotsByDate[key] ?? []
+                const isSelected = selectedDate === key
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    disabled={daySlots.length === 0}
+                    onClick={() => { setSelectedDate(key); setSelectedSlot(null) }}
+                    className={cn(
+                      'shrink-0 flex flex-col items-center gap-0.5 rounded-lg border px-3 py-2 text-xs uppercase tracking-[0.05em]',
+                      daySlots.length === 0
+                        ? 'border-border text-muted-foreground/40 cursor-not-allowed'
+                        : isSelected
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-border text-foreground hover:border-primary/60'
+                    )}
+                  >
+                    {DATE_LABEL_FORMATTER.format(day)}
+                  </button>
+                )
+              })}
+            </div>
           </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-sm font-medium text-muted-foreground">Horario</Label>
+            {selectedDaySlots.length === 0 ? (
+              <p className="text-xs text-muted-foreground">No hay horarios disponibles ese día.</p>
+            ) : (
+              <div className="grid grid-cols-4 gap-2">
+                {selectedDaySlots.map(slot => {
+                  const isSelected = selectedSlot?.getTime() === slot.getTime()
+                  return (
+                    <button
+                      key={slot.toISOString()}
+                      type="button"
+                      onClick={() => setSelectedSlot(slot)}
+                      className={cn(
+                        'rounded-lg border px-2 py-1.5 text-xs font-mono',
+                        isSelected ? 'border-primary bg-primary/10 text-primary' : 'border-border text-foreground hover:border-primary/60'
+                      )}
+                    >
+                      {TIME_LABEL_FORMATTER.format(slot)}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="notes" className="text-sm font-medium text-muted-foreground">Tipo de servicio / notas (opcional)</Label>
             <Input id="notes" type="text" placeholder="p. ej. Cambio de aceite"
@@ -271,7 +392,7 @@ function BookingModal({
 
           <div className="flex items-center justify-end gap-3 pt-1">
             <Button type="button" variant="ghost" onClick={onClose} className="px-4 py-2 text-sm">Cancelar</Button>
-            <MotionButton type="submit" disabled={submitting}
+            <MotionButton type="submit" disabled={submitting || !selectedSlot}
               whileHover={!submitting ? { scale: 1.02, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } } : undefined}
               whileTap={!submitting ? { scale: 0.97, transition: { duration: 0.1 } } : undefined}
               className="h-10 px-4 text-xs tracking-[0.037em]">
