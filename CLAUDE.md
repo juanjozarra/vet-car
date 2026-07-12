@@ -22,16 +22,13 @@ This project uses a design system defined in `DESIGN.md`
 # System language
 Spanish (Latin American)
 
-## Local development database
+## Running with Docker
 
-PostgreSQL runs in Docker. Start it with:
+`docker compose up -d --build` starts the whole stack in one command: PostgreSQL, a one-shot `migrate` service (`prisma migrate deploy`), and the app on `http://localhost:3000`. All required env vars have local-dev defaults baked into the compose file; override via shell env if needed (`NEXTAUTH_SECRET`, `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` — the latter is a build arg because `NEXT_PUBLIC_*` is inlined at build time). Stop with `docker compose down`.
 
-```bash
-docker compose up -d    # start the DB
-docker compose down     # stop the DB
-```
+For local development outside Docker, start only the DB (`docker compose up -d db`) and use `npm run dev` — the app container also binds port 3000, so don't run both at once.
 
-Credentials (local only): `postgresql://vetcar:vetcar@localhost:5432/vetcar`
+DB credentials (local only): `postgresql://vetcar:vetcar@localhost:5432/vetcar`
 
 ## Commands
 

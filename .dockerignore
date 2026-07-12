@@ -1,0 +1,15 @@
+node_modules
+.next
+.git
+.env
+.env.*
+!.env.example
+Dockerfile
+docker-compose.yml
+__tests__
+*.test.ts
+README.md
+CLAUDE.md
+AGENTS.md
+DESIGN.md
+.claude

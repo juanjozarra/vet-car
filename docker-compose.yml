@@ -10,6 +10,43 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vetcar -d vetcar"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+
+  migrate:
+    build:
+      context: .
+      target: migrate
+    environment:
+      DATABASE_URL: postgresql://vetcar:vetcar@db:5432/vetcar
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    build:
+      context: .
+      args:
+        # NEXT_PUBLIC_* se inlinan en el bundle durante el build → build arg.
+        # Vacía por defecto: la app degrada a inputs manuales sin mapa.
+        NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY:-}
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://vetcar:vetcar@db:5432/vetcar
+      NEXTAUTH_URL: http://localhost:3000
+      # Default solo para desarrollo local; en prod definir NEXTAUTH_SECRET real
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-vetcar-dev-secret-not-for-production}
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
 volumes:
   postgres_data:

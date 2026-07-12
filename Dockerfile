@@ -1,0 +1,34 @@
+# syntax=docker/dockerfile:1
+
+FROM node:22-alpine AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Runs `prisma migrate deploy` as a one-shot compose service
+FROM deps AS migrate
+COPY prisma.config.ts ./
+COPY prisma ./prisma
+CMD ["npx", "prisma", "migrate", "deploy"]
+
+FROM deps AS builder
+COPY . .
+# NEXT_PUBLIC_* vars are inlined into the client bundle at build time,
+# so the Maps key must arrive as a build arg, not a runtime env var
+ARG NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=""
+ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+# prisma.config.ts requires DATABASE_URL to be set; the build never connects
+ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
+RUN npx prisma generate
+RUN npm run build
+
+FROM node:22-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV HOSTNAME=0.0.0.0
+ENV PORT=3000
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+EXPOSE 3000
+CMD ["node", "server.js"]
