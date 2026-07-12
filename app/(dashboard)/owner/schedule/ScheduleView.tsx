@@ -7,23 +7,23 @@ import { motion, MotionConfig } from 'motion/react'
 import { motionTokens } from '@/lib/motionTokens'
 import { cn } from '@/lib/utils'
 import {
-  MapPinIcon, ServiceIcon,
+  ArrowUpRightIcon,
+  MapPinIcon,
+  PhoneIcon,
+  PlusIcon,
+  SearchIcon,
+  ServiceIcon,
 } from '@/components/ui/icons'
-import { Button } from '@/components/ui/button'
+import { Button, ButtonIconIsland } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { DatePicker } from '@/components/ui/date-picker'
 import { Map, Marker, useMapsLibrary } from '@vis.gl/react-google-maps'
 import { GoogleMapsProvider, hasGoogleMapsKey } from '@/components/shared/GoogleMapsProvider'
 import { WORKSHOP_SPECIALTY_LABELS, WORKSHOP_SPECIALTY_OPTIONS } from '@/lib/workshopSpecialty'
-
-const MotionButton = motion.create(Button)
 
 type Workshop = {
   id: string
@@ -42,6 +42,9 @@ interface ScheduleViewProps {
   workshops: Workshop[]
   vehicles: VehicleOption[]
 }
+
+const fieldLabel =
+  'font-mono text-[0.625rem] font-medium uppercase tracking-[0.16em] text-muted-foreground'
 
 function centroidOf(points: { latitude: number; longitude: number }[]): LatLng | null {
   if (points.length === 0) return null
@@ -72,7 +75,7 @@ function MapPanel({
       defaultCenter={defaultCenter}
       gestureHandling="greedy"
       disableDefaultUI
-      className="w-full h-full"
+      className="h-full w-full"
     >
       {userLocation && <Marker position={userLocation} title="Tu ubicación" />}
       {located.map(w => (
@@ -111,9 +114,9 @@ function LocationSearchField({ onLocate }: { onLocate: (coords: LatLng) => void 
   }, [geocodingLib, value, onLocate])
 
   return (
-    <div className="relative">
-      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
-        <MapPinIcon />
+    <div className="group relative w-full sm:w-72">
+      <span className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-muted-foreground/60 transition-colors duration-300 group-focus-within:text-primary">
+        <SearchIcon />
       </span>
       <Input
         type="text"
@@ -126,9 +129,14 @@ function LocationSearchField({ onLocate }: { onLocate: (coords: LatLng) => void 
           }
         }}
         placeholder="Ubicación (p. ej. Palermo, CABA)"
-        className="w-72 h-10 pl-9"
+        aria-label="Buscar por ubicación"
+        className="pl-10"
       />
-      {error && <p className="absolute top-full mt-1 text-xs text-destructive-foreground">No encontramos esa ubicación.</p>}
+      {error && (
+        <p role="alert" className="absolute top-full mt-1.5 text-xs text-[#ffb3ae]">
+          No encontramos esa ubicación.
+        </p>
+      )}
     </div>
   )
 }
@@ -140,48 +148,67 @@ function ShopCard({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: motionTokens.distance.sm }}
+      initial={{ opacity: 0, y: motionTokens.distance.md }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: motionTokens.duration.normal, ease: motionTokens.easing.smooth, delay: index * 0.06 }}
-      whileHover={{ y: -2, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } }}
+      transition={{ duration: 0.5, ease: motionTokens.easing.fluid, delay: Math.min(index, 6) * 0.06 }}
+      whileHover={{ y: -3, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } }}
       onClick={onSelect}
+      className={cn(
+        'bezel cursor-pointer transition-shadow duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]',
+        isSelected &&
+          'shadow-[0_0_0_1px_rgba(242,179,80,0.45),0_20px_50px_-20px_rgba(242,179,80,0.25)]'
+      )}
     >
-      <Card className={cn('p-[1.0625rem] gap-2 cursor-pointer', isSelected && 'ring-2 ring-primary')}>
+      <div className="bezel-core flex flex-col gap-4 p-6">
         <div className="flex items-start justify-between gap-4">
-          <div className="flex flex-col gap-1 min-w-0">
-            <span className="text-lg font-bold text-foreground">{workshop.name}</span>
-            <span className="text-sm text-muted-foreground">{workshop.address}</span>
-            <span className="text-xs text-muted-foreground">Tel: {workshop.phone}</span>
+          <div className="flex min-w-0 flex-col gap-1.5">
+            <span className="font-display text-xl font-medium leading-tight tracking-[-0.01em] text-foreground">
+              {workshop.name}
+            </span>
+            <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <MapPinIcon className="size-3.5 shrink-0 text-muted-foreground/60" />
+              <span className="truncate">{workshop.address}</span>
+            </span>
+            <span className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground/70">
+              <PhoneIcon className="size-3 shrink-0" />
+              {workshop.phone}
+            </span>
           </div>
-          <div className="flex flex-col items-end gap-1 shrink-0">
+          <div className="shrink-0">
             {workshop.distanceKm !== null ? (
-              <Badge variant="idle">{workshop.distanceKm.toFixed(1)} km</Badge>
+              <Badge variant="active">{workshop.distanceKm.toFixed(1)} km</Badge>
             ) : workshop.latitude === null ? (
-              <Badge variant="outline">Ubicación no disponible</Badge>
+              <Badge variant="idle">Sin ubicación</Badge>
             ) : null}
           </div>
         </div>
+
         {workshop.specialties.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {workshop.specialties.map(s => (
-              <Badge key={s} variant="outline">
+              <Badge key={s} variant="outline" className="text-xs">
                 {WORKSHOP_SPECIALTY_LABELS[s as keyof typeof WORKSHOP_SPECIALTY_LABELS] ?? s}
               </Badge>
             ))}
           </div>
         )}
-        <div className="flex items-center justify-end pt-2 border-t border-border">
-          <MotionButton
-            onClick={e => { e.stopPropagation(); onBook() }}
-            whileHover={{ scale: 1.03, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } }}
-            whileTap={{ scale: 0.97, transition: { duration: 0.1 } }}
-            variant="outline"
-            className="h-8 px-[1.0625rem] border-primary text-primary text-[0.625rem] tracking-[0.05em] uppercase hover:bg-primary/10 hover:text-primary"
+
+        <div className="flex items-center justify-end border-t border-white/[0.06] pt-4">
+          <Button
+            onClick={e => {
+              e.stopPropagation()
+              onBook()
+            }}
+            variant="secondary"
+            size="sm"
           >
-            Agendar
-          </MotionButton>
+            Agendar turno
+            <ButtonIconIsland>
+              <ArrowUpRightIcon className="size-3" />
+            </ButtonIconIsland>
+          </Button>
         </div>
-      </Card>
+      </div>
     </motion.div>
   )
 }
@@ -202,6 +229,21 @@ function groupSlotsByDate(slots: string[]): Record<string, Date[]> {
 }
 
 const TIME_LABEL_FORMATTER = new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit' })
+
+function SlotSkeleton() {
+  return (
+    <div className="grid grid-cols-3 gap-2 sm:grid-cols-4" aria-hidden="true">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <motion.div
+          key={i}
+          animate={{ opacity: [0.35, 0.7, 0.35] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: i * 0.08 }}
+          className="h-9 rounded-[0.625rem] bg-white/[0.05]"
+        />
+      ))}
+    </div>
+  )
+}
 
 function BookingModal({
   workshop, vehicles, onClose,
@@ -292,59 +334,85 @@ function BookingModal({
   }
 
   return (
-    <DialogContent className="w-full sm:max-w-[720px] p-6 gap-4 rounded-2xl">
+    <DialogContent className="w-full gap-6 p-7 sm:max-w-[720px] sm:p-8">
       <DialogHeader>
-        <DialogTitle className="text-xl font-bold text-foreground">Agendar turno</DialogTitle>
-        <span className="text-sm text-muted-foreground">{workshop.name}</span>
+        <span className={fieldLabel}>Reserva de turno</span>
+        <DialogTitle className="text-2xl">{workshop.name}</DialogTitle>
+        <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <MapPinIcon className="size-3.5 text-muted-foreground/60" />
+          {workshop.address}
+        </span>
       </DialogHeader>
 
       {vehicles.length === 0 ? (
-        <div className="flex flex-col gap-3 items-start py-2">
-          <span className="text-sm text-muted-foreground">Todavía no tenés vehículos registrados. Registrá uno para poder agendar un turno.</span>
+        <div className="flex flex-col items-start gap-4 py-2">
+          <span className="text-sm leading-relaxed text-muted-foreground">
+            Todavía no tenés vehículos registrados. Registrá uno para poder agendar un turno.
+          </span>
           <Link href="/owner/vehicles/new">
-            <Button className="h-10 px-4 text-xs tracking-[0.037em]">Registrar vehículo</Button>
+            <Button size="sm">
+              Registrar vehículo
+              <ButtonIconIsland>
+                <PlusIcon className="size-3" />
+              </ButtonIconIsland>
+            </Button>
           </Link>
         </div>
       ) : loadingSlots ? (
-        <p className="text-sm text-muted-foreground py-4">Buscando horarios disponibles…</p>
+        <div className="flex flex-col gap-3 py-2">
+          <span className="text-sm text-muted-foreground">Buscando horarios disponibles…</span>
+          <SlotSkeleton />
+        </div>
       ) : !hasAnyAvailability ? (
-        <div className="flex flex-col gap-2 py-2">
-          <span className="text-sm text-muted-foreground">
-            Este taller todavía no configuró su disponibilidad. Contactalo al {workshop.phone} para coordinar un turno.
+        <div className="flex flex-col gap-2 rounded-xl bg-white/[0.03] px-4 py-4 ring-1 ring-white/[0.06]">
+          <span className="text-sm leading-relaxed text-muted-foreground">
+            Este taller todavía no configuró su disponibilidad. Contactalo al{' '}
+            <span className="font-mono text-foreground">{workshop.phone}</span> para coordinar un turno.
           </span>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 min-w-0">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="vehicleId" className="text-sm font-medium text-muted-foreground">Vehículo</Label>
-            <Select value={vehicleId} onValueChange={setVehicleId} required>
-              <SelectTrigger id="vehicleId" className="h-11 w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {vehicles.map(v => <SelectItem key={v.id} value={v.id}>{v.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
+        <form onSubmit={handleSubmit} className="flex min-w-0 flex-col gap-5">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div className="flex flex-col gap-2.5">
+              <Label htmlFor="vehicleId" className={fieldLabel}>Vehículo</Label>
+              <Select value={vehicleId} onValueChange={setVehicleId} required>
+                <SelectTrigger id="vehicleId" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {vehicles.map(v => <SelectItem key={v.id} value={v.id}>{v.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              <Label className={fieldLabel}>Fecha</Label>
+              <DatePicker
+                selected={selectedDate}
+                onSelect={date => { setSelectedDate(date); setSelectedSlot(null) }}
+                isDayDisabled={date => (slotsByDate[dateKey(date)] ?? []).length === 0}
+                minMonth={next14Days[0]}
+                maxMonth={next14Days[next14Days.length - 1]}
+                className="w-full"
+              />
+            </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <Label className="text-sm font-medium text-muted-foreground">Fecha</Label>
-            <DatePicker
-              selected={selectedDate}
-              onSelect={date => { setSelectedDate(date); setSelectedSlot(null) }}
-              isDayDisabled={date => (slotsByDate[dateKey(date)] ?? []).length === 0}
-              minMonth={next14Days[0]}
-              maxMonth={next14Days[next14Days.length - 1]}
-              className="w-56"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <Label className="text-sm font-medium text-muted-foreground">Horario</Label>
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-baseline justify-between">
+              <Label className={fieldLabel}>Horario</Label>
+              {selectedDaySlots.length > 0 && (
+                <span className="font-mono text-[0.625rem] uppercase tracking-[0.14em] text-muted-foreground/50">
+                  {selectedDaySlots.length} disponibles
+                </span>
+              )}
+            </div>
             {selectedDaySlots.length === 0 ? (
-              <p className="text-xs text-muted-foreground">No hay horarios disponibles ese día.</p>
+              <p className="rounded-xl bg-white/[0.03] px-4 py-3 text-xs text-muted-foreground ring-1 ring-white/[0.06]">
+                No hay horarios disponibles ese día.
+              </p>
             ) : (
-              <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+              <div className="grid max-h-44 grid-cols-3 gap-2 overflow-y-auto pr-1 sm:grid-cols-5">
                 {selectedDaySlots.map(slot => {
                   const isSelected = selectedSlot?.getTime() === slot.getTime()
                   return (
@@ -352,9 +420,12 @@ function BookingModal({
                       key={slot.toISOString()}
                       type="button"
                       onClick={() => setSelectedSlot(slot)}
+                      aria-pressed={isSelected}
                       className={cn(
-                        'rounded-lg border px-2 py-1.5 text-xs font-mono',
-                        isSelected ? 'border-primary bg-primary/10 text-primary' : 'border-border text-foreground hover:border-primary/60'
+                        'h-9 rounded-[0.625rem] font-mono text-xs outline-none transition-[background-color,color,box-shadow] duration-200 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-3 focus-visible:ring-ring/40',
+                        isSelected
+                          ? 'bg-primary text-primary-foreground shadow-[0_6px_16px_-6px_rgba(242,179,80,0.6)]'
+                          : 'bg-white/[0.04] text-foreground ring-1 ring-white/[0.08] ring-inset hover:bg-white/[0.08]'
                       )}
                     >
                       {TIME_LABEL_FORMATTER.format(slot)}
@@ -365,22 +436,23 @@ function BookingModal({
             )}
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="notes" className="text-sm font-medium text-muted-foreground">Tipo de servicio / notas (opcional)</Label>
+          <div className="flex flex-col gap-2.5">
+            <Label htmlFor="notes" className={fieldLabel}>Tipo de servicio / notas (opcional)</Label>
             <Input id="notes" type="text" placeholder="p. ej. Cambio de aceite"
-              value={notes} onChange={e => setNotes(e.target.value)} className="h-11" />
+              value={notes} onChange={e => setNotes(e.target.value)} />
           </div>
 
-          {error && <p className="text-sm text-destructive-foreground">{error}</p>}
+          {error && (
+            <p role="alert" className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-[#ffb3ae] ring-1 ring-destructive/25">
+              {error}
+            </p>
+          )}
 
-          <div className="flex items-center justify-end gap-3 pt-1">
-            <Button type="button" variant="ghost" onClick={onClose} className="px-4 py-2 text-sm">Cancelar</Button>
-            <MotionButton type="submit" disabled={submitting || !selectedSlot}
-              whileHover={!submitting ? { scale: 1.02, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } } : undefined}
-              whileTap={!submitting ? { scale: 0.97, transition: { duration: 0.1 } } : undefined}
-              className="h-10 px-4 text-xs tracking-[0.037em]">
+          <div className="flex items-center justify-end gap-3 border-t border-white/[0.06] pt-5">
+            <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
+            <Button type="submit" disabled={submitting || !selectedSlot}>
               {submitting ? 'Agendando…' : 'Confirmar turno'}
-            </MotionButton>
+            </Button>
           </div>
         </form>
       )}
@@ -432,99 +504,144 @@ export function ScheduleView({ workshops: initialWorkshops, vehicles }: Schedule
 
   return (
     <MotionConfig reducedMotion="user">
-      <main className="flex-1 pt-16 flex flex-col overflow-hidden">
+      <main className="flex-1 pt-32 sm:pt-36">
+        <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-8 px-4 sm:px-8">
 
-        <div className="flex items-center justify-between gap-4 py-4 px-8 bg-[#0c0f0f] border-b border-border shrink-0">
-          <div className="flex items-center gap-4">
-            {hasGoogleMapsKey ? (
-              <GoogleMapsProvider>
-                <LocationSearchField onLocate={setUserLocation} />
-              </GoogleMapsProvider>
-            ) : (
-              <div className="relative">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
-                  <MapPinIcon />
-                </span>
-                <Input type="text" disabled placeholder="Búsqueda por ubicación no disponible" className="w-72 h-10 pl-9" />
-              </div>
-            )}
-            <div className="relative">
-              <span className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2">
-                <ServiceIcon />
+          {/* Hero + filters */}
+          <motion.section
+            initial={{ opacity: 0, y: motionTokens.distance.md, filter: 'blur(4px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            transition={{ duration: 0.6, ease: motionTokens.easing.fluid }}
+            className="flex flex-col gap-7"
+          >
+            <div className="flex flex-col gap-4">
+              <span className="eyebrow">
+                <span className="size-1 rounded-full bg-primary" aria-hidden="true" />
+                Agenda de turnos
               </span>
-              <Select value={specialty} onValueChange={setSpecialty}>
-                <SelectTrigger className="w-64 h-10 pl-9">
-                  <SelectValue placeholder="Tipo de servicio" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los servicios</SelectItem>
-                  {WORKSHOP_SPECIALTY_OPTIONS.map(opt => (
-                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 justify-end">
-            <Button type="button" variant="outline" onClick={requestGeolocation} className="h-10 px-4 font-mono text-xs tracking-[0.05em] uppercase">
-              <MapPinIcon />
-              Usar mi ubicación
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex flex-1 overflow-hidden">
-          <div className="flex flex-col gap-6 p-8 overflow-y-auto flex-[0_1_533px] min-w-[380px] bg-background border-r border-border">
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-foreground tracking-[-0.02em] uppercase font-mono">Talleres disponibles</h1>
-              <span className="text-xs text-muted-foreground tracking-[0.05em] uppercase whitespace-nowrap">{workshops.length} resultados</span>
+              <h1 className="font-display text-4xl font-medium leading-[1.05] tracking-[-0.03em] text-foreground sm:text-5xl">
+                Encontrá tu taller.
+              </h1>
+              <p className="max-w-lg text-base text-muted-foreground">
+                Buscá por cercanía o especialidad y reservá en los horarios reales del taller.
+              </p>
             </div>
 
-            {workshops.length === 0 ? (
-              <div className="flex items-center justify-center text-center py-12 px-4 bg-card border border-dashed border-border rounded-lg">
-                <span className="text-sm text-muted-foreground">No encontramos talleres con esos filtros.</span>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-4">
-                {workshops.map((w, i) => (
-                  <ShopCard
-                    key={w.id}
-                    workshop={w}
-                    index={i}
-                    isSelected={selectedWorkshopId === w.id}
-                    onSelect={() => setSelectedWorkshopId(w.id)}
-                    onBook={() => setActiveWorkshop(w)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+            <div className="bezel w-full">
+              <div className="bezel-core flex flex-col items-stretch gap-3 p-3 sm:flex-row sm:items-center">
+                {hasGoogleMapsKey ? (
+                  <GoogleMapsProvider>
+                    <LocationSearchField onLocate={setUserLocation} />
+                  </GoogleMapsProvider>
+                ) : (
+                  <div className="group relative w-full sm:w-72">
+                    <span className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-muted-foreground/40">
+                      <SearchIcon />
+                    </span>
+                    <Input type="text" disabled placeholder="Búsqueda por ubicación no disponible" className="pl-10" />
+                  </div>
+                )}
 
-          <div className="relative flex-1 min-w-[300px] bg-card overflow-hidden">
-            {hasGoogleMapsKey ? (
-              <GoogleMapsProvider>
-                <MapPanel
-                  workshops={workshops}
-                  userLocation={userLocation}
-                  onSelectWorkshop={w => setSelectedWorkshopId(w.id)}
-                />
-              </GoogleMapsProvider>
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-center px-8">
-                <div
-                  className="absolute inset-0 opacity-50"
-                  style={{
-                    backgroundImage:
-                      'linear-gradient(to right, #3c494a 1px, transparent 1px), linear-gradient(to bottom, #3c494a 1px, transparent 1px)',
-                    backgroundSize: '48px 48px',
-                  }}
-                />
-                <span className="relative text-sm text-muted-foreground max-w-xs">
-                  El mapa no está disponible: falta configurar NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.
+                <div className="group relative flex-1">
+                  <span className="pointer-events-none absolute top-1/2 left-3.5 z-10 -translate-y-1/2 text-muted-foreground/60">
+                    <ServiceIcon className="size-3.5" />
+                  </span>
+                  <Select value={specialty} onValueChange={setSpecialty}>
+                    <SelectTrigger className="w-full pl-9" aria-label="Tipo de servicio">
+                      <SelectValue placeholder="Tipo de servicio" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos los servicios</SelectItem>
+                      {WORKSHOP_SPECIALTY_OPTIONS.map(opt => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Button type="button" variant="secondary" onClick={requestGeolocation} className="shrink-0">
+                  <MapPinIcon className="size-3.5" />
+                  Usar mi ubicación
+                </Button>
+              </div>
+            </div>
+          </motion.section>
+
+          {/* Results + sticky map */}
+          <section className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,42%)_1fr]">
+            <div className="flex flex-col gap-5">
+              <div className="flex items-center justify-between px-1">
+                <h2 className="font-mono text-[0.625rem] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
+                  Talleres disponibles
+                </h2>
+                <span className="font-mono text-[0.625rem] uppercase tracking-[0.14em] text-muted-foreground/50">
+                  {workshops.length.toString().padStart(2, '0')} resultados
                 </span>
               </div>
-            )}
-          </div>
+
+              {workshops.length === 0 ? (
+                <div className="bezel">
+                  <div className="bezel-core flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
+                    <span className="flex size-12 items-center justify-center rounded-full bg-white/[0.04] text-muted-foreground ring-1 ring-white/[0.08]">
+                      <SearchIcon className="size-5" />
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      No encontramos talleres con esos filtros.
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  {workshops.map((w, i) => (
+                    <ShopCard
+                      key={w.id}
+                      workshop={w}
+                      index={i}
+                      isSelected={selectedWorkshopId === w.id}
+                      onSelect={() => setSelectedWorkshopId(w.id)}
+                      onBook={() => setActiveWorkshop(w)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: motionTokens.distance.md }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: motionTokens.easing.fluid, delay: 0.12 }}
+              className="hidden lg:block"
+            >
+              <div className="bezel sticky top-28">
+                <div className="bezel-core relative h-[calc(100dvh-13rem)] min-h-[420px] overflow-hidden">
+                  {hasGoogleMapsKey ? (
+                    <GoogleMapsProvider>
+                      <MapPanel
+                        workshops={workshops}
+                        userLocation={userLocation}
+                        onSelectWorkshop={w => setSelectedWorkshopId(w.id)}
+                      />
+                    </GoogleMapsProvider>
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center px-8 text-center">
+                      <div
+                        className="absolute inset-0 opacity-40"
+                        style={{
+                          backgroundImage:
+                            'linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px)',
+                          backgroundSize: '48px 48px',
+                        }}
+                      />
+                      <span className="relative max-w-xs text-sm leading-relaxed text-muted-foreground">
+                        El mapa no está disponible: falta configurar{' '}
+                        <span className="font-mono text-xs">NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</span>.
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </section>
         </div>
       </main>
 

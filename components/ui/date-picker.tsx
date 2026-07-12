@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
+import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from "@/components/ui/icons"
 
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -72,7 +72,7 @@ function DatePicker({
           type="button"
           disabled={disabled}
           className={cn(
-            "flex h-11 items-center gap-2 rounded-lg border border-input bg-background px-3 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50",
+            "flex h-11 items-center gap-2 rounded-[0.875rem] border border-white/[0.09] bg-white/[0.03] px-3.5 text-sm text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] outline-none transition-[border-color,box-shadow,background-color] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-white/[0.16] focus-visible:border-ring/60 focus-visible:ring-3 focus-visible:ring-ring/25 disabled:cursor-not-allowed disabled:opacity-50",
             className
           )}
         >
@@ -93,7 +93,7 @@ function DatePicker({
           >
             <ChevronLeftIcon className="size-4" />
           </button>
-          <span className="text-sm font-medium text-foreground">{capitalize(MONTH_FORMATTER.format(visibleMonth))}</span>
+          <span className="font-display text-sm font-medium text-foreground">{capitalize(MONTH_FORMATTER.format(visibleMonth))}</span>
           <button
             type="button"
             aria-label="Mes siguiente"
@@ -106,7 +106,7 @@ function DatePicker({
         </div>
         <div className="grid grid-cols-7 gap-1">
           {WEEKDAY_LABELS.map((label, i) => (
-            <div key={i} className="flex h-7 items-center justify-center text-xs text-muted-foreground">
+            <div key={i} className="flex h-7 items-center justify-center font-mono text-[0.625rem] uppercase tracking-[0.14em] text-muted-foreground/70">
               {label}
             </div>
           ))}
@@ -122,13 +122,13 @@ function DatePicker({
                 disabled={isDisabled}
                 onClick={() => handleSelect(date)}
                 className={cn(
-                  "flex h-8 items-center justify-center rounded-md text-sm transition-colors",
+                  "flex h-8 items-center justify-center rounded-[0.625rem] font-mono text-sm transition-[background-color,color,box-shadow] duration-200 ease-[cubic-bezier(0.32,0.72,0,1)]",
                   isDisabled
-                    ? "cursor-not-allowed text-muted-foreground/30"
+                    ? "cursor-not-allowed text-muted-foreground/25"
                     : isSelected
-                      ? "bg-primary text-primary-foreground"
-                      : "text-foreground hover:bg-accent",
-                  !isSelected && isToday && "ring-1 ring-inset ring-border"
+                      ? "bg-primary text-primary-foreground shadow-[0_6px_16px_-6px_rgba(242,179,80,0.6)]"
+                      : "text-foreground hover:bg-accent hover:text-accent-foreground",
+                  !isSelected && isToday && "ring-1 ring-inset ring-primary/40"
                 )}
               >
                 {date.getDate()}

@@ -1,15 +1,19 @@
+import { Logo } from './Logo'
+
 export function DashboardFooter() {
   return (
-    <footer className="flex items-center justify-between px-8 py-8 bg-card border-t border-border">
-      <span className="text-2xl font-bold text-foreground font-mono tracking-[0.037em]">VetCar</span>
-      <span className="text-xs font-medium text-muted-foreground tracking-[0.037em]">
-        © 2024 VetCar. Todos los derechos reservados.
-      </span>
-      <nav className="flex items-center gap-4">
-        {['Política de privacidad', 'Términos del servicio', 'Contactar soporte', 'Soluciones para flotas'].map(link => (
-          <span key={link} className="text-xs font-medium text-muted-foreground tracking-[0.037em] transition-colors cursor-pointer hover:text-foreground">{link}</span>
-        ))}
-      </nav>
+    <footer className="relative mt-24 border-t border-white/[0.06] px-6 py-12 sm:px-10">
+      <div className="mx-auto flex w-full max-w-[1200px] flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+        <div className="flex flex-col gap-1.5">
+          <Logo className="text-base" />
+          <span className="font-mono text-[0.625rem] font-medium uppercase tracking-[0.18em] text-muted-foreground/60">
+            Historial de servicio vehicular
+          </span>
+        </div>
+        <span className="text-xs text-muted-foreground/60">
+          © {new Date().getFullYear()} VetCar — Todos los derechos reservados.
+        </span>
+      </div>
     </footer>
   )
 }

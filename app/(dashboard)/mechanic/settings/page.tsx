@@ -31,12 +31,10 @@ export default async function MechanicSettingsPage() {
         userName={session.user.name ?? 'mecánico'}
         userEmail={session.user.email ?? undefined}
         userImage={userImage}
+        profileHref={null}
       />
-      <main className="flex-1 pt-16 px-8 py-12">
-        <div className="max-w-2xl mx-auto flex flex-col gap-6">
-          <h1 className="text-2xl font-bold text-foreground tracking-[-0.02em] uppercase font-mono">
-            Configuración del taller
-          </h1>
+      <main className="flex-1 px-4 pt-32 sm:px-8 sm:pt-36">
+        <div className="mx-auto w-full max-w-[1200px]">
           <WorkshopSettingsForm
             initialSpecialties={workshop.specialties}
             initialSlotDurationMinutes={workshop.slotDurationMinutes}

@@ -10,9 +10,5 @@ export default async function WorkshopSetupPage() {
   if (session.user.role !== 'MECHANIC') redirect('/owner')
   if (session.user.workshopId) redirect('/mechanic')
 
-  return (
-    <main className="min-h-screen flex items-center justify-center p-4 bg-background">
-      <WorkshopSetupForm />
-    </main>
-  )
+  return <WorkshopSetupForm />
 }

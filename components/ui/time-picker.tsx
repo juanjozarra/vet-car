@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ClockIcon } from "lucide-react"
+import { ClockIcon } from "@/components/ui/icons"
 
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -41,7 +41,7 @@ function TimePicker({ value, onChange, disabled, className }: TimePickerProps) {
           disabled={disabled}
           data-slot="time-picker-trigger"
           className={cn(
-            "flex h-9 w-32 items-center gap-2 rounded-lg border border-input bg-background px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50",
+            "flex h-10 w-32 items-center gap-2 rounded-[0.75rem] border border-white/[0.09] bg-white/[0.03] px-3 text-sm text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] outline-none transition-[border-color,box-shadow,background-color] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-white/[0.16] focus-visible:border-ring/60 focus-visible:ring-3 focus-visible:ring-ring/25 disabled:cursor-not-allowed disabled:opacity-40",
             className
           )}
         >
@@ -82,10 +82,10 @@ function TimeColumn({
           type="button"
           onClick={() => onSelect(v)}
           className={cn(
-            "shrink-0 rounded-md px-2 py-1.5 text-center font-mono text-sm transition-colors",
+            "shrink-0 rounded-[0.625rem] px-2 py-1.5 text-center font-mono text-sm transition-[background-color,color] duration-200",
             v === selected
-              ? "bg-primary/10 text-primary"
-              : "text-foreground hover:bg-accent"
+              ? "bg-primary/15 text-primary ring-1 ring-inset ring-primary/30"
+              : "text-foreground hover:bg-accent hover:text-accent-foreground"
           )}
         >
           {pad(v)}

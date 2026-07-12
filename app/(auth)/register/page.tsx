@@ -4,20 +4,26 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { motion, AnimatePresence, MotionConfig } from 'motion/react'
-import { ArrowRightIcon, CarIcon, EyeIcon, EyeOffIcon, LockIcon, MailIcon, UserIcon } from '@/components/ui/icons'
+import { motion, AnimatePresence } from 'motion/react'
+import { ArrowRightIcon, EyeIcon, EyeOffIcon, LockIcon, MailIcon, UserIcon } from '@/components/ui/icons'
 import { motionTokens } from '@/lib/motionTokens'
-import { Button } from '@/components/ui/button'
+import { AuthShell } from '@/components/shared/AuthShell'
+import { Button, ButtonIconIsland } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-const MotionButton = motion.create(Button)
+const labelClass =
+  'font-mono text-[0.625rem] font-medium uppercase tracking-[0.16em] text-muted-foreground'
+const iconClass =
+  'pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-muted-foreground/60 transition-colors duration-300 group-focus-within:text-primary'
 
 export default function RegisterPage() {
   const router = useRouter()
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -33,127 +39,174 @@ export default function RegisterPage() {
       setError('Las contraseñas no coinciden')
       return
     }
+    if (!acceptedTerms) {
+      setError('Tenés que aceptar los términos para continuar')
+      return
+    }
 
     sessionStorage.setItem('reg_pending', JSON.stringify({ name, email, password }))
     router.push('/select-role')
   }
 
   return (
-    <MotionConfig reducedMotion="user">
-      <main className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
-        <div className="absolute top-[-10%] right-[-5%] w-96 h-96 rounded-full bg-primary opacity-[0.08] blur-[80px] pointer-events-none" />
-        <div className="absolute bottom-[-10%] left-[-5%] w-80 h-80 rounded-full bg-primary opacity-[0.08] blur-[80px] pointer-events-none" />
-
-        <motion.div
-          initial={{ opacity: 0, y: motionTokens.distance.lg }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: motionTokens.duration.normal, ease: motionTokens.easing.smooth }}
-          className="w-full max-w-[448px] flex flex-col gap-6 z-10"
-        >
-          {/* Header */}
-          <div className="flex flex-col items-center gap-3 text-center">
-            <div className="flex items-center justify-center size-12 rounded-lg border border-border bg-muted">
-              <CarIcon color="#55d8e1" />
-            </div>
-            <div className="flex flex-col gap-1">
-              <h1 className="text-2xl font-semibold text-foreground font-mono">Crear cuenta</h1>
-              <p className="text-sm text-muted-foreground">Completá tus datos para comenzar</p>
-            </div>
+    <AuthShell
+      eyebrow="Creá tu cuenta"
+      headline="Empezá tu registro de servicio."
+      sub="En menos de un minuto tenés tu cuenta lista — para registrar tu vehículo o poner tu taller en el mapa."
+    >
+      <div className="bezel">
+        <div className="bezel-core flex flex-col gap-7 p-8 sm:p-9">
+          <div className="flex flex-col gap-1.5">
+            <h1 className="font-display text-[1.75rem] font-medium tracking-[-0.02em] text-foreground">
+              Crear cuenta
+            </h1>
+            <p className="text-sm text-muted-foreground">Paso 1 de 2 — tus datos.</p>
           </div>
 
-          {/* Card */}
-          <div className="p-8 flex flex-col gap-5 rounded-[1.5rem] border border-border bg-card">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <AnimatePresence mode="wait">
               {error && (
-                <motion.p key="error"
-                  initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+                <motion.p
+                  key="error"
+                  role="alert"
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: motionTokens.duration.fast, ease: motionTokens.easing.smooth }}
-                  className="text-sm text-center text-destructive-foreground bg-destructive/30 border border-destructive rounded-md px-3 py-2">
+                  className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-[#ffb3ae] ring-1 ring-destructive/25"
+                >
                   {error}
                 </motion.p>
               )}
             </AnimatePresence>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="name" className="text-[0.6875rem] font-medium tracking-[0.08em] uppercase text-foreground font-mono">Nombre completo</Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"><UserIcon /></span>
-                  <Input id="name" name="name" type="text" required autoComplete="name"
-                    placeholder="Juan Pérez" className="h-11 pl-10" />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="email" className="text-[0.6875rem] font-medium tracking-[0.08em] uppercase text-foreground font-mono">Correo electrónico</Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"><MailIcon /></span>
-                  <Input id="email" name="email" type="email" required autoComplete="email"
-                    placeholder="vos@ejemplo.com" className="h-11 pl-10" />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="password" className="text-[0.6875rem] font-medium tracking-[0.08em] uppercase text-foreground font-mono">Contraseña</Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"><LockIcon /></span>
-                  <Input id="password" name="password" type={showPassword ? 'text' : 'password'}
-                    required minLength={8} autoComplete="new-password"
-                    placeholder="Mín. 8 caracteres" className="h-11 pl-10 pr-10" />
-                  <button type="button" onClick={() => setShowPassword(v => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2"
-                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
-                    {showPassword ? <EyeOffIcon /> : <EyeIcon />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="confirm" className="text-[0.6875rem] font-medium tracking-[0.08em] uppercase text-foreground font-mono">Confirmar contraseña</Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"><LockIcon /></span>
-                  <Input id="confirm" name="confirm" type={showConfirm ? 'text' : 'password'}
-                    required autoComplete="new-password"
-                    placeholder="Repetí tu contraseña" className="h-11 pl-10 pr-10" />
-                  <button type="button" onClick={() => setShowConfirm(v => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2"
-                    aria-label={showConfirm ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
-                    {showConfirm ? <EyeOffIcon /> : <EyeIcon />}
-                  </button>
-                </div>
-              </div>
-
-              <label className="flex items-start gap-2 cursor-pointer select-none">
-                <input type="checkbox" required
-                  className="mt-0.5 w-4 h-4 rounded accent-[#55d8e1] shrink-0" />
-                <span className="text-sm text-muted-foreground">
-                  Acepto los{' '}
-                  <span className="font-medium text-primary cursor-pointer">Términos del servicio</span>
-                  {' '}y la{' '}
-                  <span className="font-medium text-primary cursor-pointer">Política de privacidad</span>
+            <div className="flex flex-col gap-2.5">
+              <Label htmlFor="name" className={labelClass}>
+                Nombre completo
+              </Label>
+              <div className="group relative">
+                <span className={iconClass}>
+                  <UserIcon />
                 </span>
-              </label>
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  autoComplete="name"
+                  placeholder="Juan Pérez"
+                  className="pl-10"
+                />
+              </div>
+            </div>
 
-              <MotionButton type="submit"
-                whileHover={{ scale: 1.02, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } }}
-                whileTap={{ scale: 0.97, transition: { duration: 0.1 } }}
-                className="w-full h-11 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]">
-                Continuar
-                <ArrowRightIcon />
-              </MotionButton>
-            </form>
-          </div>
+            <div className="flex flex-col gap-2.5">
+              <Label htmlFor="email" className={labelClass}>
+                Correo electrónico
+              </Label>
+              <div className="group relative">
+                <span className={iconClass}>
+                  <MailIcon />
+                </span>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  placeholder="vos@ejemplo.com"
+                  className="pl-10"
+                />
+              </div>
+            </div>
 
-          <p className="text-sm text-center text-muted-foreground">
+            <div className="flex flex-col gap-2.5">
+              <Label htmlFor="password" className={labelClass}>
+                Contraseña
+              </Label>
+              <div className="group relative">
+                <span className={iconClass}>
+                  <LockIcon />
+                </span>
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  placeholder="Mín. 8 caracteres"
+                  className="pr-11 pl-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  className="absolute top-1/2 right-3 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground/60 outline-none transition-colors duration-300 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/40"
+                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                >
+                  {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              <Label htmlFor="confirm" className={labelClass}>
+                Confirmar contraseña
+              </Label>
+              <div className="group relative">
+                <span className={iconClass}>
+                  <LockIcon />
+                </span>
+                <Input
+                  id="confirm"
+                  name="confirm"
+                  type={showConfirm ? 'text' : 'password'}
+                  required
+                  autoComplete="new-password"
+                  placeholder="Repetí tu contraseña"
+                  className="pr-11 pl-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(v => !v)}
+                  className="absolute top-1/2 right-3 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground/60 outline-none transition-colors duration-300 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/40"
+                  aria-label={showConfirm ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                >
+                  {showConfirm ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+              </div>
+            </div>
+
+            <label className="flex cursor-pointer items-start gap-3 select-none">
+              <Checkbox
+                checked={acceptedTerms}
+                onCheckedChange={checked => setAcceptedTerms(checked === true)}
+                className="mt-0.5"
+              />
+              <span className="text-sm leading-relaxed text-muted-foreground">
+                Acepto los términos del servicio y la política de privacidad de VetCar.
+              </span>
+            </label>
+
+            <Button type="submit" size="lg" className="mt-1 w-full">
+              Continuar
+              <ButtonIconIsland>
+                <ArrowRightIcon className="size-3.5" />
+              </ButtonIconIsland>
+            </Button>
+          </form>
+
+          <p className="text-center text-sm text-muted-foreground">
             ¿Ya tenés una cuenta?{' '}
-            <Link href="/login" className="font-medium text-primary transition-opacity hover:opacity-80">Iniciá sesión</Link>
+            <Link
+              href="/login"
+              className="font-medium text-primary underline-offset-4 transition-opacity duration-300 hover:underline"
+            >
+              Iniciá sesión
+            </Link>
           </p>
-        </motion.div>
-
-        <p className="absolute bottom-6 text-xs text-muted-foreground/50">
-          © 2024 VetCar. Todos los derechos reservados.
-        </p>
-      </main>
-    </MotionConfig>
+        </div>
+      </div>
+    </AuthShell>
   )
 }
