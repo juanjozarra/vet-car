@@ -101,4 +101,5 @@ DATABASE_URL="postgresql://username:password@localhost:5432/vetcar"
 NEXTAUTH_SECRET=""   # generate: openssl rand -base64 32
 NEXTAUTH_URL="http://localhost:3000"
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=""   # optional — enables the real map and Places Autocomplete; degrades gracefully to manual inputs without it
+BLOB_READ_WRITE_TOKEN=""   # Vercel Blob (photo attachments on vehicle history entries); provision via the Vercel dashboard/Marketplace
 ```
