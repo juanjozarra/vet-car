@@ -42,6 +42,11 @@ enum WorkshopSpecialty {
   OTRO
 }
 
+enum HistorySource {
+  OWNER
+  MECHANIC
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -61,6 +66,7 @@ model User {
   sessions   Session[]
   vehicles   Vehicle[]   @relation("VehicleOwner")
   workOrders WorkOrder[] @relation("MechanicWorkOrders")
+  historyEntries HistoryEntry[] @relation("HistoryEntryAuthor")
 }
 
 model Workshop {
@@ -80,6 +86,7 @@ model Workshop {
   mechanics    User[]
   appointments Appointment[]
   hours        WorkshopHours[]
+  historyEntries HistoryEntry[]
 }
 
 model WorkshopHours {
@@ -150,6 +157,7 @@ model Vehicle {
   owner        User          @relation("VehicleOwner", fields: [ownerId], references: [id])
   workOrders   WorkOrder[]
   appointments Appointment[]
+  historyEntries HistoryEntry[]
 }
 
 model WorkOrder {
@@ -167,6 +175,7 @@ model WorkOrder {
   vehicle      Vehicle       @relation(fields: [vehicleId], references: [id])
   mechanic     User          @relation("MechanicWorkOrders", fields: [mechanicId], references: [id])
   serviceItems ServiceItem[]
+  historyEntries HistoryEntry[]
 }
 
 model ServiceItem {
@@ -198,4 +207,28 @@ model Appointment {
   workshop Workshop? @relation(fields: [workshopId], references: [id])
 
   @@unique([workshopId, scheduledAt])
+}
+
+model HistoryEntry {
+  id              String          @id @default(cuid())
+  vehicleId       String
+  type            ServiceItemType
+  description     String          @db.Text
+  performedAt     DateTime
+  odometerReading Int?
+  cost            Float?
+  photoUrl        String?
+  source          HistorySource
+  createdById     String
+  workshopId      String?
+  workOrderId     String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  vehicle   Vehicle    @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  createdBy User       @relation("HistoryEntryAuthor", fields: [createdById], references: [id])
+  workshop  Workshop?  @relation(fields: [workshopId], references: [id])
+  workOrder WorkOrder? @relation(fields: [workOrderId], references: [id])
+
+  @@index([vehicleId])
 }
