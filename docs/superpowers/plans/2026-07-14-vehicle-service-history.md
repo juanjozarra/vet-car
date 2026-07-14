@@ -341,6 +341,8 @@ git commit -m "feat: add workshop-scoped vehicle access control"
   - `getVehicleWithHistory(user: SessionUser, vehicleId: string): Promise<VehicleWithHistory | null>`
   - `getOwnHistoryEntry(userId: string, entryId: string): Promise<HistoryEntry | null>` (raw Prisma row)
   - `parseOptionalNumber(value: unknown): number | null | 'invalid'`
+  - `type ParsedHistoryEntryInput = { type: ServiceItemType; description: string; performedAt: Date; odometerReading: number | null; cost: number | null; photoUrl: string | null }`
+  - `parseHistoryEntryInput(body: Record<string, unknown>): ParsedHistoryEntryInput | { error: string }` — the single validation routine shared by the create route (Task 5) and the edit route (Task 6), so the type/description/date/number checks exist in exactly one place.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -354,7 +356,12 @@ jest.mock('@/lib/prisma', () => ({
   },
 }))
 
-import { getVehicleWithHistory, getOwnHistoryEntry, parseOptionalNumber } from '@/lib/vehicleHistory'
+import {
+  getVehicleWithHistory,
+  getOwnHistoryEntry,
+  parseOptionalNumber,
+  parseHistoryEntryInput,
+} from '@/lib/vehicleHistory'
 import { canAccessVehicleHistory } from '@/lib/vehicleAccess'
 import { prisma } from '@/lib/prisma'
 
@@ -447,6 +454,73 @@ describe('parseOptionalNumber', () => {
 
   it('returns "invalid" for non-numeric input', () => {
     expect(parseOptionalNumber('abc')).toBe('invalid')
+  })
+})
+
+const validEntryBody = {
+  type: 'MAINTENANCE',
+  description: 'Cambio de aceite',
+  performedAt: '2026-01-01',
+  odometerReading: 50000,
+  cost: 100,
+  photoUrl: null,
+}
+
+describe('parseHistoryEntryInput', () => {
+  it('returns the parsed fields for a fully valid body', () => {
+    const result = parseHistoryEntryInput(validEntryBody)
+    expect(result).toEqual({
+      type: 'MAINTENANCE',
+      description: 'Cambio de aceite',
+      performedAt: new Date('2026-01-01'),
+      odometerReading: 50000,
+      cost: 100,
+      photoUrl: null,
+    })
+  })
+
+  it('defaults odometerReading, cost, and photoUrl to null when omitted', () => {
+    const result = parseHistoryEntryInput({
+      type: 'REPAIR',
+      description: 'Cambio de pastillas',
+      performedAt: '2026-01-01',
+    })
+    expect(result).toEqual({
+      type: 'REPAIR',
+      description: 'Cambio de pastillas',
+      performedAt: new Date('2026-01-01'),
+      odometerReading: null,
+      cost: null,
+      photoUrl: null,
+    })
+  })
+
+  it('returns an error when type is missing or not a valid ServiceItemType', () => {
+    expect(parseHistoryEntryInput({ ...validEntryBody, type: undefined })).toEqual({ error: 'A valid type is required' })
+    expect(parseHistoryEntryInput({ ...validEntryBody, type: 'NOT_A_TYPE' })).toEqual({ error: 'A valid type is required' })
+  })
+
+  it('returns an error when description is missing or empty', () => {
+    expect(parseHistoryEntryInput({ ...validEntryBody, description: '' })).toEqual({ error: 'description is required' })
+  })
+
+  it('returns an error when performedAt is missing or invalid', () => {
+    expect(parseHistoryEntryInput({ ...validEntryBody, performedAt: undefined })).toEqual({
+      error: 'A valid performedAt date is required',
+    })
+    expect(parseHistoryEntryInput({ ...validEntryBody, performedAt: 'not-a-date' })).toEqual({
+      error: 'A valid performedAt date is required',
+    })
+  })
+
+  it('returns an error when odometerReading is not a number', () => {
+    expect(parseHistoryEntryInput({ ...validEntryBody, odometerReading: 'abc' })).toEqual({
+      error: 'odometerReading must be a number',
+    })
+  })
+
+  it('returns an error when cost is not a number', () => {
+    expect(parseHistoryEntryInput({ ...validEntryBody, cost: 'abc' })).toEqual({ error: 'cost must be a number' })
   })
 })
 ```
@@ -546,12 +620,55 @@ export function parseOptionalNumber(value: unknown): number | null | 'invalid' {
   const n = Number(value)
   return Number.isFinite(n) ? n : 'invalid'
 }
+
+export type ParsedHistoryEntryInput = {
+  type: ServiceItemType
+  description: string
+  performedAt: Date
+  odometerReading: number | null
+  cost: number | null
+  photoUrl: string | null
+}
+
+export function parseHistoryEntryInput(
+  body: Record<string, unknown>
+): ParsedHistoryEntryInput | { error: string } {
+  const { type, description, performedAt, odometerReading, cost, photoUrl } = body
+
+  if (!type || !Object.values(ServiceItemType).includes(type as ServiceItemType)) {
+    return { error: 'A valid type is required' }
+  }
+  if (!description || typeof description !== 'string') {
+    return { error: 'description is required' }
+  }
+  const parsedDate = new Date(performedAt as string)
+  if (!performedAt || Number.isNaN(parsedDate.getTime())) {
+    return { error: 'A valid performedAt date is required' }
+  }
+  const odometerReadingValue = parseOptionalNumber(odometerReading)
+  if (odometerReadingValue === 'invalid') {
+    return { error: 'odometerReading must be a number' }
+  }
+  const costValue = parseOptionalNumber(cost)
+  if (costValue === 'invalid') {
+    return { error: 'cost must be a number' }
+  }
+
+  return {
+    type: type as ServiceItemType,
+    description,
+    performedAt: parsedDate,
+    odometerReading: odometerReadingValue,
+    cost: costValue,
+    photoUrl: typeof photoUrl === 'string' ? photoUrl : null,
+  }
+}
 ```
 
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `npx jest __tests__/lib/vehicleHistory.test.ts`
-Expected: PASS, 8 tests.
+Expected: PASS, 16 tests.
 
 - [ ] **Step 5: Commit**
 
@@ -569,7 +686,7 @@ git commit -m "feat: add vehicle history read helper and shared validation"
 - Test: `__tests__/api/vehicle-history.test.ts`
 
 **Interfaces:**
-- Consumes: `canAccessVehicleHistory` (Task 3), `parseOptionalNumber` (Task 4)
+- Consumes: `canAccessVehicleHistory` (Task 3), `parseHistoryEntryInput` (Task 4)
 - Produces: `POST` route handler at `/api/vehicles/[id]/history`, returns 201 with the created `HistoryEntry` row.
 
 - [ ] **Step 1: Write the failing tests**
@@ -691,11 +808,10 @@ Expected: FAIL — `Cannot find module '@/app/api/vehicles/[id]/history/route'`
 // app/api/vehicles/[id]/history/route.ts
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { ServiceItemType } from '@prisma/client'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { canAccessVehicleHistory } from '@/lib/vehicleAccess'
-import { parseOptionalNumber } from '@/lib/vehicleHistory'
+import { parseHistoryEntryInput } from '@/lib/vehicleHistory'
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions)
@@ -709,36 +825,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: 'Vehicle not found' }, { status: 404 })
   }
 
-  const { type, description, performedAt, odometerReading, cost, photoUrl } = await request.json()
-
-  if (!type || !Object.values(ServiceItemType).includes(type)) {
-    return NextResponse.json({ error: 'A valid type is required' }, { status: 400 })
-  }
-  if (!description || typeof description !== 'string') {
-    return NextResponse.json({ error: 'description is required' }, { status: 400 })
-  }
-  const parsedDate = new Date(performedAt)
-  if (!performedAt || Number.isNaN(parsedDate.getTime())) {
-    return NextResponse.json({ error: 'A valid performedAt date is required' }, { status: 400 })
-  }
-  const odometerReadingValue = parseOptionalNumber(odometerReading)
-  if (odometerReadingValue === 'invalid') {
-    return NextResponse.json({ error: 'odometerReading must be a number' }, { status: 400 })
-  }
-  const costValue = parseOptionalNumber(cost)
-  if (costValue === 'invalid') {
-    return NextResponse.json({ error: 'cost must be a number' }, { status: 400 })
+  const parsed = parseHistoryEntryInput(await request.json())
+  if ('error' in parsed) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 })
   }
 
   const entry = await prisma.historyEntry.create({
     data: {
       vehicleId,
-      type,
-      description,
-      performedAt: parsedDate,
-      odometerReading: odometerReadingValue,
-      cost: costValue,
-      photoUrl: photoUrl || null,
+      ...parsed,
       source: session.user.role === 'MECHANIC' ? 'MECHANIC' : 'OWNER',
       createdById: session.user.id,
       workshopId: session.user.role === 'MECHANIC' ? session.user.workshopId : null,
@@ -769,7 +864,7 @@ git commit -m "feat: add POST /api/vehicles/[id]/history"
 - Test: `__tests__/api/history-entry.test.ts`
 
 **Interfaces:**
-- Consumes: `parseOptionalNumber` (Task 4)
+- Consumes: `parseHistoryEntryInput` (Task 4)
 - Produces: `PATCH` and `DELETE` route handlers at `/api/history/[id]`.
 
 - [ ] **Step 1: Write the failing tests**
@@ -883,10 +978,9 @@ Expected: FAIL — `Cannot find module '@/app/api/history/[id]/route'`
 // app/api/history/[id]/route.ts
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { ServiceItemType } from '@prisma/client'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { parseOptionalNumber } from '@/lib/vehicleHistory'
+import { parseHistoryEntryInput } from '@/lib/vehicleHistory'
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions)
@@ -900,37 +994,14 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     return NextResponse.json({ error: 'History entry not found' }, { status: 404 })
   }
 
-  const { type, description, performedAt, odometerReading, cost, photoUrl } = await request.json()
-
-  if (!type || !Object.values(ServiceItemType).includes(type)) {
-    return NextResponse.json({ error: 'A valid type is required' }, { status: 400 })
-  }
-  if (!description || typeof description !== 'string') {
-    return NextResponse.json({ error: 'description is required' }, { status: 400 })
-  }
-  const parsedDate = new Date(performedAt)
-  if (!performedAt || Number.isNaN(parsedDate.getTime())) {
-    return NextResponse.json({ error: 'A valid performedAt date is required' }, { status: 400 })
-  }
-  const odometerReadingValue = parseOptionalNumber(odometerReading)
-  if (odometerReadingValue === 'invalid') {
-    return NextResponse.json({ error: 'odometerReading must be a number' }, { status: 400 })
-  }
-  const costValue = parseOptionalNumber(cost)
-  if (costValue === 'invalid') {
-    return NextResponse.json({ error: 'cost must be a number' }, { status: 400 })
+  const parsed = parseHistoryEntryInput(await request.json())
+  if ('error' in parsed) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 })
   }
 
   const updated = await prisma.historyEntry.update({
     where: { id },
-    data: {
-      type,
-      description,
-      performedAt: parsedDate,
-      odometerReading: odometerReadingValue,
-      cost: costValue,
-      photoUrl: photoUrl || null,
-    },
+    data: parsed,
   })
   return NextResponse.json(updated)
 }
