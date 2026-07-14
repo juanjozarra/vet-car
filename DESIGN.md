@@ -1,127 +1,98 @@
----
-name: Midnight Tech
-colors:
-  surface: '#121414'
-  surface-dim: '#121414'
-  surface-bright: '#38393a'
-  surface-container-lowest: '#0c0f0f'
-  surface-container-low: '#1a1c1c'
-  surface-container: '#1e2020'
-  surface-container-high: '#282a2b'
-  surface-container-highest: '#333535'
-  on-surface: '#e2e2e2'
-  on-surface-variant: '#bbc9ca'
-  inverse-surface: '#e2e2e2'
-  inverse-on-surface: '#2f3131'
-  outline: '#869394'
-  outline-variant: '#3c494a'
-  surface-tint: '#55d8e1'
-  primary: '#55d8e1'
-  on-primary: '#003739'
-  primary-container: '#00adb5'
-  on-primary-container: '#003a3d'
-  inverse-primary: '#00696e'
-  secondary: '#c1c7d3'
-  on-secondary: '#2b313a'
-  secondary-container: '#414751'
-  on-secondary-container: '#b0b5c1'
-  tertiary: '#c2c7d0'
-  on-tertiary: '#2c3138'
-  tertiary-container: '#989ca6'
-  on-tertiary-container: '#2f343c'
-  error: '#ffb4ab'
-  on-error: '#690005'
-  error-container: '#93000a'
-  on-error-container: '#ffdad6'
-  primary-fixed: '#75f5fd'
-  primary-fixed-dim: '#55d8e1'
-  on-primary-fixed: '#002022'
-  on-primary-fixed-variant: '#004f53'
-  secondary-fixed: '#dde3ef'
-  secondary-fixed-dim: '#c1c7d3'
-  on-secondary-fixed: '#161c25'
-  on-secondary-fixed-variant: '#414751'
-  tertiary-fixed: '#dee2ed'
-  tertiary-fixed-dim: '#c2c7d0'
-  on-tertiary-fixed: '#171c23'
-  on-tertiary-fixed-variant: '#42474f'
-  background: '#121414'
-  on-background: '#e2e2e2'
-  surface-variant: '#333535'
-typography:
-  headline-lg:
-    fontFamily: Jetbrains Mono
-    fontSize: 32px
-    fontWeight: '700'
-    lineHeight: '1.2'
-  headline-md:
-    fontFamily: Jetbrains Mono
-    fontSize: 24px
-    fontWeight: '600'
-    lineHeight: '1.3'
-  body-lg:
-    fontFamily: Inter
-    fontSize: 16px
-    fontWeight: '400'
-    lineHeight: '1.5'
-  body-md:
-    fontFamily: Inter
-    fontSize: 14px
-    fontWeight: '400'
-    lineHeight: '1.5'
-  label-md:
-    fontFamily: Jetbrains Mono
-    fontSize: 12px
-    fontWeight: '500'
-    lineHeight: '1.2'
-rounded:
-  sm: 0.25rem
-  DEFAULT: 0.5rem
-  md: 0.75rem
-  lg: 1rem
-  xl: 1.5rem
-  full: 9999px
-spacing:
-  base: 8px
-  xs: 4px
-  sm: 8px
-  md: 16px
-  lg: 24px
-  xl: 32px
----
+# Night Garage — sistema de diseño de VetCar
 
-# Design System: Midnight Tech
+Estética de tablero de instrumentos en un taller de noche: negro OLED profundo,
+vidrio con hairlines, un único acento ámbar (luz de tablero) y verde de "todo OK".
+La app es **siempre oscura** — los tokens viven en `:root` (`app/globals.css`),
+no hay toggle de tema.
 
-## Brand & Style
-The brand identity has evolved into a sophisticated "Midnight Tech" persona. This style is deeply rooted in modern minimalism with a heavy influence from developer-centric aesthetics (Brutalism-lite), now featuring a vibrant cyan-forward primary palette.
+## Color
 
-The emotional response should be one of precision, technical authority, and calm focus. By utilizing a dark color mode, prominent cyan actions, and monospaced accents, the UI evokes a high-performance environment suitable for technical tools, coding platforms, or premium hardware interfaces.
+| Token | Valor | Uso |
+| --- | --- | --- |
+| `--background` | `#060607` | Fondo base (asfalto) |
+| `--foreground` | `#f4f2ec` | Texto principal (blanco cálido) |
+| `--card` | `#0d0d10` | Superficies (núcleo del bezel) |
+| `--popover` | `#131317` | Menús flotantes / dialogs |
+| `--primary` | `#f2b350` | **Ámbar señal** — CTAs, foco, seleccionado, estados "atención" |
+| `--ok` | `#3ecf8e` | Verde de tablero — "al día", disponible, guardado |
+| `--destructive` | `#e5484d` | Errores |
+| `--muted-foreground` | `#a39e94` | Texto secundario (gris cálido) |
+| `--accent` | `rgba(242,179,80,0.12)` | Hover/focus tint en listas |
+| bordes | `rgba(255,255,255,0.06–0.14)` | Solo hairlines blancos translúcidos — nunca gris sólido |
 
-## Colors
-The palette is built on a high-contrast dark foundation with a vibrant primary highlight.
+Reglas:
 
-*   **Primary (#00ADB5):** The vibrant cyan "Action" color used for main branding, primary buttons, and active states.
-*   **Secondary (#222831):** The deep foundation color used for main surfaces, sidebars, and primary background layers.
-*   **Tertiary (#393E46):** Used for elevated surfaces, component containers, and subtle structural separation.
-*   **Neutral (#EEEEEE):** A near-white off-grey used for high-readability text and primary icons.
+- Un solo acento (ámbar) por pantalla como jerarquía.
+- El verde `ok` es exclusivo de estados positivos.
+- Nada de sombras negras duras — profundidad con
+  `0 24px 60px -24px rgba(0,0,0,.7)` + glow ámbar solo en elementos primarios.
 
-## Typography
-The typography strategy pairs technical precision with human readability.
+Atmósfera global (en `globals.css`, pseudo-elementos `fixed` del `body`):
+malla radial ámbar/acero (`::before`, z -10) + grano de película
+(`::after`, opacity .03, z 80). No agregar más decoración de fondo por página.
 
-*   **Headlines & Labels:** **Jetbrains Mono** provides a distinct "code-inspired" character. Headlines are bold and rhythmic, while labels provide a clear, data-heavy feel for metadata.
-*   **Body:** **Inter** is used for all long-form text and interface copy to ensure maximum legibility and a modern, neutral feel.
+## Tipografía
 
-## Layout & Spacing
-The layout follows a strict 8px-based rhythmic grid. The system uses a fluid grid that collapses into a single column for mobile devices, maintaining a consistent gutter and margin profile. Space is used as a functional separator, keeping technical information dense but organized.
+| Familia | Token | Uso |
+| --- | --- | --- |
+| **Clash Display** (500/600, vendorizada en `app/fonts/`) | `font-display` | Titulares, nombres, números de fecha |
+| **Geist Sans** | `font-sans` | UI y cuerpo |
+| **Geist Mono** | `font-mono` | Datos duros: patentes, VIN, km, horarios, contadores, eyebrows |
 
-## Elevation & Depth
-In this dark theme, depth is communicated through **Tonal Layering**. Surfaces that are "higher" in the stack use progressively lighter shades of grey (utilizing the Tertiary and Secondary palettes). Subtle, low-opacity borders define component boundaries, maintaining a flat, architectural feel.
+Patrones:
+- **Titular**: `font-display font-medium tracking-[-0.03em]`, tamaños 4xl–6xl, leading ~1.05.
+- **Eyebrow / etiqueta de instrumento**: utilidad `eyebrow` (mono 10px, tracking 0.2em,
+  uppercase, pill con hairline) — precede a los H1/H2 de sección.
+- **Section label**: mono `text-[0.625rem] uppercase tracking-[0.18em] text-muted-foreground/70`.
+- Prohibidas: Inter, Roboto, Arial, Open Sans, Helvetica.
 
-## Shapes
-The UI features a **Rounded** (Level 2) shape language. Standard components feature an 8px (0.5rem) corner radius. This softening of the corners balances the "harshness" of the monospaced typography and the dark color palette.
+## Superficies — Double-Bezel (utilidades `bezel` / `bezel-core`)
 
-## Components
-*   **Buttons:** Primary buttons use the Primary cyan background with dark Secondary text. Secondary buttons use a Tertiary grey background with Neutral text.
-*   **Inputs:** Dark backgrounds with subtle Tertiary borders. Focus states are highlighted with a Primary cyan border.
-*   **Cards:** Use the Tertiary color to pop against the Secondary background, featuring the 8px rounded corners.
-*   **Code Blocks:** Utilize Jetbrains Mono and appear slightly darker than surrounding containers for distinction.
+Toda tarjeta importante es hardware anidado: bandeja exterior + placa interior
+con radios concéntricos.
+
+```tsx
+<div className="bezel">            {/* r=1.75rem, p-1.5, bg-white/3, hairline */}
+  <div className="bezel-core p-6"> {/* r=1.375rem, bg card + luz superior inset */}
+    …
+  </div>
+</div>
+```
+
+Inputs/selects: `rounded-[0.875rem] bg-white/[0.03] border-white/[0.09]`,
+foco = borde + ring ámbar. Botones: **pills** (`rounded-full`), primario ámbar
+con glow, `secondary` vidrio, `outline` hairline. CTA con flecha usa
+`ButtonIconIsland` (ícono en su propio círculo, flush al padding derecho).
+
+## Iconografía
+
+Set propio en `components/ui/icons.tsx`: grilla 24px, trazo 1.5, `currentColor`,
+tamaño por `className` (default `size-4`). No usar lucide/FontAwesome directos.
+
+## Motion (tokens en `lib/motionTokens.ts`, curvas en `--ease-*`)
+
+- Curva de masa: `cubic-bezier(0.32,0.72,0,1)` (`ease-fluid` / `easing.fluid`) para
+  entradas y layout; `smooth` para micro; nunca `linear`/`ease-in-out` en UI.
+- Entradas: fade-up con blur (`y:16, blur 4–8px → 0`) ~0.6s, stagger ≤ 0.1s.
+- Hover en cards: lift `y:-3/-4`; press: `scale .98`.
+- Modales/menús: `AnimatePresence mode="wait"`; overlay `bg-black/65 backdrop-blur-md`.
+- Todo envuelto en `MotionConfig reducedMotion="user"`; solo `transform`/`opacity`/`filter`.
+- `backdrop-blur` únicamente en elementos fijos/flotantes (nav, overlays, popovers).
+
+## Componentes clave
+
+- **Nav**: isla flotante (pill de vidrio despegada del borde, `bg-black/60
+  backdrop-blur-2xl`), item activo con LED ámbar; en mobile hamburguesa que muta a X
+  y overlay de pantalla completa con reveal escalonado (`DashboardNav`).
+- **Layout de páginas de app**: `pt-32 sm:pt-36`, contenedor `max-w-[1200px]`,
+  hero (eyebrow + titular display + sub) y bento asimétrico `lg:grid-cols-12`
+  (celda ancha 7–8 + riel 4–5). Colapsa a una columna debajo de `lg`.
+- **Auth**: `AuthShell` — split editorial (tipografía enorme izquierda, tarea derecha).
+- **Estados**: badges mono uppercase (`active` ámbar / `ok` verde / `idle` neutro)
+  con `BadgeDot`; empty states dentro de bezel con ícono en círculo + CTA;
+  loading con skeletons pulsantes; errores `role="alert"` en pill destructivo.
+
+## Radios
+
+`--radius: 1rem`. Escala: inputs 0.875rem · items de lista 0.625rem ·
+cards (core) 1.375rem · shell 1.75rem · pills/botones full.

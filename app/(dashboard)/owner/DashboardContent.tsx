@@ -4,16 +4,16 @@ import { useRouter } from 'next/navigation'
 import { motion, MotionConfig } from 'motion/react'
 import {
   PlusIcon,
-  ChevronRightIcon,
-  CheckIcon,
+  ArrowUpRightIcon,
   CalendarIcon,
+  CarIcon,
+  CheckIcon,
+  ChevronRightIcon,
 } from '@/components/ui/icons'
 import { motionTokens } from '@/lib/motionTokens'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
-
-const MotionButton = motion.create(Button)
+import { Button, ButtonIconIsland } from '@/components/ui/button'
+import { Badge, BadgeDot } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 
 type VehicleSummary = {
   id: string
@@ -53,74 +53,83 @@ function timelineCurrentStep(status: ActiveRepairSummary['status']): number {
   return 3
 }
 
-type Step = { label: string; state: 'done' | 'current' | 'pending' }
+const sectionLabel =
+  'font-mono text-[0.625rem] font-medium uppercase tracking-[0.18em] text-muted-foreground/70'
+
+const enter = (delay: number) => ({
+  initial: { opacity: 0, y: motionTokens.distance.md, filter: 'blur(4px)' },
+  animate: { opacity: 1, y: 0, filter: 'blur(0px)' },
+  transition: { duration: 0.6, ease: motionTokens.easing.fluid, delay },
+})
 
 function VehicleCard({ v, index }: { v: VehicleSummary; index: number }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: motionTokens.distance.md }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: motionTokens.duration.normal, ease: motionTokens.easing.smooth, delay: index * 0.08 }}
+      {...enter(0.16 + index * 0.07)}
       whileHover={{ y: -4, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } }}
-      className="flex-1 min-w-0"
+      className="bezel h-full"
     >
-      <Card className="relative h-48 p-4 flex-col justify-between gap-0 cursor-pointer transition-colors hover:border-[#869394]">
-        <div className={`absolute top-0 left-0 right-0 h-1 ${v.hasActiveRepair ? 'bg-primary' : 'bg-border'}`} />
-        <div className="flex flex-col gap-1 pt-1">
-          <span className="text-2xl font-semibold text-foreground leading-8 font-mono">{v.label}</span>
-          {v.vin && <span className="text-xs font-medium text-muted-foreground tracking-[0.037em]">VIN: {v.vin}</span>}
-          {v.plate && <span className="text-sm font-medium text-muted-foreground tracking-[0.037em]">Patente: {v.plate}</span>}
-        </div>
-        <div className="flex items-center justify-between">
-          <Badge variant={v.hasActiveRepair ? 'active' : 'idle'}>
-            {v.hasActiveRepair ? 'Reparación activa' : 'Al día'}
+      <div className="bezel-core flex h-full flex-col justify-between gap-8 p-6">
+        <div className="flex items-start justify-between gap-3">
+          <span className="flex size-10 items-center justify-center rounded-full bg-white/[0.05] text-muted-foreground ring-1 ring-white/[0.08]">
+            <CarIcon className="size-4.5" />
+          </span>
+          <Badge variant={v.hasActiveRepair ? 'active' : 'ok'}>
+            <BadgeDot />
+            {v.hasActiveRepair ? 'En taller' : 'Al día'}
           </Badge>
-          <button className="text-xs font-medium text-primary tracking-[0.037em]">Ver detalles</button>
         </div>
-      </Card>
+        <div className="flex flex-col gap-3">
+          <span className="font-display text-2xl font-medium leading-tight tracking-[-0.02em] text-foreground">
+            {v.label}
+          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            {v.plate && (
+              <span className="rounded-md bg-white/[0.06] px-2 py-1 font-mono text-xs font-medium uppercase tracking-[0.08em] text-foreground ring-1 ring-white/[0.1]">
+                {v.plate}
+              </span>
+            )}
+            {v.vin && (
+              <span className="font-mono text-[0.625rem] uppercase tracking-[0.08em] text-muted-foreground/60">
+                VIN {v.vin}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
     </motion.div>
   )
 }
 
-function TimelineStep({ step, total, index }: { step: Step; total: number; index: number }) {
-  const isDone = step.state === 'done'
-  const isCurrent = step.state === 'current'
-
+function AppointmentRow({
+  appt,
+  onOpen,
+  isLast,
+}: {
+  appt: AppointmentSummary
+  onOpen: () => void
+  isLast: boolean
+}) {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: motionTokens.duration.fast, ease: motionTokens.easing.smooth, delay: 0.6 + index * 0.08 }}
-      className="flex flex-col items-center gap-2 relative z-10"
-      style={{ width: `${100 / total}%` }}
+    <button
+      onClick={onOpen}
+      className={cn(
+        'group flex w-full items-center gap-4 px-2 py-3.5 text-left outline-none transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] first:pt-1 hover:bg-white/[0.03] focus-visible:ring-3 focus-visible:ring-ring/40 rounded-xl',
+        !isLast && 'border-b border-white/[0.05]'
+      )}
     >
-      {isDone && (
-        <div className="size-6 rounded-full flex items-center justify-center shrink-0 bg-primary border-2 border-card">
-          <CheckIcon />
-        </div>
-      )}
-      {isCurrent && (
-        <motion.div
-          animate={{ scale: [1, 1.18, 1] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          className="size-8 rounded-full flex items-center justify-center shrink-0 -mt-1 bg-card border-4 border-primary"
-        >
-          <div className="size-2 rounded-full bg-[#55d8e1]" />
-        </motion.div>
-      )}
-      {step.state === 'pending' && (
-        <div className="size-6 rounded-full shrink-0 bg-muted border-2 border-card" />
-      )}
-      <span className={
-        isCurrent
-          ? 'text-xs font-bold tracking-[0.037em] text-center whitespace-nowrap text-primary font-mono'
-          : isDone
-            ? 'text-xs font-medium tracking-[0.037em] text-center whitespace-nowrap text-foreground font-mono'
-            : 'text-xs font-medium tracking-[0.037em] text-center whitespace-nowrap text-muted-foreground font-mono'
-      }>
-        {step.label}
-      </span>
-    </motion.div>
+      <div className="flex min-w-13 shrink-0 flex-col items-center rounded-xl bg-white/[0.05] px-2 py-2 ring-1 ring-white/[0.07]">
+        <span className="font-mono text-[0.5625rem] font-medium uppercase tracking-[0.16em] text-primary">
+          {appt.month}
+        </span>
+        <span className="font-display text-xl font-medium leading-6 text-foreground">{appt.day}</span>
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="truncate text-sm font-medium text-foreground">{appt.title}</span>
+        <span className="truncate text-xs text-muted-foreground">{appt.vehicle}</span>
+      </div>
+      <ChevronRightIcon className="size-3.5 shrink-0 text-muted-foreground/50 transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-0.5 group-hover:text-foreground" />
+    </button>
   )
 }
 
@@ -129,140 +138,213 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
 
   return (
     <MotionConfig reducedMotion="user">
-      <main className="flex-1 pt-16">
-        <div className="max-w-[1280px] mx-auto px-8 py-8 flex flex-col gap-8">
+      <main className="flex-1 pt-32 sm:pt-36">
+        <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-14 px-4 sm:px-8">
 
-          <motion.div
-            initial={{ opacity: 0, y: motionTokens.distance.md }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: motionTokens.duration.normal, ease: motionTokens.easing.smooth }}
-            className="flex items-end justify-between"
-          >
-            <div className="flex flex-col gap-1">
-              <span className="text-base text-foreground">Hola de nuevo, {userName}</span>
-              <span className="text-base text-muted-foreground">Acá está el estado de tus vehículos y turnos próximos.</span>
+          {/* Hero */}
+          <motion.section {...enter(0)} className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
+            <div className="flex flex-col gap-4">
+              <span className="eyebrow">
+                <span className="size-1 rounded-full bg-primary" aria-hidden="true" />
+                Panel del propietario
+              </span>
+              <h1 className="font-display text-4xl font-medium leading-[1.05] tracking-[-0.03em] text-foreground sm:text-5xl">
+                Hola, {userName}.
+              </h1>
+              <p className="max-w-lg text-base text-muted-foreground">
+                El estado de tus vehículos y tus próximos turnos, de un vistazo.
+              </p>
             </div>
-            <MotionButton
-              onClick={() => router.push('/owner/vehicles/new')}
-              whileHover={{ scale: 1.02, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } }}
-              whileTap={{ scale: 0.97, transition: { duration: 0.1 } }}
-              className="h-10 px-4 text-xs tracking-[0.037em]"
-            >
-              <PlusIcon color="#003739" />
-              Registrar nuevo vehículo
-            </MotionButton>
-          </motion.div>
+            <Button onClick={() => router.push('/owner/vehicles/new')} className="shrink-0">
+              Registrar vehículo
+              <ButtonIconIsland>
+                <PlusIcon className="size-3.5" />
+              </ButtonIconIsland>
+            </Button>
+          </motion.section>
 
-          <motion.div
-            initial={{ opacity: 0, y: motionTokens.distance.md }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: motionTokens.duration.normal, ease: motionTokens.easing.smooth, delay: 0.08 }}
-            className="grid grid-cols-12 gap-4"
-          >
-            <div className="col-span-8 flex flex-col gap-4">
-              <h2 className="text-2xl font-semibold text-foreground font-mono">Mis vehículos</h2>
+          {/* Bento */}
+          <section className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+            {/* Vehicles — wide cell */}
+            <div className="flex flex-col gap-5 lg:col-span-8">
+              <motion.div {...enter(0.1)} className="flex items-center justify-between px-1">
+                <h2 className={sectionLabel}>Mis vehículos</h2>
+                <span className="font-mono text-[0.625rem] tracking-[0.14em] text-muted-foreground/50 uppercase">
+                  {vehicles.length.toString().padStart(2, '0')} registrados
+                </span>
+              </motion.div>
+
               {vehicles.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-48 gap-3 bg-card border border-dashed border-border rounded-lg">
-                  <span className="text-sm text-muted-foreground">Todavía no tenés vehículos registrados.</span>
-                  <Button onClick={() => router.push('/owner/vehicles/new')} className="h-9 px-3 text-xs tracking-[0.037em]">
-                    <PlusIcon color="#003739" />
-                    Registrá tu primer vehículo
-                  </Button>
-                </div>
+                <motion.div {...enter(0.16)} className="bezel">
+                  <div className="bezel-core flex flex-col items-center justify-center gap-5 px-6 py-16 text-center">
+                    <span className="flex size-14 items-center justify-center rounded-full bg-white/[0.04] text-muted-foreground ring-1 ring-white/[0.08]">
+                      <CarIcon className="size-6" />
+                    </span>
+                    <div className="flex flex-col gap-1">
+                      <span className="font-display text-lg font-medium text-foreground">
+                        Todavía no registraste vehículos
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        Registrá el primero para empezar a construir su historial.
+                      </span>
+                    </div>
+                    <Button variant="secondary" size="sm" onClick={() => router.push('/owner/vehicles/new')}>
+                      <PlusIcon className="size-3.5" />
+                      Registrá tu primer vehículo
+                    </Button>
+                  </div>
+                </motion.div>
               ) : (
-                <div className="flex gap-4">
-                  {vehicles.map((v, i) => <VehicleCard key={v.id} v={v} index={i} />)}
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  {vehicles.map((v, i) => (
+                    <VehicleCard key={v.id} v={v} index={i} />
+                  ))}
                 </div>
               )}
             </div>
 
-            <div className="col-span-4 flex flex-col gap-4">
-              <h2 className="text-2xl font-semibold text-foreground font-mono">Turnos próximos</h2>
-              <Card className="p-4 gap-2">
-                {upcomingAppointments.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-6 gap-1">
-                    <span className="text-sm text-muted-foreground">No hay turnos próximos.</span>
-                  </div>
-                ) : (
-                  upcomingAppointments.map(appt => (
-                    <button
-                      key={appt.id}
-                      onClick={() => router.push('/owner/schedule')}
-                      className="flex items-center gap-4 pl-2.5 pr-2 py-2 w-full text-left border-l-2 border-primary rounded-r-lg"
-                    >
-                      <div className="flex flex-col items-center px-2 py-1 bg-muted rounded-lg min-w-12 shrink-0">
-                        <span className="text-xs font-medium text-muted-foreground tracking-[0.037em] uppercase font-mono">{appt.month}</span>
-                        <span className="text-2xl font-semibold text-foreground leading-8 font-mono">{appt.day}</span>
-                      </div>
-                      <div className="flex-1 min-w-0 flex flex-col">
-                        <span className="text-base font-semibold text-foreground">{appt.title}</span>
-                        <span className="text-sm text-muted-foreground">{appt.vehicle}</span>
-                      </div>
-                      <ChevronRightIcon />
-                    </button>
-                  ))
+            {/* Appointments — narrow rail */}
+            <div className="flex flex-col gap-5 lg:col-span-4">
+              <motion.div {...enter(0.14)} className="flex items-center justify-between px-1">
+                <h2 className={sectionLabel}>Turnos próximos</h2>
+                {upcomingAppointments.length > 0 && (
+                  <span className="font-mono text-[0.625rem] tracking-[0.14em] text-muted-foreground/50 uppercase">
+                    {upcomingAppointments.length.toString().padStart(2, '0')}
+                  </span>
                 )}
-                <div className="mt-4 pt-2">
-                  <MotionButton
-                    onClick={() => router.push('/owner/schedule')}
-                    whileHover={{ scale: 1.02, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } }}
-                    whileTap={{ scale: 0.97, transition: { duration: 0.1 } }}
-                    variant="outline"
-                    className="w-full border-dashed font-mono text-xs tracking-[0.037em] text-muted-foreground hover:border-primary hover:bg-transparent hover:text-muted-foreground"
-                  >
-                    <CalendarIcon />
-                    Agendar servicio
-                  </MotionButton>
-                </div>
-              </Card>
-            </div>
-          </motion.div>
+              </motion.div>
 
+              <motion.div {...enter(0.2)} className="bezel flex-1">
+                <div className="bezel-core flex h-full flex-col justify-between gap-4 p-4">
+                  {upcomingAppointments.length === 0 ? (
+                    <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4 py-12 text-center">
+                      <span className="flex size-12 items-center justify-center rounded-full bg-white/[0.04] text-muted-foreground ring-1 ring-white/[0.08]">
+                        <CalendarIcon className="size-5" />
+                      </span>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-sm font-medium text-foreground">Sin turnos próximos</span>
+                        <span className="text-xs text-muted-foreground">
+                          Buscá un taller y reservá tu próximo service.
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col">
+                      {upcomingAppointments.map((appt, i) => (
+                        <AppointmentRow
+                          key={appt.id}
+                          appt={appt}
+                          isLast={i === upcomingAppointments.length - 1}
+                          onOpen={() => router.push('/owner/schedule')}
+                        />
+                      ))}
+                    </div>
+                  )}
+                  <Button
+                    variant="secondary"
+                    onClick={() => router.push('/owner/schedule')}
+                    className="w-full"
+                  >
+                    Agendar servicio
+                    <ButtonIconIsland>
+                      <ArrowUpRightIcon className="size-3.5" />
+                    </ButtonIconIsland>
+                  </Button>
+                </div>
+              </motion.div>
+            </div>
+          </section>
+
+          {/* Active repairs — full-width timeline */}
           {activeRepairs.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: motionTokens.distance.md }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: motionTokens.duration.normal, ease: motionTokens.easing.smooth, delay: 0.16 }}
-              className="flex flex-col gap-4"
-            >
-              <h2 className="text-2xl font-semibold text-foreground font-mono">Seguimiento de reparaciones activas</h2>
-              {activeRepairs.map(repair => {
+            <section className="flex flex-col gap-5">
+              <motion.h2 {...enter(0.24)} className={cn(sectionLabel, 'px-1')}>
+                Reparaciones en curso
+              </motion.h2>
+              {activeRepairs.map((repair, r) => {
                 const currentStep = timelineCurrentStep(repair.status)
                 const progressPct = (currentStep / (TIMELINE_STEPS.length - 1)) * 100
-                const steps: Step[] = TIMELINE_STEPS.map((label, i) => ({
-                  label,
-                  state: i < currentStep ? 'done' : i === currentStep ? 'current' : 'pending',
-                }))
 
                 return (
-                  <Card key={repair.id} className="p-6 gap-4 bg-card/90 backdrop-blur-sm">
-                    <div className="flex items-center justify-between pb-3 border-b border-border">
-                      <div className="flex flex-col">
-                        <span className="text-base font-semibold text-foreground">{repair.vehicle}</span>
-                        <span className="text-sm text-muted-foreground">{repair.workOrder}</span>
+                  <motion.div key={repair.id} {...enter(0.28 + r * 0.08)} className="bezel">
+                    <div className="bezel-core flex flex-col gap-2 p-6 sm:p-8">
+                      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] pb-5">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-display text-lg font-medium tracking-[-0.01em] text-foreground">
+                            {repair.vehicle}
+                          </span>
+                          <span className="text-sm text-muted-foreground">{repair.workOrder}</span>
+                        </div>
+                        <Badge variant="active">
+                          <BadgeDot className="animate-pulse" />
+                          En progreso
+                        </Badge>
                       </div>
-                      <Badge variant="active">En progreso</Badge>
-                    </div>
-                    <div className="relative py-8">
-                      <div className="absolute top-1/2 left-0 right-0 h-1 -translate-y-1/2 rounded-full bg-muted" />
-                      <motion.div
-                        className="absolute top-1/2 left-0 h-1 -translate-y-1/2 rounded-full bg-primary"
-                        initial={{ width: '0%' }}
-                        animate={{ width: `${progressPct}%` }}
-                        transition={{ duration: motionTokens.duration.slow, ease: motionTokens.easing.smooth, delay: 0.5 }}
-                      />
-                      <div className="relative flex items-start justify-between">
-                        {steps.map((step, i) => (
-                          <TimelineStep key={step.label} step={step} index={i} total={steps.length} />
-                        ))}
+
+                      <div className="relative py-9">
+                        <div className="absolute top-1/2 right-0 left-0 h-px -translate-y-1/2 bg-white/[0.08]" />
+                        <motion.div
+                          className="absolute top-1/2 left-0 h-px -translate-y-1/2 bg-primary shadow-[0_0_12px_rgba(242,179,80,0.6)]"
+                          initial={{ width: '0%' }}
+                          animate={{ width: `${progressPct}%` }}
+                          transition={{ duration: motionTokens.duration.slow, ease: motionTokens.easing.fluid, delay: 0.5 }}
+                        />
+                        <div className="relative flex items-start justify-between">
+                          {TIMELINE_STEPS.map((label, i) => {
+                            const state = i < currentStep ? 'done' : i === currentStep ? 'current' : 'pending'
+                            return (
+                              <motion.div
+                                key={label}
+                                initial={{ opacity: 0, scale: 0.7 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{
+                                  duration: motionTokens.duration.fast,
+                                  ease: motionTokens.easing.smooth,
+                                  delay: 0.55 + i * 0.08,
+                                }}
+                                className="relative z-10 flex flex-col items-center gap-2.5"
+                                style={{ width: `${100 / TIMELINE_STEPS.length}%` }}
+                              >
+                                {state === 'done' && (
+                                  <span className="flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground ring-4 ring-card">
+                                    <CheckIcon className="size-3" strokeWidth={2} />
+                                  </span>
+                                )}
+                                {state === 'current' && (
+                                  <motion.span
+                                    animate={{ scale: [1, 1.15, 1] }}
+                                    transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+                                    className="flex size-7 items-center justify-center rounded-full bg-card ring-1 ring-primary shadow-[0_0_18px_rgba(242,179,80,0.45)]"
+                                  >
+                                    <span className="size-2 rounded-full bg-primary" />
+                                  </motion.span>
+                                )}
+                                {state === 'pending' && (
+                                  <span className="size-6 rounded-full bg-white/[0.05] ring-1 ring-white/[0.1]" />
+                                )}
+                                <span
+                                  className={cn(
+                                    'whitespace-nowrap text-center font-mono text-[0.5625rem] font-medium uppercase tracking-[0.14em] sm:text-[0.625rem]',
+                                    state === 'current'
+                                      ? 'text-primary'
+                                      : state === 'done'
+                                        ? 'text-foreground/80'
+                                        : 'text-muted-foreground/50'
+                                  )}
+                                >
+                                  {label}
+                                </span>
+                              </motion.div>
+                            )
+                          })}
+                        </div>
                       </div>
                     </div>
-                  </Card>
+                  </motion.div>
                 )
               })}
-            </motion.div>
+            </section>
           )}
-
         </div>
       </main>
     </MotionConfig>

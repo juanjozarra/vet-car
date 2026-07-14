@@ -1,18 +1,18 @@
 import type { Metadata } from 'next'
-import { JetBrains_Mono, Inter } from 'next/font/google'
+import { GeistSans } from 'geist/font/sans'
+import { GeistMono } from 'geist/font/mono'
+import localFont from 'next/font/local'
 import './globals.css'
 import { SessionProvider } from '@/components/shared/SessionProvider'
 import { cn } from '@/lib/utils'
 
-const jetbrainsMono = JetBrains_Mono({
-  weight: ['500', '600', '700'],
-  variable: '--font-jetbrains',
-  subsets: ['latin'],
-})
-
-const inter = Inter({
-  variable: '--font-inter',
-  subsets: ['latin'],
+const clashDisplay = localFont({
+  src: [
+    { path: './fonts/ClashDisplay-Medium.woff2', weight: '500', style: 'normal' },
+    { path: './fonts/ClashDisplay-Semibold.woff2', weight: '600', style: 'normal' },
+  ],
+  variable: '--font-clash',
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
@@ -26,7 +26,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className={cn('h-full', 'antialiased', jetbrainsMono.variable, inter.variable)}>
+    <html
+      lang="es"
+      className={cn('h-full antialiased', GeistSans.variable, GeistMono.variable, clashDisplay.variable)}
+    >
       <body className="min-h-full flex flex-col">
         <SessionProvider>{children}</SessionProvider>
       </body>

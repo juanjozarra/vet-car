@@ -24,8 +24,8 @@ export default async function ProfilePage() {
         userEmail={session.user.email ?? undefined}
         userImage={user.image}
       />
-      <main className="flex-1 pt-16">
-        <div className="max-w-[1280px] mx-auto px-8 py-12">
+      <main className="flex-1 pt-32 sm:pt-36">
+        <div className="mx-auto w-full max-w-[1200px] px-4 sm:px-8">
           <ProfileForm
             name={user.name ?? ''}
             email={user.email}
