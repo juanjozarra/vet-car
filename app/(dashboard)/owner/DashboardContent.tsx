@@ -62,12 +62,14 @@ const enter = (delay: number) => ({
   transition: { duration: 0.6, ease: motionTokens.easing.fluid, delay },
 })
 
-function VehicleCard({ v, index }: { v: VehicleSummary; index: number }) {
+function VehicleCard({ v, index, onOpen }: { v: VehicleSummary; index: number; onOpen: () => void }) {
   return (
-    <motion.div
+    <motion.button
+      type="button"
+      onClick={onOpen}
       {...enter(0.16 + index * 0.07)}
       whileHover={{ y: -4, transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp } }}
-      className="bezel h-full"
+      className="bezel h-full text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/40"
     >
       <div className="bezel-core flex h-full flex-col justify-between gap-8 p-6">
         <div className="flex items-start justify-between gap-3">
@@ -97,7 +99,7 @@ function VehicleCard({ v, index }: { v: VehicleSummary; index: number }) {
           </div>
         </div>
       </div>
-    </motion.div>
+    </motion.button>
   )
 }
 
@@ -197,7 +199,7 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
               ) : (
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                   {vehicles.map((v, i) => (
-                    <VehicleCard key={v.id} v={v} index={i} />
+                    <VehicleCard key={v.id} v={v} index={i} onOpen={() => router.push(`/owner/vehicles/${v.id}`)} />
                   ))}
                 </div>
               )}
