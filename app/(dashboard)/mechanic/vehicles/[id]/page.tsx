@@ -42,14 +42,29 @@ export default async function MechanicVehicleDetailPage({
       <main className="flex-1 pt-32 sm:pt-36">
         <div className="mx-auto flex w-full max-w-[900px] flex-col gap-8 px-4 sm:px-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-col gap-1">
-              <span className="eyebrow">
-                <span className="size-1 rounded-full bg-primary" aria-hidden="true" />
-                Historial de servicio
-              </span>
-              <h1 className="font-display text-4xl font-medium leading-[1.05] tracking-[-0.03em] text-foreground sm:text-5xl">
-                {vehicle.nickname ?? `${vehicle.year} ${vehicle.make} ${vehicle.model}`}
-              </h1>
+            <div className="flex items-center gap-4">
+              {vehicle.photoUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={vehicle.photoUrl}
+                  alt=""
+                  className="size-16 shrink-0 rounded-2xl object-cover ring-1 ring-white/[0.08]"
+                />
+              )}
+              <div className="flex flex-col gap-1">
+                <span className="eyebrow">
+                  <span className="size-1 rounded-full bg-primary" aria-hidden="true" />
+                  Historial de servicio
+                </span>
+                <h1 className="font-display text-4xl font-medium leading-[1.05] tracking-[-0.03em] text-foreground sm:text-5xl">
+                  {vehicle.nickname ?? `${vehicle.year} ${vehicle.make} ${vehicle.model}`}
+                </h1>
+                {vehicle.plate && (
+                  <span className="w-fit rounded-md bg-white/[0.06] px-2 py-1 font-mono text-xs uppercase tracking-[0.08em] text-foreground ring-1 ring-white/[0.1]">
+                    {vehicle.plate}
+                  </span>
+                )}
+              </div>
             </div>
             <Button asChild>
               <Link href={`/mechanic/vehicles/${vehicle.id}/history/new`}>

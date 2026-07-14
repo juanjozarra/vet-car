@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { parseHistoryEntryInput } from '@/lib/vehicleHistory'
+import { getOwnHistoryEntry, parseHistoryEntryInput } from '@/lib/vehicleHistory'
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions)
@@ -11,8 +11,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 
   const { id } = await params
-  const existing = await prisma.historyEntry.findUnique({ where: { id } })
-  if (!existing || existing.createdById !== session.user.id) {
+  const existing = await getOwnHistoryEntry(session.user.id, id)
+  if (!existing) {
     return NextResponse.json({ error: 'History entry not found' }, { status: 404 })
   }
 
@@ -35,8 +35,8 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   }
 
   const { id } = await params
-  const existing = await prisma.historyEntry.findUnique({ where: { id } })
-  if (!existing || existing.createdById !== session.user.id) {
+  const existing = await getOwnHistoryEntry(session.user.id, id)
+  if (!existing) {
     return NextResponse.json({ error: 'History entry not found' }, { status: 404 })
   }
 
