@@ -13,6 +13,7 @@ import {
   PlusIcon,
   SearchIcon,
   ServiceIcon,
+  WrenchIcon,
 } from '@/components/ui/icons'
 import { Button, ButtonIconIsland } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,7 +22,7 @@ import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { DatePicker } from '@/components/ui/date-picker'
-import { Map, Marker, useMapsLibrary } from '@vis.gl/react-google-maps'
+import { AdvancedMarker, Map, useMap, useMapsLibrary } from '@vis.gl/react-google-maps'
 import { GoogleMapsProvider, hasGoogleMapsKey } from '@/components/shared/GoogleMapsProvider'
 import { WORKSHOP_SPECIALTY_LABELS, WORKSHOP_SPECIALTY_OPTIONS } from '@/lib/workshopSpecialty'
 
@@ -55,37 +56,108 @@ function centroidOf(points: { latitude: number; longitude: number }[]): LatLng |
   return { lat: sum.lat / points.length, lng: sum.lng / points.length }
 }
 
+// Google's public demo Map ID — required for Advanced Markers to render.
+// ponytail: swap for a real Map ID from Cloud Console if custom map styling is ever needed.
+const MAP_ID = 'DEMO_MAP_ID'
+
+const BUENOS_AIRES: LatLng = { lat: -34.6037, lng: -58.3816 }
+
+function WorkshopPin({ selected }: { selected: boolean }) {
+  return (
+    <div
+      className={cn(
+        'relative flex size-8 items-center justify-center rounded-full border-2 border-background bg-primary text-primary-foreground shadow-[0_8px_20px_-6px_rgba(242,179,80,0.6)] transition-transform duration-200 ease-out',
+        selected && 'scale-125 ring-4 ring-primary/25'
+      )}
+    >
+      <WrenchIcon className="size-3.5" />
+      <span className="absolute -bottom-1 left-1/2 size-2 -translate-x-1/2 rotate-45 bg-primary" />
+    </div>
+  )
+}
+
+function UserLocationPin() {
+  return (
+    <div className="relative flex size-4 items-center justify-center">
+      <span className="absolute inline-flex size-full animate-ping rounded-full bg-sky-400/60" />
+      <span className="relative size-2.5 rounded-full border-2 border-white bg-sky-500" />
+    </div>
+  )
+}
+
 function MapPanel({
   workshops,
   userLocation,
+  selectedWorkshopId,
   onSelectWorkshop,
 }: {
   workshops: Workshop[]
   userLocation: LatLng | null
+  selectedWorkshopId: string | null
   onSelectWorkshop: (workshop: Workshop) => void
 }) {
+  const map = useMap()
+  const coreLib = useMapsLibrary('core')
+  const mapsLib = useMapsLibrary('maps')
+
   const located = workshops.filter(
     (w): w is Workshop & { latitude: number; longitude: number } => w.latitude !== null && w.longitude !== null
   )
-  const defaultCenter = userLocation ?? centroidOf(located) ?? { lat: 0, lng: 0 }
+  const locatedKey = located.map(w => `${w.id}:${w.latitude},${w.longitude}`).join('|')
+  const defaultCenter = userLocation ?? centroidOf(located) ?? BUENOS_AIRES
+
+  // Recenter on the user's city (or the visible results) instead of leaving the map
+  // zoomed out to fit every workshop in the country.
+  useEffect(() => {
+    if (!map || !coreLib) return
+    if (userLocation) {
+      map.panTo(userLocation)
+      map.setZoom(14)
+      return
+    }
+    if (located.length === 0) return
+    const bounds = new coreLib.LatLngBounds()
+    located.forEach(w => bounds.extend({ lat: w.latitude, lng: w.longitude }))
+    map.fitBounds(bounds, 64)
+    const listener = coreLib.event.addListenerOnce(map, 'bounds_changed', () => {
+      if ((map.getZoom() ?? 0) > 15) map.setZoom(15)
+    })
+    return () => listener.remove()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- locatedKey stands in for `located`, an array recreated every render
+  }, [map, coreLib, userLocation, locatedKey])
+
+  // Transit lines/stations overlay; Google fades it out automatically at low zoom.
+  useEffect(() => {
+    if (!map || !mapsLib) return
+    const layer = new mapsLib.TransitLayer()
+    layer.setMap(map)
+    return () => layer.setMap(null)
+  }, [map, mapsLib])
 
   return (
     <Map
-      defaultZoom={userLocation ? 13 : 4}
+      mapId={MAP_ID}
+      defaultZoom={userLocation ? 14 : 12}
       defaultCenter={defaultCenter}
       gestureHandling="greedy"
-      disableDefaultUI
+      mapTypeControl={false}
+      fullscreenControl={false}
       className="h-full w-full"
     >
-      {userLocation && <Marker position={userLocation} title="Tu ubicación" />}
+      {userLocation && (
+        <AdvancedMarker position={userLocation} title="Tu ubicación">
+          <UserLocationPin />
+        </AdvancedMarker>
+      )}
       {located.map(w => (
-        <Marker
+        <AdvancedMarker
           key={w.id}
           position={{ lat: w.latitude, lng: w.longitude }}
           title={w.name}
-          clickable
           onClick={() => onSelectWorkshop(w)}
-        />
+        >
+          <WorkshopPin selected={selectedWorkshopId === w.id} />
+        </AdvancedMarker>
       ))}
     </Map>
   )
@@ -193,7 +265,21 @@ function ShopCard({
           </div>
         )}
 
-        <div className="flex items-center justify-end border-t border-white/[0.06] pt-4">
+        <div className="flex items-center justify-between border-t border-white/[0.06] pt-4">
+          <a
+            href={`https://www.google.com/maps/dir/?api=1&destination=${
+              workshop.latitude !== null && workshop.longitude !== null
+                ? `${workshop.latitude},${workshop.longitude}`
+                : encodeURIComponent(workshop.address)
+            }&travelmode=transit`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={e => e.stopPropagation()}
+            className="flex items-center gap-1.5 font-mono text-[0.625rem] font-medium uppercase tracking-[0.14em] text-muted-foreground transition-colors duration-200 hover:text-foreground"
+          >
+            <MapPinIcon className="size-3" />
+            Cómo llegar
+          </a>
           <Button
             onClick={e => {
               e.stopPropagation()
@@ -619,6 +705,7 @@ export function ScheduleView({ workshops: initialWorkshops, vehicles }: Schedule
                       <MapPanel
                         workshops={workshops}
                         userLocation={userLocation}
+                        selectedWorkshopId={selectedWorkshopId}
                         onSelectWorkshop={w => setSelectedWorkshopId(w.id)}
                       />
                     </GoogleMapsProvider>
