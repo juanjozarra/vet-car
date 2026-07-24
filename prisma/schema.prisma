@@ -184,11 +184,13 @@ model WorkOrder {
   endDate     DateTime?
   vehicleId   String
   mechanicId  String
+  appointmentId String?     @unique
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
   vehicle      Vehicle       @relation(fields: [vehicleId], references: [id])
   mechanic     User          @relation("MechanicWorkOrders", fields: [mechanicId], references: [id])
+  appointment  Appointment?  @relation(fields: [appointmentId], references: [id])
   serviceItems ServiceItem[]
   historyEntries HistoryEntry[]
 }
@@ -220,6 +222,7 @@ model Appointment {
 
   vehicle  Vehicle   @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
   workshop Workshop? @relation(fields: [workshopId], references: [id])
+  workOrder WorkOrder?
 
   @@unique([workshopId, scheduledAt])
 }
