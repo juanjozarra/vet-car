@@ -47,6 +47,18 @@ enum HistorySource {
   MECHANIC
 }
 
+enum WorkshopRole {
+  ADMIN
+  STAFF
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELLED
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -58,6 +70,7 @@ model User {
   address       String?
   role          Role      @default(OWNER)
   workshopId    String?
+  workshopRole  WorkshopRole?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -66,6 +79,7 @@ model User {
   sessions   Session[]
   vehicles   Vehicle[]   @relation("VehicleOwner")
   workOrders WorkOrder[] @relation("MechanicWorkOrders")
+  invitesSent WorkshopInvite[] @relation("InvitesSent")
   historyEntries HistoryEntry[] @relation("HistoryEntryAuthor")
 }
 
@@ -86,6 +100,7 @@ model Workshop {
   mechanics    User[]
   appointments Appointment[]
   hours        WorkshopHours[]
+  invites WorkshopInvite[]
   historyEntries HistoryEntry[]
 }
 
@@ -231,4 +246,22 @@ model HistoryEntry {
   workOrder WorkOrder? @relation(fields: [workOrderId], references: [id])
 
   @@index([vehicleId])
+}
+
+model WorkshopInvite {
+  id          String       @id @default(cuid())
+  workshopId  String
+  email       String
+  token       String       @unique
+  status      InviteStatus @default(PENDING)
+  invitedById String
+  expiresAt   DateTime
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  workshop  Workshop @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+  invitedBy User     @relation("InvitesSent", fields: [invitedById], references: [id])
+
+  @@unique([workshopId, email])
+  @@index([token])
 }
