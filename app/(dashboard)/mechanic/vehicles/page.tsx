@@ -38,16 +38,7 @@ export default async function MechanicVehiclesPage() {
         profileHref={null}
       />
       <main className="flex-1 px-4 pt-32 sm:px-8 sm:pt-36">
-        <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-8">
-          <div className="flex flex-col gap-4">
-            <span className="eyebrow">
-              <span className="size-1 rounded-full bg-primary" aria-hidden="true" />
-              Vehículos del taller
-            </span>
-            <h1 className="font-display text-4xl font-medium leading-[1.05] tracking-[-0.03em] text-foreground sm:text-5xl">
-              Historial de tus clientes.
-            </h1>
-          </div>
+        <div className="mx-auto w-full max-w-[1200px]">
           <VehicleSearchList vehicles={vehicles} />
         </div>
       </main>
