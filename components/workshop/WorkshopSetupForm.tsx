@@ -3,10 +3,9 @@
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
-import { motionTokens } from '@/lib/motionTokens'
 import { ArrowRightIcon } from '@/components/ui/icons'
 import { AuthShell } from '@/components/shared/AuthShell'
+import { FormErrorBanner } from '@/components/shared/FormErrorBanner'
 import { Button, ButtonIconIsland } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -70,21 +69,7 @@ export function WorkshopSetupForm() {
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-            <AnimatePresence mode="wait">
-              {error && (
-                <motion.p
-                  key="error"
-                  role="alert"
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: motionTokens.duration.fast, ease: motionTokens.easing.smooth }}
-                  className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-[#ffb3ae] ring-1 ring-destructive/25"
-                >
-                  {error}
-                </motion.p>
-              )}
-            </AnimatePresence>
+            <FormErrorBanner error={error} />
 
             <div className="flex flex-col gap-2.5">
               <Label htmlFor="ws-name" className={labelClass}>Nombre del taller</Label>

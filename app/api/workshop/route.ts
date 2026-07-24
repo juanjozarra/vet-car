@@ -7,7 +7,7 @@ import { prisma } from '@/lib/prisma'
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions)
 
-  if (!session || session.user.role !== 'MECHANIC') {
+  if (session?.user.role !== 'MECHANIC') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -39,6 +39,37 @@ export async function POST(request: Request) {
   }
 }
 
+function validateSpecialties(specialties: unknown): string | null {
+  if (specialties === undefined) return null
+  if (!Array.isArray(specialties)) return 'specialties must be an array'
+  const valid = Object.values(WorkshopSpecialty) as string[]
+  if (specialties.some((s: string) => !valid.includes(s))) return 'Invalid specialty value'
+  return null
+}
+
+function validateSlotDuration(slotDurationMinutes: unknown): string | null {
+  if (slotDurationMinutes === undefined) return null
+  if (typeof slotDurationMinutes !== 'number' || slotDurationMinutes <= 0) {
+    return 'slotDurationMinutes must be a positive number'
+  }
+  return null
+}
+
+function validateHours(hours: unknown): string | null {
+  if (hours === undefined) return null
+  if (!Array.isArray(hours)) return 'hours must be an array'
+  for (const h of hours) {
+    if (
+      typeof h.dayOfWeek !== 'number' || h.dayOfWeek < 0 || h.dayOfWeek > 6 ||
+      typeof h.opensMinute !== 'number' || typeof h.closesMinute !== 'number' ||
+      h.opensMinute < 0 || h.closesMinute > 1440 || h.opensMinute >= h.closesMinute
+    ) {
+      return 'Invalid hours entry'
+    }
+  }
+  return null
+}
+
 export async function PATCH(request: Request) {
   const session = await getServerSession(authOptions)
 
@@ -53,35 +84,10 @@ export async function PATCH(request: Request) {
   const body = await request.json()
   const { specialties, slotDurationMinutes, latitude, longitude, googlePlaceId, address, hours } = body
 
-  if (specialties !== undefined) {
-    if (!Array.isArray(specialties)) {
-      return NextResponse.json({ error: 'specialties must be an array' }, { status: 400 })
-    }
-    const valid = Object.values(WorkshopSpecialty) as string[]
-    if (specialties.some((s: string) => !valid.includes(s))) {
-      return NextResponse.json({ error: 'Invalid specialty value' }, { status: 400 })
-    }
-  }
-
-  if (slotDurationMinutes !== undefined) {
-    if (typeof slotDurationMinutes !== 'number' || slotDurationMinutes <= 0) {
-      return NextResponse.json({ error: 'slotDurationMinutes must be a positive number' }, { status: 400 })
-    }
-  }
-
-  if (hours !== undefined) {
-    if (!Array.isArray(hours)) {
-      return NextResponse.json({ error: 'hours must be an array' }, { status: 400 })
-    }
-    for (const h of hours) {
-      if (
-        typeof h.dayOfWeek !== 'number' || h.dayOfWeek < 0 || h.dayOfWeek > 6 ||
-        typeof h.opensMinute !== 'number' || typeof h.closesMinute !== 'number' ||
-        h.opensMinute < 0 || h.closesMinute > 1440 || h.opensMinute >= h.closesMinute
-      ) {
-        return NextResponse.json({ error: 'Invalid hours entry' }, { status: 400 })
-      }
-    }
+  const validationError =
+    validateSpecialties(specialties) ?? validateSlotDuration(slotDurationMinutes) ?? validateHours(hours)
+  if (validationError) {
+    return NextResponse.json({ error: validationError }, { status: 400 })
   }
 
   try {

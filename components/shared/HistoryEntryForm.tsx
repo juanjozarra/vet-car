@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { DatePicker } from '@/components/ui/date-picker'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { SERVICE_ITEM_TYPE_OPTIONS } from '@/lib/serviceItemType'
+import { FormErrorBanner } from '@/components/shared/FormErrorBanner'
 import type { ServiceItemType } from '@prisma/client'
 
 interface HistoryEntryFormInitialValues {
@@ -212,11 +213,7 @@ export function HistoryEntryForm({ vehicleId, backHref, mode, entryId, initialVa
                 {uploadError && <p className="text-xs text-[#ffb3ae]">{uploadError}</p>}
               </div>
 
-              {error && (
-                <p role="alert" className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-[#ffb3ae] ring-1 ring-destructive/25">
-                  {error}
-                </p>
-              )}
+              <FormErrorBanner error={error} />
 
               <div className="flex items-center justify-end gap-3 border-t border-white/[0.06] pt-6">
                 <Button type="button" variant="ghost" onClick={() => router.push(backHref)}>

@@ -29,6 +29,8 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
   }
 
   if (!session) {
+    const inviteUrl = `/invite/${token}`
+    const encodedCallbackUrl = encodeURIComponent(inviteUrl)
     return (
       <AuthShell
         eyebrow="Invitación"
@@ -38,11 +40,11 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
         <div className="bezel">
           <div className="bezel-core flex flex-col gap-4 p-8">
             <Button asChild size="lg" className="w-full">
-              <Link href={`/login?callbackUrl=${encodeURIComponent(`/invite/${token}`)}`}>Iniciar sesión</Link>
+              <Link href={`/login?callbackUrl=${encodedCallbackUrl}`}>Iniciar sesión</Link>
             </Button>
             <Button asChild variant="secondary" size="lg" className="w-full">
               <Link
-                href={`/register?callbackUrl=${encodeURIComponent(`/invite/${token}`)}&email=${encodeURIComponent(invite.email)}&role=MECHANIC`}
+                href={`/register?callbackUrl=${encodedCallbackUrl}&email=${encodeURIComponent(invite.email)}&role=MECHANIC`}
               >
                 Crear cuenta
               </Link>

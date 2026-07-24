@@ -82,13 +82,15 @@ function AutocompleteLocationInput({
       />
       {suggestions.length > 0 && (
         <ul className="absolute top-full z-10 mt-1.5 w-full overflow-hidden rounded-2xl bg-popover/95 p-1.5 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.8)] ring-1 ring-white/[0.09] backdrop-blur-xl">
-          {suggestions.map((suggestion, index) => (
-            <li
-              key={index}
-              onClick={() => handleSuggestionClick(suggestion)}
-              className="cursor-pointer rounded-[0.625rem] px-2.5 py-2 text-sm text-foreground transition-colors duration-200 hover:bg-accent hover:text-accent-foreground"
-            >
-              {suggestion.placePrediction?.text.text}
+          {suggestions.map(suggestion => (
+            <li key={suggestion.placePrediction?.placeId}>
+              <button
+                type="button"
+                onClick={() => handleSuggestionClick(suggestion)}
+                className="w-full cursor-pointer rounded-[0.625rem] px-2.5 py-2 text-left text-sm text-foreground transition-colors duration-200 hover:bg-accent hover:text-accent-foreground"
+              >
+                {suggestion.placePrediction?.text.text}
+              </button>
             </li>
           ))}
         </ul>

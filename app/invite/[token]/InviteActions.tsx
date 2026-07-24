@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Button, ButtonIconIsland } from '@/components/ui/button'
 import { CheckIcon, CloseIcon } from '@/components/ui/icons'
+import { FormErrorBanner } from '@/components/shared/FormErrorBanner'
 
 export function InviteActions({ token }: { token: string }) {
   const router = useRouter()
@@ -32,14 +33,7 @@ export function InviteActions({ token }: { token: string }) {
   return (
     <div className="bezel">
       <div className="bezel-core flex flex-col gap-4 p-8">
-        {error && (
-          <p
-            role="alert"
-            className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-[#ffb3ae] ring-1 ring-destructive/25"
-          >
-            {error}
-          </p>
-        )}
+        <FormErrorBanner error={error} />
         <Button onClick={() => respond('accept')} disabled={loading !== null} size="lg" className="w-full">
           {loading === 'accept' ? 'Aceptando…' : 'Aceptar invitación'}
           <ButtonIconIsland>

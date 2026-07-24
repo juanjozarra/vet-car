@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dialog'
 import { UserPlusIcon, TrashIcon, MailIcon, CloseIcon } from '@/components/ui/icons'
 import { getInitials } from '@/lib/utils'
+import { FormErrorBanner } from '@/components/shared/FormErrorBanner'
 
 type Mechanic = { id: string; name: string | null; email: string; role: 'ADMIN' | 'STAFF' }
 type PendingInvite = { id: string; email: string; createdAt: string; expiresAt: string }
@@ -118,14 +119,7 @@ export function TeamRoster({ currentUserId, isAdmin, mechanics, pendingInvites }
           </h1>
         </motion.div>
 
-        {rosterError && (
-          <p
-            role="alert"
-            className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-[#ffb3ae] ring-1 ring-destructive/25"
-          >
-            {rosterError}
-          </p>
-        )}
+        <FormErrorBanner error={rosterError} />
         <motion.div {...enter(0.1)} className="flex flex-col gap-5">
           <div className="flex items-center justify-between px-1">
             <h2 className={sectionLabel}>Mecánicos</h2>
@@ -218,14 +212,7 @@ export function TeamRoster({ currentUserId, isAdmin, mechanics, pendingInvites }
             <DialogDescription>Le enviamos un correo con un enlace para unirse a tu taller.</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleInvite} className="flex flex-col gap-4">
-            {inviteError && (
-              <p
-                role="alert"
-                className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-[#ffb3ae] ring-1 ring-destructive/25"
-              >
-                {inviteError}
-              </p>
-            )}
+            <FormErrorBanner error={inviteError} />
             <div className="flex flex-col gap-2">
               <Label htmlFor="invite-email">Correo electrónico</Label>
               <Input

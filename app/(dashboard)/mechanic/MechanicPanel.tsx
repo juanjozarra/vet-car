@@ -74,6 +74,13 @@ export function MechanicPanel({
   pendingTicketCount,
 }: MechanicPanelProps) {
   const setupComplete = hasLocation && hoursConfiguredDays > 0 && specialtyLabels.length > 0
+  const dayWord = hoursConfiguredDays === 1 ? 'día configurado' : 'días configurados'
+  const hoursDetail =
+    hoursConfiguredDays > 0
+      ? `${hoursConfiguredDays} ${dayWord} — turnos cada ${slotDurationMinutes} min.`
+      : 'Definí tus horarios para recibir reservas de turnos.'
+  const ticketWord = pendingTicketCount === 1 ? 'ticket abierto' : 'tickets abiertos'
+  const ticketBadgeText = pendingTicketCount > 0 ? `${pendingTicketCount} ${ticketWord}` : 'Sin tickets abiertos'
 
   return (
     <MotionConfig reducedMotion="user">
@@ -129,11 +136,7 @@ export function MechanicPanel({
                     <ChecklistRow
                       ok={hoursConfiguredDays > 0}
                       label="Horario de atención"
-                      detail={
-                        hoursConfiguredDays > 0
-                          ? `${hoursConfiguredDays} ${hoursConfiguredDays === 1 ? 'día configurado' : 'días configurados'} — turnos cada ${slotDurationMinutes} min.`
-                          : 'Definí tus horarios para recibir reservas de turnos.'
-                      }
+                      detail={hoursDetail}
                     />
                     <ChecklistRow
                       ok={specialtyLabels.length > 0}
@@ -170,11 +173,7 @@ export function MechanicPanel({
                     <WrenchIcon className="size-6" />
                   </span>
                   <div className="flex flex-col items-center gap-2">
-                    <Badge variant={pendingTicketCount > 0 ? 'active' : 'idle'}>
-                      {pendingTicketCount > 0
-                        ? `${pendingTicketCount} ${pendingTicketCount === 1 ? 'ticket abierto' : 'tickets abiertos'}`
-                        : 'Sin tickets abiertos'}
-                    </Badge>
+                    <Badge variant={pendingTicketCount > 0 ? 'active' : 'idle'}>{ticketBadgeText}</Badge>
                     <span className="max-w-2xs text-sm leading-relaxed text-muted-foreground">
                       Gestioná los turnos que llegan y las órdenes de trabajo en curso.
                     </span>

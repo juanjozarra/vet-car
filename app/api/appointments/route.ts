@@ -8,7 +8,7 @@ import { getAvailableSlots } from '@/lib/availability'
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions)
 
-  if (!session || session.user.role !== 'OWNER') {
+  if (session?.user.role !== 'OWNER') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

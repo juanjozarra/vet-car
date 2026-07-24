@@ -53,6 +53,20 @@ function timelineCurrentStep(status: ActiveRepairSummary['status']): number {
   return 3
 }
 
+type TimelineStepState = 'done' | 'current' | 'pending'
+
+function timelineStepState(index: number, currentStep: number): TimelineStepState {
+  if (index < currentStep) return 'done'
+  if (index === currentStep) return 'current'
+  return 'pending'
+}
+
+const TIMELINE_STEP_LABEL_CLASS: Record<TimelineStepState, string> = {
+  current: 'text-primary',
+  done: 'text-foreground/80',
+  pending: 'text-muted-foreground/50',
+}
+
 const sectionLabel =
   'font-mono text-[0.625rem] font-medium uppercase tracking-[0.18em] text-muted-foreground/70'
 
@@ -293,7 +307,7 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
                         />
                         <div className="relative flex items-start justify-between">
                           {TIMELINE_STEPS.map((label, i) => {
-                            const state = i < currentStep ? 'done' : i === currentStep ? 'current' : 'pending'
+                            const state = timelineStepState(i, currentStep)
                             return (
                               <motion.div
                                 key={label}
@@ -327,11 +341,7 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
                                 <span
                                   className={cn(
                                     'whitespace-nowrap text-center font-mono text-[0.5625rem] font-medium uppercase tracking-[0.14em] sm:text-[0.625rem]',
-                                    state === 'current'
-                                      ? 'text-primary'
-                                      : state === 'done'
-                                        ? 'text-foreground/80'
-                                        : 'text-muted-foreground/50'
+                                    TIMELINE_STEP_LABEL_CLASS[state]
                                   )}
                                 >
                                   {label}

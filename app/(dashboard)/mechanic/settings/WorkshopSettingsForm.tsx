@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { WORKSHOP_SPECIALTY_OPTIONS } from '@/lib/workshopSpecialty'
 import { PlaceLocationInput, type PlaceLocationValue } from '@/components/shared/PlaceLocationInput'
 import { GoogleMapsProvider } from '@/components/shared/GoogleMapsProvider'
+import { FormErrorBanner } from '@/components/shared/FormErrorBanner'
 import { cn } from '@/lib/utils'
 
 const DAY_LABELS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
@@ -286,20 +287,8 @@ export function WorkshopSettingsForm({
                 </div>
               </section>
 
+              <FormErrorBanner error={error} />
               <AnimatePresence mode="wait">
-                {error && (
-                  <motion.p
-                    key="error"
-                    role="alert"
-                    initial={{ opacity: 0, y: -8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: motionTokens.duration.fast, ease: motionTokens.easing.smooth }}
-                    className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-[#ffb3ae] ring-1 ring-destructive/25"
-                  >
-                    {error}
-                  </motion.p>
-                )}
                 {saved && !error && (
                   <motion.p
                     key="saved"
