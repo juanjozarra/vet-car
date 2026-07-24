@@ -280,3 +280,23 @@ export function LogOutIcon(props: IconProps) {
     </Icon>
   )
 }
+
+export function TrashIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M5 7h14" />
+      <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+      <path d="M7 7l1 13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-13" />
+    </Icon>
+  )
+}
+
+export function UserPlusIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="10" cy="7.5" r="3.5" />
+      <path d="M3 20.5a7 7 0 0 1 14 0" />
+      <path d="M19 8v6M16 11h6" />
+    </Icon>
+  )
+}

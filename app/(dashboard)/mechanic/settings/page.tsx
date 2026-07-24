@@ -13,6 +13,7 @@ export default async function MechanicSettingsPage() {
   if (!session) redirect('/login')
   if (session.user.role !== 'MECHANIC') redirect('/owner')
   if (!session.user.workshopId) redirect('/workshop/setup')
+  if (session.user.workshopRole !== 'ADMIN') redirect('/mechanic')
 
   const [workshop, userImage] = await Promise.all([
     prisma.workshop.findUnique({

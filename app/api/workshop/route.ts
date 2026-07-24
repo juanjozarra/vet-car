@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       })
       await tx.user.update({
         where: { id: session.user.id },
-        data: { workshopId: ws.id },
+        data: { workshopId: ws.id, workshopRole: 'ADMIN' },
       })
       return ws
     })
@@ -44,6 +44,10 @@ export async function PATCH(request: Request) {
 
   if (!session || session.user.role !== 'MECHANIC' || !session.user.workshopId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  if (session.user.workshopRole !== 'ADMIN') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
   const body = await request.json()

@@ -38,6 +38,7 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           role: user.role,
           workshopId: user.workshopId,
+          workshopRole: user.workshopRole,
         }
       },
     }),
@@ -52,10 +53,14 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id
         token.role = user.role
         token.workshopId = user.workshopId ?? null
+        token.workshopRole = user.workshopRole ?? null
       }
       if (trigger === 'update') {
         const dbUser = await prisma.user.findUnique({ where: { id: token.id } })
-        if (dbUser) token.workshopId = dbUser.workshopId ?? null
+        if (dbUser) {
+          token.workshopId = dbUser.workshopId ?? null
+          token.workshopRole = dbUser.workshopRole ?? null
+        }
       }
       return token
     },
@@ -64,6 +69,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id
         session.user.role = token.role
         session.user.workshopId = token.workshopId ?? null
+        session.user.workshopRole = token.workshopRole ?? null
       }
       return session
     },

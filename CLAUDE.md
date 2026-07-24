@@ -102,4 +102,6 @@ NEXTAUTH_SECRET=""   # generate: openssl rand -base64 32
 NEXTAUTH_URL="http://localhost:3000"
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=""   # optional — enables the real map and Places Autocomplete; degrades gracefully to manual inputs without it
 BLOB_READ_WRITE_TOKEN=""   # Vercel Blob (photo attachments on vehicle history entries); provision via the Vercel dashboard/Marketplace
+RESEND_API_KEY=""   # Resend (workshop staff invite emails); get an API key at resend.com or provision via Vercel Marketplace
+RESEND_FROM_EMAIL="onboarding@resend.dev"   # Resend's shared dev domain only delivers to your own verified Resend account address — use a verified sending domain in production
 ```
