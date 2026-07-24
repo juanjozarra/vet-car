@@ -2,6 +2,8 @@
 
 import { useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
+import { motion, MotionConfig } from 'motion/react'
+import { motionTokens } from '@/lib/motionTokens'
 import { Button, ButtonIconIsland } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -31,6 +33,12 @@ interface TeamRosterProps {
 const sectionLabel =
   'font-mono text-[0.625rem] font-medium uppercase tracking-[0.18em] text-muted-foreground/70'
 const DATE_FORMATTER = new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short' })
+
+const enter = (delay: number) => ({
+  initial: { opacity: 0, y: motionTokens.distance.md, filter: 'blur(4px)' },
+  animate: { opacity: 1, y: 0, filter: 'blur(0px)' },
+  transition: { duration: 0.6, ease: motionTokens.easing.fluid, delay },
+})
 
 export function TeamRoster({ currentUserId, isAdmin, mechanics, pendingInvites }: TeamRosterProps) {
   const router = useRouter()
@@ -98,98 +106,110 @@ export function TeamRoster({ currentUserId, isAdmin, mechanics, pendingInvites }
   }
 
   return (
-    <div className="flex flex-col gap-8">
-      {rosterError && (
-        <p
-          role="alert"
-          className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-[#ffb3ae] ring-1 ring-destructive/25"
-        >
-          {rosterError}
-        </p>
-      )}
-      <div className="flex flex-col gap-5">
-        <div className="flex items-center justify-between px-1">
-          <h2 className={sectionLabel}>Mecánicos</h2>
-          {isAdmin && (
-            <Button size="sm" onClick={() => setInviteOpen(true)}>
-              Invitar mecánico
-              <ButtonIconIsland>
-                <UserPlusIcon className="size-3.5" />
-              </ButtonIconIsland>
-            </Button>
-          )}
-        </div>
-        <div className="bezel">
-          <div className="bezel-core flex flex-col">
-            {mechanics.map(m => (
-              <div key={m.id} className="flex items-center gap-4 border-b border-white/[0.05] py-4 last:border-b-0">
-                <Avatar className="size-10 bg-white/[0.06]">
-                  <AvatarFallback className="bg-white/[0.06] font-mono text-xs font-semibold text-primary">
-                    {getInitials(m.name ?? m.email)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="truncate text-sm font-medium text-foreground">{m.name ?? m.email}</span>
-                  <span className="truncate text-xs text-muted-foreground">{m.email}</span>
-                </div>
-                <Badge variant={m.role === 'ADMIN' ? 'active' : 'idle'}>
-                  {m.role === 'ADMIN' ? 'Admin' : 'Staff'}
-                </Badge>
-                {isAdmin && m.role !== 'ADMIN' && m.id !== currentUserId && (
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    disabled={removingId === m.id}
-                    onClick={() => handleRemove(m.id)}
-                    aria-label={`Quitar a ${m.name ?? m.email}`}
-                  >
-                    <TrashIcon className="size-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+    <MotionConfig reducedMotion="user">
+      <div className="flex flex-col gap-8">
+        <motion.div {...enter(0)} className="flex flex-col gap-4">
+          <span className="eyebrow">
+            <span className="size-1 rounded-full bg-primary" aria-hidden="true" />
+            Equipo
+          </span>
+          <h1 className="font-display text-4xl font-medium leading-[1.05] tracking-[-0.03em] text-foreground sm:text-5xl">
+            Tu equipo de mecánicos.
+          </h1>
+        </motion.div>
 
-      {isAdmin && (
-        <div className="flex flex-col gap-5">
-          <h2 className={`${sectionLabel} px-1`}>Invitaciones pendientes</h2>
-          {pendingInvites.length === 0 ? (
-            <p className="px-1 text-sm text-muted-foreground">No hay invitaciones pendientes.</p>
-          ) : (
-            <div className="bezel">
-              <div className="bezel-core flex flex-col">
-                {pendingInvites.map(invite => (
-                  <div
-                    key={invite.id}
-                    className="flex items-center gap-4 border-b border-white/[0.05] py-4 last:border-b-0"
-                  >
-                    <span className="flex size-10 items-center justify-center rounded-full bg-white/[0.04] text-muted-foreground ring-1 ring-white/[0.08]">
-                      <MailIcon className="size-4" />
-                    </span>
-                    <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                      <span className="truncate text-sm font-medium text-foreground">{invite.email}</span>
-                      <span className="text-xs text-muted-foreground">
-                        Vence el {DATE_FORMATTER.format(new Date(invite.expiresAt))}
-                      </span>
-                    </div>
+        {rosterError && (
+          <p
+            role="alert"
+            className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-[#ffb3ae] ring-1 ring-destructive/25"
+          >
+            {rosterError}
+          </p>
+        )}
+        <motion.div {...enter(0.1)} className="flex flex-col gap-5">
+          <div className="flex items-center justify-between px-1">
+            <h2 className={sectionLabel}>Mecánicos</h2>
+            {isAdmin && (
+              <Button size="sm" onClick={() => setInviteOpen(true)}>
+                Invitar mecánico
+                <ButtonIconIsland>
+                  <UserPlusIcon className="size-3.5" />
+                </ButtonIconIsland>
+              </Button>
+            )}
+          </div>
+          <div className="bezel">
+            <div className="bezel-core flex flex-col">
+              {mechanics.map(m => (
+                <div key={m.id} className="flex items-center gap-4 border-b border-white/[0.05] py-4 last:border-b-0">
+                  <Avatar className="size-10 bg-white/[0.06]">
+                    <AvatarFallback className="bg-white/[0.06] font-mono text-xs font-semibold text-primary">
+                      {getInitials(m.name ?? m.email)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span className="truncate text-sm font-medium text-foreground">{m.name ?? m.email}</span>
+                    <span className="truncate text-xs text-muted-foreground">{m.email}</span>
+                  </div>
+                  <Badge variant={m.role === 'ADMIN' ? 'active' : 'idle'}>
+                    {m.role === 'ADMIN' ? 'Admin' : 'Staff'}
+                  </Badge>
+                  {isAdmin && m.role !== 'ADMIN' && m.id !== currentUserId && (
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      disabled={cancelingId === invite.id}
-                      onClick={() => handleCancelInvite(invite.id)}
-                      aria-label={`Cancelar invitación a ${invite.email}`}
+                      disabled={removingId === m.id}
+                      onClick={() => handleRemove(m.id)}
+                      aria-label={`Quitar a ${m.name ?? m.email}`}
                     >
-                      <CloseIcon className="size-4" />
+                      <TrashIcon className="size-4" />
                     </Button>
-                  </div>
-                ))}
-              </div>
+                  )}
+                </div>
+              ))}
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        </motion.div>
+
+        {isAdmin && (
+          <motion.div {...enter(0.18)} className="flex flex-col gap-5">
+            <h2 className={`${sectionLabel} px-1`}>Invitaciones pendientes</h2>
+            {pendingInvites.length === 0 ? (
+              <p className="px-1 text-sm text-muted-foreground">No hay invitaciones pendientes.</p>
+            ) : (
+              <div className="bezel">
+                <div className="bezel-core flex flex-col">
+                  {pendingInvites.map(invite => (
+                    <div
+                      key={invite.id}
+                      className="flex items-center gap-4 border-b border-white/[0.05] py-4 last:border-b-0"
+                    >
+                      <span className="flex size-10 items-center justify-center rounded-full bg-white/[0.04] text-muted-foreground ring-1 ring-white/[0.08]">
+                        <MailIcon className="size-4" />
+                      </span>
+                      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                        <span className="truncate text-sm font-medium text-foreground">{invite.email}</span>
+                        <span className="text-xs text-muted-foreground">
+                          Vence el {DATE_FORMATTER.format(new Date(invite.expiresAt))}
+                        </span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        disabled={cancelingId === invite.id}
+                        onClick={() => handleCancelInvite(invite.id)}
+                        aria-label={`Cancelar invitación a ${invite.email}`}
+                      >
+                        <CloseIcon className="size-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </div>
 
       <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
         <DialogContent>
@@ -225,6 +245,6 @@ export function TeamRoster({ currentUserId, isAdmin, mechanics, pendingInvites }
           </form>
         </DialogContent>
       </Dialog>
-    </div>
+    </MotionConfig>
   )
 }

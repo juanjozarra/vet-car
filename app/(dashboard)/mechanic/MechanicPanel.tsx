@@ -22,6 +22,7 @@ interface MechanicPanelProps {
   hoursConfiguredDays: number
   slotDurationMinutes: number
   hasLocation: boolean
+  pendingTicketCount: number
 }
 
 const sectionLabel =
@@ -70,6 +71,7 @@ export function MechanicPanel({
   hoursConfiguredDays,
   slotDurationMinutes,
   hasLocation,
+  pendingTicketCount,
 }: MechanicPanelProps) {
   const setupComplete = hasLocation && hoursConfiguredDays > 0 && specialtyLabels.length > 0
 
@@ -157,7 +159,7 @@ export function MechanicPanel({
               </motion.div>
             </div>
 
-            {/* Work orders — coming soon */}
+            {/* Work orders */}
             <div className="flex flex-col gap-5 lg:col-span-5">
               <motion.h2 {...enter(0.14)} className={cn(sectionLabel, 'px-1')}>
                 Órdenes de trabajo
@@ -168,11 +170,23 @@ export function MechanicPanel({
                     <WrenchIcon className="size-6" />
                   </span>
                   <div className="flex flex-col items-center gap-2">
-                    <Badge variant="idle">Próximamente</Badge>
+                    <Badge variant={pendingTicketCount > 0 ? 'active' : 'idle'}>
+                      {pendingTicketCount > 0
+                        ? `${pendingTicketCount} ${pendingTicketCount === 1 ? 'ticket abierto' : 'tickets abiertos'}`
+                        : 'Sin tickets abiertos'}
+                    </Badge>
                     <span className="max-w-2xs text-sm leading-relaxed text-muted-foreground">
-                      El registro de órdenes de trabajo y service de tus clientes llega pronto a VetCar.
+                      Gestioná los turnos que llegan y las órdenes de trabajo en curso.
                     </span>
                   </div>
+                  <Button asChild variant="secondary">
+                    <Link href="/mechanic/board">
+                      Ir al tablero
+                      <ButtonIconIsland>
+                        <ArrowUpRightIcon className="size-3.5" />
+                      </ButtonIconIsland>
+                    </Link>
+                  </Button>
                 </div>
               </motion.div>
             </div>

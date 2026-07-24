@@ -19,6 +19,10 @@ ARG NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=""
 ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 # prisma.config.ts requires DATABASE_URL to be set; the build never connects
 ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
+# lib/email.ts constructs the Resend client at module load, so Next's build-time
+# page-data collection needs a non-empty value here; the real key is supplied at
+# container runtime via docker-compose (this ENV doesn't carry into the runner stage)
+ENV RESEND_API_KEY="build-time-placeholder"
 RUN npx prisma generate
 RUN npm run build
 
