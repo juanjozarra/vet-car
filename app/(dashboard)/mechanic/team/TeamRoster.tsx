@@ -40,6 +40,7 @@ export function TeamRoster({ currentUserId, isAdmin, mechanics, pendingInvites }
   const [inviteSubmitting, setInviteSubmitting] = useState(false)
   const [removingId, setRemovingId] = useState<string | null>(null)
   const [cancelingId, setCancelingId] = useState<string | null>(null)
+  const [rosterError, setRosterError] = useState<string | null>(null)
 
   async function handleInvite(e: FormEvent) {
     e.preventDefault()
@@ -65,9 +66,15 @@ export function TeamRoster({ currentUserId, isAdmin, mechanics, pendingInvites }
   }
 
   async function handleRemove(userId: string) {
+    setRosterError(null)
     setRemovingId(userId)
     try {
-      await fetch(`/api/workshop/team/${userId}`, { method: 'DELETE' })
+      const res = await fetch(`/api/workshop/team/${userId}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setRosterError(data.error ?? 'No se pudo quitar al mecánico')
+        return
+      }
       router.refresh()
     } finally {
       setRemovingId(null)
@@ -75,9 +82,15 @@ export function TeamRoster({ currentUserId, isAdmin, mechanics, pendingInvites }
   }
 
   async function handleCancelInvite(id: string) {
+    setRosterError(null)
     setCancelingId(id)
     try {
-      await fetch(`/api/workshop/invites/${id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/workshop/invites/${id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setRosterError(data.error ?? 'No se pudo cancelar la invitación')
+        return
+      }
       router.refresh()
     } finally {
       setCancelingId(null)
@@ -86,6 +99,14 @@ export function TeamRoster({ currentUserId, isAdmin, mechanics, pendingInvites }
 
   return (
     <div className="flex flex-col gap-8">
+      {rosterError && (
+        <p
+          role="alert"
+          className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-[#ffb3ae] ring-1 ring-destructive/25"
+        >
+          {rosterError}
+        </p>
+      )}
       <div className="flex flex-col gap-5">
         <div className="flex items-center justify-between px-1">
           <h2 className={sectionLabel}>Mecánicos</h2>

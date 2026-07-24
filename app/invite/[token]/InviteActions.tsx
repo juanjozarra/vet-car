@@ -2,11 +2,13 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { Button, ButtonIconIsland } from '@/components/ui/button'
 import { CheckIcon, CloseIcon } from '@/components/ui/icons'
 
 export function InviteActions({ token }: { token: string }) {
   const router = useRouter()
+  const { update } = useSession()
   const [loading, setLoading] = useState<'accept' | 'decline' | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -19,6 +21,9 @@ export function InviteActions({ token }: { token: string }) {
       setError(data.error ?? 'Algo salió mal')
       setLoading(null)
       return
+    }
+    if (action === 'accept') {
+      await update()
     }
     router.push('/mechanic')
     router.refresh()

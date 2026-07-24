@@ -89,7 +89,9 @@ export default function SelectRolePage() {
       return
     }
 
-    router.push(callbackUrl ?? '/')
+    const safeCallbackUrl =
+      callbackUrl && callbackUrl.startsWith('/') && !callbackUrl.startsWith('//') ? callbackUrl : '/'
+    router.push(safeCallbackUrl)
     router.refresh()
   }
 
