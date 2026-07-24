@@ -1,8 +1,9 @@
 // app/(auth)/register/page.tsx
 'use client'
 
+import { Suspense } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { ArrowRightIcon, EyeIcon, EyeOffIcon, LockIcon, MailIcon, UserIcon } from '@/components/ui/icons'
@@ -18,8 +19,12 @@ const labelClass =
 const iconClass =
   'pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-muted-foreground/60 transition-colors duration-300 group-focus-within:text-primary'
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const prefillEmail = searchParams.get('email') ?? ''
+  const lockedRole = searchParams.get('role') === 'MECHANIC' ? 'MECHANIC' : null
+  const callbackUrl = searchParams.get('callbackUrl')
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
@@ -44,7 +49,7 @@ export default function RegisterPage() {
       return
     }
 
-    sessionStorage.setItem('reg_pending', JSON.stringify({ name, email, password }))
+    sessionStorage.setItem('reg_pending', JSON.stringify({ name, email, password, lockedRole, callbackUrl }))
     router.push('/select-role')
   }
 
@@ -60,7 +65,9 @@ export default function RegisterPage() {
             <h1 className="font-display text-[1.75rem] font-medium tracking-[-0.02em] text-foreground">
               Crear cuenta
             </h1>
-            <p className="text-sm text-muted-foreground">Paso 1 de 2 — tus datos.</p>
+            <p className="text-sm text-muted-foreground">
+              {lockedRole ? 'Paso 1 de 2 — tus datos para unirte al taller.' : 'Paso 1 de 2 — tus datos.'}
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -115,9 +122,14 @@ export default function RegisterPage() {
                   required
                   autoComplete="email"
                   placeholder="vos@ejemplo.com"
+                  defaultValue={prefillEmail}
+                  readOnly={lockedRole !== null}
                   className="pl-10"
                 />
               </div>
+              {lockedRole && (
+                <span className="text-xs text-muted-foreground">Este correo viene de tu invitación.</span>
+              )}
             </div>
 
             <div className="flex flex-col gap-2.5">
@@ -208,5 +220,13 @@ export default function RegisterPage() {
         </div>
       </div>
     </AuthShell>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterForm />
+    </Suspense>
   )
 }

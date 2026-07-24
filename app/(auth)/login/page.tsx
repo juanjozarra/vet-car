@@ -1,9 +1,10 @@
 // app/(auth)/login/page.tsx
 'use client'
 
+import { Suspense } from 'react'
 import Link from 'next/link'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { ArrowRightIcon, EyeIcon, EyeOffIcon, LockIcon, MailIcon } from '@/components/ui/icons'
@@ -16,8 +17,10 @@ import { Label } from '@/components/ui/label'
 const labelClass =
   'font-mono text-[0.625rem] font-medium uppercase tracking-[0.16em] text-muted-foreground'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams.get('callbackUrl') || '/'
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -39,7 +42,7 @@ export default function LoginPage() {
       return
     }
 
-    router.push('/')
+    router.push(callbackUrl)
     router.refresh()
   }
 
@@ -147,5 +150,13 @@ export default function LoginPage() {
         </div>
       </div>
     </AuthShell>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   )
 }
