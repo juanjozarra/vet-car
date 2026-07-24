@@ -7,6 +7,7 @@ import { WrenchIcon, OdometerIcon } from '@/components/ui/icons'
 import { Badge, BadgeDot } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { SERVICE_ITEM_TYPE_LABELS } from '@/lib/serviceItemType'
+import { FormErrorBanner } from '@/components/shared/FormErrorBanner'
 import type { HistoryEntrySummary } from '@/lib/vehicleHistory'
 
 const DATE_FORMATTER = new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -57,11 +58,7 @@ export function VehicleHistoryTimeline({ entries, currentUserId, basePath }: Veh
 
   return (
     <div className="flex flex-col gap-4">
-      {error && (
-        <p role="alert" className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-[#ffb3ae] ring-1 ring-destructive/25">
-          {error}
-        </p>
-      )}
+      <FormErrorBanner error={error} />
       {entries.map(entry => (
         <div key={entry.id} className="bezel">
           <div className="bezel-core flex flex-col gap-3 p-5 sm:p-6">

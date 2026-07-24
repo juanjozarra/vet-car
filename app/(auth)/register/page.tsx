@@ -1,14 +1,12 @@
 // app/(auth)/register/page.tsx
 'use client'
 
-import { Suspense } from 'react'
+import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
 import { ArrowRightIcon, EyeIcon, EyeOffIcon, LockIcon, MailIcon, UserIcon } from '@/components/ui/icons'
-import { motionTokens } from '@/lib/motionTokens'
 import { AuthShell } from '@/components/shared/AuthShell'
+import { FormErrorBanner } from '@/components/shared/FormErrorBanner'
 import { Button, ButtonIconIsland } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
@@ -71,21 +69,7 @@ function RegisterForm() {
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-            <AnimatePresence mode="wait">
-              {error && (
-                <motion.p
-                  key="error"
-                  role="alert"
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: motionTokens.duration.fast, ease: motionTokens.easing.smooth }}
-                  className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-[#ffb3ae] ring-1 ring-destructive/25"
-                >
-                  {error}
-                </motion.p>
-              )}
-            </AnimatePresence>
+            <FormErrorBanner error={error} />
 
             <div className="flex flex-col gap-2.5">
               <Label htmlFor="name" className={labelClass}>

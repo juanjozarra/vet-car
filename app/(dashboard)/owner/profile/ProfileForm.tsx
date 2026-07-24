@@ -2,7 +2,7 @@
 
 import { useState, useRef, type ChangeEvent, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion, AnimatePresence, MotionConfig } from 'motion/react'
+import { motion, MotionConfig } from 'motion/react'
 import { motionTokens } from '@/lib/motionTokens'
 import { getInitials } from '@/lib/utils'
 import { UploadIcon, CheckIcon } from '@/components/ui/icons'
@@ -10,6 +10,7 @@ import { Button, ButtonIconIsland } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { FormErrorBanner } from '@/components/shared/FormErrorBanner'
 
 const MAX_AVATAR_SIZE = 256
 
@@ -185,21 +186,7 @@ export function ProfileForm({ name, email, phone, address, image }: ProfileFormP
                 </div>
               </section>
 
-              <AnimatePresence mode="wait">
-                {error && (
-                  <motion.p
-                    key="error"
-                    role="alert"
-                    initial={{ opacity: 0, y: -8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: motionTokens.duration.fast, ease: motionTokens.easing.smooth }}
-                    className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-[#ffb3ae] ring-1 ring-destructive/25"
-                  >
-                    {error}
-                  </motion.p>
-                )}
-              </AnimatePresence>
+              <FormErrorBanner error={error} />
 
               <div className="flex items-center justify-end gap-3 border-t border-white/[0.06] pt-6">
                 <Button type="button" variant="ghost" onClick={() => router.push('/owner')}>

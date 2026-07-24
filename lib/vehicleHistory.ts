@@ -76,7 +76,7 @@ export async function getVehicleWithHistory(
 
 export async function getOwnHistoryEntry(userId: string, entryId: string) {
   const entry = await prisma.historyEntry.findUnique({ where: { id: entryId } })
-  if (!entry || entry.createdById !== userId) return null
+  if (entry?.createdById !== userId) return null
   return entry
 }
 

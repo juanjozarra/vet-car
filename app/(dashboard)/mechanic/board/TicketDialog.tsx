@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { FormErrorBanner } from '@/components/shared/FormErrorBanner'
 import type { TicketCardData } from './TicketCard'
 
 interface Mechanic {
@@ -79,11 +80,7 @@ function TicketDialogForm({
         </DialogDescription>
       </DialogHeader>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        {error && (
-          <p role="alert" className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-[#ffb3ae] ring-1 ring-destructive/25">
-            {error}
-          </p>
-        )}
+        <FormErrorBanner error={error} />
         <div className="flex flex-col gap-2">
           <Label htmlFor="ticket-title">Título</Label>
           <Input id="ticket-title" value={title} onChange={e => setTitle(e.target.value)} required />

@@ -18,6 +18,12 @@ function startOfMonth(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), 1)
 }
 
+function dayButtonClass(isDisabled: boolean, isSelected: boolean): string {
+  if (isDisabled) return "cursor-not-allowed text-muted-foreground/25"
+  if (isSelected) return "bg-primary text-primary-foreground shadow-[0_6px_16px_-6px_rgba(242,179,80,0.6)]"
+  return "text-foreground hover:bg-accent hover:text-accent-foreground"
+}
+
 function capitalize(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
@@ -123,11 +129,7 @@ function DatePicker({
                 onClick={() => handleSelect(date)}
                 className={cn(
                   "flex h-8 items-center justify-center rounded-[0.625rem] font-mono text-sm transition-[background-color,color,box-shadow] duration-200 ease-[cubic-bezier(0.32,0.72,0,1)]",
-                  isDisabled
-                    ? "cursor-not-allowed text-muted-foreground/25"
-                    : isSelected
-                      ? "bg-primary text-primary-foreground shadow-[0_6px_16px_-6px_rgba(242,179,80,0.6)]"
-                      : "text-foreground hover:bg-accent hover:text-accent-foreground",
+                  dayButtonClass(isDisabled, isSelected),
                   !isSelected && isToday && "ring-1 ring-inset ring-primary/40"
                 )}
               >

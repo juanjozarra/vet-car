@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion, MotionConfig } from 'motion/react'
@@ -18,6 +18,7 @@ import {
 import { Button, ButtonIconIsland } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { FormErrorBanner } from '@/components/shared/FormErrorBanner'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -213,6 +214,12 @@ function LocationSearchField({ onLocate }: { onLocate: (coords: LatLng) => void 
   )
 }
 
+function DistanceBadge({ distanceKm, latitude }: { distanceKm: number | null; latitude: number | null }) {
+  if (distanceKm !== null) return <Badge variant="active">{distanceKm.toFixed(1)} km</Badge>
+  if (latitude === null) return <Badge variant="idle">Sin ubicación</Badge>
+  return null
+}
+
 function ShopCard({
   workshop, index, isSelected, onSelect, onBook,
 }: {
@@ -247,11 +254,7 @@ function ShopCard({
             </span>
           </div>
           <div className="shrink-0">
-            {workshop.distanceKm !== null ? (
-              <Badge variant="active">{workshop.distanceKm.toFixed(1)} km</Badge>
-            ) : workshop.latitude === null ? (
-              <Badge variant="idle">Sin ubicación</Badge>
-            ) : null}
+            <DistanceBadge distanceKm={workshop.distanceKm} latitude={workshop.latitude} />
           </div>
         </div>
 
@@ -419,6 +422,124 @@ function BookingModal({
     }
   }
 
+  let body: ReactNode
+  if (vehicles.length === 0) {
+    body = (
+      <div className="flex flex-col items-start gap-4 py-2">
+        <span className="text-sm leading-relaxed text-muted-foreground">
+          Todavía no tenés vehículos registrados. Registrá uno para poder agendar un turno.
+        </span>
+        <Link href="/owner/vehicles/new">
+          <Button size="sm">
+            Registrar vehículo
+            <ButtonIconIsland>
+              <PlusIcon className="size-3" />
+            </ButtonIconIsland>
+          </Button>
+        </Link>
+      </div>
+    )
+  } else if (loadingSlots) {
+    body = (
+      <div className="flex flex-col gap-3 py-2">
+        <span className="text-sm text-muted-foreground">Buscando horarios disponibles…</span>
+        <SlotSkeleton />
+      </div>
+    )
+  } else if (!hasAnyAvailability) {
+    body = (
+      <div className="flex flex-col gap-2 rounded-xl bg-white/[0.03] px-4 py-4 ring-1 ring-white/[0.06]">
+        <span className="text-sm leading-relaxed text-muted-foreground">
+          Este taller todavía no configuró su disponibilidad. Contactalo al{' '}
+          <span className="font-mono text-foreground">{workshop.phone}</span> para coordinar un turno.
+        </span>
+      </div>
+    )
+  } else {
+    body = (
+      <form onSubmit={handleSubmit} className="flex min-w-0 flex-col gap-5">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div className="flex flex-col gap-2.5">
+            <Label htmlFor="vehicleId" className={fieldLabel}>Vehículo</Label>
+            <Select value={vehicleId} onValueChange={setVehicleId} required>
+              <SelectTrigger id="vehicleId" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {vehicles.map(v => <SelectItem key={v.id} value={v.id}>{v.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-2.5">
+            <Label className={fieldLabel}>Fecha</Label>
+            <DatePicker
+              selected={selectedDate}
+              onSelect={date => { setSelectedDate(date); setSelectedSlot(null) }}
+              isDayDisabled={date => (slotsByDate[dateKey(date)] ?? []).length === 0}
+              minMonth={next14Days[0]}
+              maxMonth={next14Days[next14Days.length - 1]}
+              className="w-full"
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2.5">
+          <div className="flex items-baseline justify-between">
+            <Label className={fieldLabel}>Horario</Label>
+            {selectedDaySlots.length > 0 && (
+              <span className="font-mono text-[0.625rem] uppercase tracking-[0.14em] text-muted-foreground/50">
+                {selectedDaySlots.length} disponibles
+              </span>
+            )}
+          </div>
+          {selectedDaySlots.length === 0 ? (
+            <p className="rounded-xl bg-white/[0.03] px-4 py-3 text-xs text-muted-foreground ring-1 ring-white/[0.06]">
+              No hay horarios disponibles ese día.
+            </p>
+          ) : (
+            <div className="grid max-h-44 grid-cols-3 gap-2 overflow-y-auto pr-1 sm:grid-cols-5">
+              {selectedDaySlots.map(slot => {
+                const isSelected = selectedSlot?.getTime() === slot.getTime()
+                return (
+                  <button
+                    key={slot.toISOString()}
+                    type="button"
+                    onClick={() => setSelectedSlot(slot)}
+                    aria-pressed={isSelected}
+                    className={cn(
+                      'h-9 rounded-[0.625rem] font-mono text-xs outline-none transition-[background-color,color,box-shadow] duration-200 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-3 focus-visible:ring-ring/40',
+                      isSelected
+                        ? 'bg-primary text-primary-foreground shadow-[0_6px_16px_-6px_rgba(242,179,80,0.6)]'
+                        : 'bg-white/[0.04] text-foreground ring-1 ring-white/[0.08] ring-inset hover:bg-white/[0.08]'
+                    )}
+                  >
+                    {TIME_LABEL_FORMATTER.format(slot)}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-2.5">
+          <Label htmlFor="notes" className={fieldLabel}>Tipo de servicio / notas (opcional)</Label>
+          <Input id="notes" type="text" placeholder="p. ej. Cambio de aceite"
+            value={notes} onChange={e => setNotes(e.target.value)} />
+        </div>
+
+        <FormErrorBanner error={error} />
+
+        <div className="flex items-center justify-end gap-3 border-t border-white/[0.06] pt-5">
+          <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
+          <Button type="submit" disabled={submitting || !selectedSlot}>
+            {submitting ? 'Agendando…' : 'Confirmar turno'}
+          </Button>
+        </div>
+      </form>
+    )
+  }
+
   return (
     <DialogContent className="w-full gap-6 p-7 sm:max-w-[720px] sm:p-8">
       <DialogHeader>
@@ -430,118 +551,7 @@ function BookingModal({
         </span>
       </DialogHeader>
 
-      {vehicles.length === 0 ? (
-        <div className="flex flex-col items-start gap-4 py-2">
-          <span className="text-sm leading-relaxed text-muted-foreground">
-            Todavía no tenés vehículos registrados. Registrá uno para poder agendar un turno.
-          </span>
-          <Link href="/owner/vehicles/new">
-            <Button size="sm">
-              Registrar vehículo
-              <ButtonIconIsland>
-                <PlusIcon className="size-3" />
-              </ButtonIconIsland>
-            </Button>
-          </Link>
-        </div>
-      ) : loadingSlots ? (
-        <div className="flex flex-col gap-3 py-2">
-          <span className="text-sm text-muted-foreground">Buscando horarios disponibles…</span>
-          <SlotSkeleton />
-        </div>
-      ) : !hasAnyAvailability ? (
-        <div className="flex flex-col gap-2 rounded-xl bg-white/[0.03] px-4 py-4 ring-1 ring-white/[0.06]">
-          <span className="text-sm leading-relaxed text-muted-foreground">
-            Este taller todavía no configuró su disponibilidad. Contactalo al{' '}
-            <span className="font-mono text-foreground">{workshop.phone}</span> para coordinar un turno.
-          </span>
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="flex min-w-0 flex-col gap-5">
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <div className="flex flex-col gap-2.5">
-              <Label htmlFor="vehicleId" className={fieldLabel}>Vehículo</Label>
-              <Select value={vehicleId} onValueChange={setVehicleId} required>
-                <SelectTrigger id="vehicleId" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {vehicles.map(v => <SelectItem key={v.id} value={v.id}>{v.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex flex-col gap-2.5">
-              <Label className={fieldLabel}>Fecha</Label>
-              <DatePicker
-                selected={selectedDate}
-                onSelect={date => { setSelectedDate(date); setSelectedSlot(null) }}
-                isDayDisabled={date => (slotsByDate[dateKey(date)] ?? []).length === 0}
-                minMonth={next14Days[0]}
-                maxMonth={next14Days[next14Days.length - 1]}
-                className="w-full"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2.5">
-            <div className="flex items-baseline justify-between">
-              <Label className={fieldLabel}>Horario</Label>
-              {selectedDaySlots.length > 0 && (
-                <span className="font-mono text-[0.625rem] uppercase tracking-[0.14em] text-muted-foreground/50">
-                  {selectedDaySlots.length} disponibles
-                </span>
-              )}
-            </div>
-            {selectedDaySlots.length === 0 ? (
-              <p className="rounded-xl bg-white/[0.03] px-4 py-3 text-xs text-muted-foreground ring-1 ring-white/[0.06]">
-                No hay horarios disponibles ese día.
-              </p>
-            ) : (
-              <div className="grid max-h-44 grid-cols-3 gap-2 overflow-y-auto pr-1 sm:grid-cols-5">
-                {selectedDaySlots.map(slot => {
-                  const isSelected = selectedSlot?.getTime() === slot.getTime()
-                  return (
-                    <button
-                      key={slot.toISOString()}
-                      type="button"
-                      onClick={() => setSelectedSlot(slot)}
-                      aria-pressed={isSelected}
-                      className={cn(
-                        'h-9 rounded-[0.625rem] font-mono text-xs outline-none transition-[background-color,color,box-shadow] duration-200 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-3 focus-visible:ring-ring/40',
-                        isSelected
-                          ? 'bg-primary text-primary-foreground shadow-[0_6px_16px_-6px_rgba(242,179,80,0.6)]'
-                          : 'bg-white/[0.04] text-foreground ring-1 ring-white/[0.08] ring-inset hover:bg-white/[0.08]'
-                      )}
-                    >
-                      {TIME_LABEL_FORMATTER.format(slot)}
-                    </button>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-2.5">
-            <Label htmlFor="notes" className={fieldLabel}>Tipo de servicio / notas (opcional)</Label>
-            <Input id="notes" type="text" placeholder="p. ej. Cambio de aceite"
-              value={notes} onChange={e => setNotes(e.target.value)} />
-          </div>
-
-          {error && (
-            <p role="alert" className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-[#ffb3ae] ring-1 ring-destructive/25">
-              {error}
-            </p>
-          )}
-
-          <div className="flex items-center justify-end gap-3 border-t border-white/[0.06] pt-5">
-            <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
-            <Button type="submit" disabled={submitting || !selectedSlot}>
-              {submitting ? 'Agendando…' : 'Confirmar turno'}
-            </Button>
-          </div>
-        </form>
-      )}
+      {body}
     </DialogContent>
   )
 }
