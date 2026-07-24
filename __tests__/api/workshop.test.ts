@@ -4,24 +4,26 @@ jest.mock('next-auth', () => ({
 
 jest.mock('@/lib/prisma', () => ({
   prisma: {
-    workshop: { create: jest.fn() },
+    workshop: { create: jest.fn(), update: jest.fn() },
+    workshopHours: { deleteMany: jest.fn(), createMany: jest.fn() },
     user: { update: jest.fn() },
     $transaction: jest.fn(),
   },
 }))
 
-import { POST } from '@/app/api/workshop/route'
+import { POST, PATCH } from '@/app/api/workshop/route'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 
 const mockGetServerSession = getServerSession as jest.Mock
 const mockWorkshopCreate = prisma.workshop.create as jest.Mock
+const mockWorkshopUpdate = prisma.workshop.update as jest.Mock
 const mockUserUpdate = prisma.user.update as jest.Mock
 const mockTransaction = prisma.$transaction as jest.Mock
 
-function makeRequest(body: object) {
+function makeRequest(method: string, body: object) {
   return new Request('http://localhost/api/workshop', {
-    method: 'POST',
+    method,
     body: JSON.stringify(body),
     headers: { 'Content-Type': 'application/json' },
   })
@@ -37,39 +39,76 @@ describe('POST /api/workshop', () => {
 
   it('returns 401 when not authenticated', async () => {
     mockGetServerSession.mockResolvedValue(null)
-    const res = await POST(makeRequest(validBody))
+    const res = await POST(makeRequest('POST', validBody))
     expect(res.status).toBe(401)
   })
 
   it('returns 401 when user is not a mechanic', async () => {
     mockGetServerSession.mockResolvedValue({ user: { id: 'u1', role: 'OWNER', workshopId: null } })
-    const res = await POST(makeRequest(validBody))
+    const res = await POST(makeRequest('POST', validBody))
     expect(res.status).toBe(401)
   })
 
   it('returns 409 when workshop already exists', async () => {
     mockGetServerSession.mockResolvedValue({ user: { id: 'u1', role: 'MECHANIC', workshopId: 'ws-existing' } })
-    const res = await POST(makeRequest(validBody))
+    const res = await POST(makeRequest('POST', validBody))
     expect(res.status).toBe(409)
   })
 
   it('returns 400 when required fields are missing', async () => {
     mockGetServerSession.mockResolvedValue({ user: { id: 'u1', role: 'MECHANIC', workshopId: null } })
-    const res = await POST(makeRequest({ name: 'AutoShop' }))
+    const res = await POST(makeRequest('POST', { name: 'AutoShop' }))
     expect(res.status).toBe(400)
   })
 
-  it('creates workshop, updates user, and returns 201', async () => {
+  it('creates workshop, sets the creator as ADMIN, and returns 201', async () => {
     mockGetServerSession.mockResolvedValue({ user: { id: 'u1', role: 'MECHANIC', workshopId: null } })
     mockWorkshopCreate.mockResolvedValue({ id: 'ws-1', ...validBody })
 
-    const res = await POST(makeRequest(validBody))
+    const res = await POST(makeRequest('POST', validBody))
     expect(res.status).toBe(201)
     expect(mockWorkshopCreate).toHaveBeenCalledWith({
       data: { name: 'AutoShop', address: '123 Main St', phone: '555-0100', email: 'shop@example.com' },
     })
-    expect(mockUserUpdate).toHaveBeenCalledWith({ where: { id: 'u1' }, data: { workshopId: 'ws-1' } })
+    expect(mockUserUpdate).toHaveBeenCalledWith({
+      where: { id: 'u1' },
+      data: { workshopId: 'ws-1', workshopRole: 'ADMIN' },
+    })
     const data = await res.json()
     expect(data.id).toBe('ws-1')
+  })
+})
+
+describe('PATCH /api/workshop', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockTransaction.mockImplementation(async (cb: (tx: typeof prisma) => Promise<unknown>) => cb(prisma))
+  })
+
+  it('returns 401 when not authenticated', async () => {
+    mockGetServerSession.mockResolvedValue(null)
+    const res = await PATCH(makeRequest('PATCH', { slotDurationMinutes: 90 }))
+    expect(res.status).toBe(401)
+  })
+
+  it('returns 403 when caller is STAFF, not ADMIN', async () => {
+    mockGetServerSession.mockResolvedValue({
+      user: { id: 'm1', role: 'MECHANIC', workshopId: 'ws1', workshopRole: 'STAFF' },
+    })
+    const res = await PATCH(makeRequest('PATCH', { slotDurationMinutes: 90 }))
+    expect(res.status).toBe(403)
+    expect(mockWorkshopUpdate).not.toHaveBeenCalled()
+  })
+
+  it('updates workshop settings and returns 200 for ADMIN', async () => {
+    mockGetServerSession.mockResolvedValue({
+      user: { id: 'a1', role: 'MECHANIC', workshopId: 'ws1', workshopRole: 'ADMIN' },
+    })
+    mockWorkshopUpdate.mockResolvedValue({ id: 'ws1', slotDurationMinutes: 90 })
+
+    const res = await PATCH(makeRequest('PATCH', { slotDurationMinutes: 90 }))
+    expect(res.status).toBe(200)
+    const data = await res.json()
+    expect(data.slotDurationMinutes).toBe(90)
   })
 })
