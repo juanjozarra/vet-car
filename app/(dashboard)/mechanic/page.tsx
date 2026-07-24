@@ -15,12 +15,15 @@ export default async function MechanicDashboard() {
   if (session.user.role !== 'MECHANIC') redirect('/owner')
   if (!session.user.workshopId) redirect('/workshop/setup')
 
-  const [workshop, userImage] = await Promise.all([
+  const [workshop, userImage, pendingTicketCount] = await Promise.all([
     prisma.workshop.findUnique({
       where: { id: session.user.workshopId },
       include: { hours: true },
     }),
     getUserImage(session.user.id),
+    prisma.workOrder.count({
+      where: { mechanic: { workshopId: session.user.workshopId }, status: { in: ['PENDING', 'IN_PROGRESS'] } },
+    }),
   ])
   if (!workshop) redirect('/workshop/setup')
 
@@ -44,6 +47,7 @@ export default async function MechanicDashboard() {
         hoursConfiguredDays={workshop.hours.length}
         slotDurationMinutes={workshop.slotDurationMinutes}
         hasLocation={workshop.latitude !== null && workshop.longitude !== null}
+        pendingTicketCount={pendingTicketCount}
       />
       <DashboardFooter />
     </div>
