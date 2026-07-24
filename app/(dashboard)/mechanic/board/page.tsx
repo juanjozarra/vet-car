@@ -1,0 +1,97 @@
+// app/(dashboard)/mechanic/board/page.tsx
+import { getServerSession } from 'next-auth'
+import { redirect } from 'next/navigation'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import { getUserImage } from '@/lib/user'
+import { DashboardNav } from '@/components/shared/DashboardNav'
+import { DashboardFooter } from '@/components/shared/DashboardFooter'
+import { MECHANIC_NAV_ITEMS } from '../nav-items'
+import { Board } from './Board'
+
+function vehicleLabel(vehicle: {
+  nickname: string | null
+  year: number
+  make: string
+  model: string
+}) {
+  return vehicle.nickname ?? `${vehicle.year} ${vehicle.make} ${vehicle.model}`
+}
+
+export default async function MechanicBoardPage() {
+  const session = await getServerSession(authOptions)
+  if (!session) redirect('/login')
+  if (session.user.role !== 'MECHANIC') redirect('/owner')
+  if (!session.user.workshopId) redirect('/workshop/setup')
+
+  const workshopId = session.user.workshopId
+
+  const [appointments, workOrders, mechanics, userImage] = await Promise.all([
+    prisma.appointment.findMany({
+      where: { workshopId, status: 'SCHEDULED', workOrder: null },
+      include: { vehicle: { include: { owner: { select: { name: true } } } } },
+      orderBy: { scheduledAt: 'asc' },
+    }),
+    prisma.workOrder.findMany({
+      where: { mechanic: { workshopId } },
+      include: {
+        vehicle: { select: { nickname: true, year: true, make: true, model: true } },
+        mechanic: { select: { id: true, name: true, email: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    }),
+    prisma.user.findMany({
+      where: { workshopId },
+      select: { id: true, name: true, email: true },
+      orderBy: { createdAt: 'asc' },
+    }),
+    getUserImage(session.user.id),
+  ])
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      <DashboardNav
+        items={MECHANIC_NAV_ITEMS}
+        active="board"
+        userName={session.user.name ?? 'mecánico'}
+        userEmail={session.user.email ?? undefined}
+        userImage={userImage}
+        profileHref={null}
+      />
+      <main className="flex-1 px-4 pt-32 sm:px-8 sm:pt-36">
+        <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-8">
+          <div className="flex flex-col gap-4">
+            <span className="eyebrow">
+              <span className="size-1 rounded-full bg-primary" aria-hidden="true" />
+              Tablero
+            </span>
+            <h1 className="font-display text-4xl font-medium leading-[1.05] tracking-[-0.03em] text-foreground sm:text-5xl">
+              Turnos y órdenes de trabajo.
+            </h1>
+          </div>
+          <Board
+            scheduledAppointments={appointments.map(a => ({
+              id: a.id,
+              title: a.title,
+              scheduledAt: a.scheduledAt.toISOString(),
+              vehicleLabel: vehicleLabel(a.vehicle),
+              ownerName: a.vehicle.owner.name ?? 'Sin nombre',
+            }))}
+            tickets={workOrders.map(w => ({
+              id: w.id,
+              title: w.title,
+              description: w.description,
+              status: w.status,
+              vehicleId: w.vehicleId,
+              vehicleLabel: vehicleLabel(w.vehicle),
+              mechanicId: w.mechanicId,
+              mechanicName: w.mechanic.name ?? w.mechanic.email,
+            }))}
+            mechanics={mechanics}
+          />
+        </div>
+      </main>
+      <DashboardFooter />
+    </div>
+  )
+}
