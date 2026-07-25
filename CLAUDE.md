@@ -52,20 +52,40 @@ npx prisma studio                              # Open Prisma DB GUI
 
 ```
 app/
-  (auth)/          # Login and register pages (public)
-  (dashboard)/     # Protected routes — redirects to /login if unauthenticated
-    mechanic/      # Mechanic dashboard
-    owner/         # Owner dashboard
-  api/auth/        # NextAuth.js catch-all route
+  (auth)/            # Login, register, and role-selection pages (public)
+  (dashboard)/       # Protected routes — redirects to /login if unauthenticated
+    mechanic/        # Mechanic dashboard (board, vehicles, team, settings)
+    owner/           # Owner dashboard (vehicles, schedule, profile)
+    workshop/setup/  # First-run workshop setup wizard (mechanic-only)
+  api/
+    auth/            # NextAuth.js catch-all route + registration
+    vehicles/        # Vehicle CRUD (owner-scoped)
+    workorders/      # Work order + service item management
+    appointments/    # Appointment booking/cancellation
+    workshop/        # Own workshop config, staff team, staff invites (mechanic-only)
+    workshops/       # Public workshop search/detail (owner-facing)
+    invites/         # Invite token lookup/accept/decline
+    history/         # Vehicle history entries + photo upload (Vercel Blob)
+    profile/         # User profile
+  invite/[token]/    # Public staff-invite acceptance page
 components/
   ui/              # Reusable UI primitives
-  shared/          # Shared layout components (nav, header, etc.)
+  shared/          # Shared layout + feature components (nav, header, history timeline, maps, forms)
+  workshop/        # Workshop-specific components (setup form)
 lib/
-  auth.ts          # NextAuth options and configuration
-  prisma.ts        # Prisma client singleton
-  utils.ts         # Shared utility functions
-  geo.ts           # Haversine distance calculation
-  availability.ts  # Workshop time-slot availability computation (shared by the availability and booking APIs)
+  auth.ts               # NextAuth options and configuration
+  prisma.ts             # Prisma client singleton
+  utils.ts              # Shared utility functions
+  geo.ts                # Haversine distance calculation
+  availability.ts       # Workshop time-slot availability computation (shared by the availability and booking APIs)
+  email.ts              # Resend email sending (workshop staff invites)
+  user.ts               # User lookup/role helpers
+  vehicleAccess.ts       # Vehicle ownership/access checks
+  vehicleHistory.ts      # HistoryEntry aggregation helpers
+  workOrderStatus(Effects).ts  # Work order status transition rules and side effects
+  workshopInvite.ts      # Workshop staff invite token logic
+  workshopSpecialty.ts   # WorkshopSpecialty enum labels/helpers
+  serviceItemType.ts     # ServiceItemType enum labels/helpers
 prisma/
   schema.prisma    # Database schema
 types/
@@ -75,22 +95,36 @@ types/
 ## Data Model
 
 ```
-User (role: MECHANIC | OWNER)
-  ├── Workshop (a MECHANIC belongs to one; has location, specialties, slot duration)
+User (role: MECHANIC | OWNER; MECHANICs also have workshopRole: ADMIN | STAFF)
+  ├── Workshop (a MECHANIC belongs to one via workshopId; has location, specialties, slot duration)
   │     ├── WorkshopHours (weekly business hours: dayOfWeek, opensMinute, closesMinute)
+  │     ├── WorkshopInvite (staff email invites — status: PENDING | ACCEPTED | DECLINED | CANCELLED)
   │     └── specialties: WorkshopSpecialty[]
   └── Vehicle (owned by OWNER)
         ├── WorkOrder (created by MECHANIC — status: PENDING | IN_PROGRESS | COMPLETED | CANCELLED)
         │     └── ServiceItem (type: REPAIR | MAINTENANCE | UPGRADE | OTHER)
-        └── Appointment (booked by OWNER against a Workshop's available slots — status: SCHEDULED | COMPLETED | CANCELLED)
+        ├── Appointment (booked by OWNER against a Workshop's available slots — status: SCHEDULED | COMPLETED | CANCELLED)
+        └── HistoryEntry (unified vehicle history feed — type mirrors ServiceItemType, source: OWNER | MECHANIC; optionally linked to the originating WorkOrder/Workshop)
 ```
 
 `Appointment` has a `@@unique([workshopId, scheduledAt])` constraint — the source of truth against double-booking. `lib/availability.ts`'s `getAvailableSlots` computes valid slots from `WorkshopHours` minus existing appointments; both the availability API and the booking API call it so they can never disagree.
 
+`HistoryEntry` is the merged timeline shown to owners: mechanics' completed `ServiceItem`s and owners' own manual entries both land here (`lib/vehicleHistory.ts`), distinguished by `source`.
+
+`WorkshopInvite` backs staff onboarding: a workshop `ADMIN` invites a MECHANIC by email (`POST /api/workshop/invites`), the invite is emailed via `lib/email.ts` (Resend), and the recipient accepts/declines at `/invite/[token]`.
+
 ## Auth Roles
 
-- **MECHANIC**: creates work orders, adds service items; configures their workshop's location, specialties, business hours, and appointment slot duration (`PATCH /api/workshop`)
-- **OWNER**: registers their own vehicles (`POST /api/vehicles`), reads vehicles, work orders, and service items; searches workshops by distance/specialty and books appointments into a workshop's available slots (`GET /api/workshops/search`, `POST /api/appointments`)
+- **MECHANIC**: creates work orders, adds service items; if workshop `ADMIN`, configures the workshop's location, specialties, business hours, and appointment slot duration (`PATCH /api/workshop`) and manages staff invites (`POST/GET /api/workshop/invites`, `GET /api/workshop/team`)
+- **OWNER**: registers their own vehicles (`POST /api/vehicles`), reads vehicles, work orders, and service items; adds manual history entries with optional photos; searches workshops by distance/specialty and books appointments into a workshop's available slots (`GET /api/workshops/search`, `POST /api/appointments`)
+
+## Code Quality — SonarQube
+
+This repo is wired to SonarQube (`sonar-project.properties`, project key `vetcar`). Run a scan as part of finishing any feature or bugfix, before opening a PR:
+
+- Use the `sonarqube:sonarqube-reviewer` agent (or the underlying `sonarqube:sonar-analyze` / `sonarqube:sonar-quality-gate` / `sonarqube:sonar-list-issues` skills) against the changed files or the branch diff.
+- Fix any new Critical/Blocker issues and quality-gate failures before merging; use `sonarqube:sonar-fix-issue` for issues tied to a specific rule/location.
+- `npm test` generates `coverage/lcov.info`, which SonarQube reads for coverage — run it before scanning so coverage data isn't stale.
 
 ## Environment Setup
 
