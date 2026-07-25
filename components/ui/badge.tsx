@@ -24,6 +24,8 @@ const badgeVariants = cva(
           "bg-ok/10 text-ok ring-1 ring-ok/25 ring-inset font-mono text-[0.625rem] font-medium uppercase tracking-[0.14em]",
         idle:
           "bg-white/[0.05] text-muted-foreground ring-1 ring-white/[0.08] ring-inset font-mono text-[0.625rem] font-medium uppercase tracking-[0.14em]",
+        danger:
+          "bg-destructive/12 text-[#ff9b96] ring-1 ring-destructive/25 ring-inset font-mono text-[0.625rem] font-medium uppercase tracking-[0.14em]",
       },
     },
     defaultVariants: {

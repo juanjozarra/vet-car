@@ -35,8 +35,9 @@ export default async function MechanicBoardPage() {
     prisma.workOrder.findMany({
       where: { mechanic: { workshopId } },
       include: {
-        vehicle: { select: { nickname: true, year: true, make: true, model: true } },
+        vehicle: { select: { nickname: true, year: true, make: true, model: true, plate: true } },
         mechanic: { select: { id: true, name: true, email: true } },
+        serviceItems: { select: { id: true, type: true } },
       },
       orderBy: { createdAt: 'desc' },
     }),
@@ -75,8 +76,11 @@ export default async function MechanicBoardPage() {
               status: w.status,
               vehicleId: w.vehicleId,
               vehicleLabel: vehicleLabel(w.vehicle),
+              vehiclePlate: w.vehicle.plate,
               mechanicId: w.mechanicId,
               mechanicName: w.mechanic.name ?? w.mechanic.email,
+              serviceItems: w.serviceItems.map(s => ({ id: s.id, type: s.type })),
+              createdAt: w.createdAt.toISOString(),
             }))}
             mechanics={mechanics}
           />
