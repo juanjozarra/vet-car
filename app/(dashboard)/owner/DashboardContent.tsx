@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { motion, AnimatePresence, MotionConfig } from 'motion/react'
+import { motion, MotionConfig } from 'motion/react'
 import {
   PlusIcon,
   ArrowUpRightIcon,
@@ -290,17 +290,10 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
               <motion.h2 {...enter(0.24)} className={cn(sectionLabel, 'px-1')}>
                 Reparaciones en curso
               </motion.h2>
-              <AnimatePresence mode="popLayout">
-                {activeRepairs.map((repair, r) => {
-                  const exitAnim = {
-                    opacity: 0,
-                    scale: 0.96,
-                    transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp },
-                  }
-
-                  if (repair.status === 'CANCELLED') {
+              {activeRepairs.map((repair, r) => {
+                if (repair.status === 'CANCELLED') {
                     return (
-                      <motion.div key={repair.id} {...enter(0.28 + r * 0.08)} exit={exitAnim} className="bezel">
+                      <motion.div key={repair.id} {...enter(0.28 + r * 0.08)} className="bezel">
                         <div className="bezel-core flex flex-wrap items-center justify-between gap-3 p-6 sm:p-8">
                           <div className="flex flex-col gap-0.5">
                             <span className="font-display text-lg font-medium tracking-[-0.01em] text-foreground">
@@ -322,7 +315,7 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
                   const isDone = repair.status === 'COMPLETED'
 
                   return (
-                    <motion.div key={repair.id} {...enter(0.28 + r * 0.08)} exit={exitAnim} className="bezel">
+                    <motion.div key={repair.id} {...enter(0.28 + r * 0.08)} className="bezel">
                       <div className="bezel-core flex flex-col gap-2 p-6 sm:p-8">
                         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] pb-5">
                           <div className="flex flex-col gap-0.5">
@@ -395,7 +388,6 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
                     </motion.div>
                   )
                 })}
-              </AnimatePresence>
             </section>
           )}
         </div>

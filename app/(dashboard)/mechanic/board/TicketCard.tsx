@@ -188,7 +188,7 @@ export function TicketCard({ ticket, onOpen }: TicketCardProps) {
           }
         />
         <Select value={ticket.status} onValueChange={handleStatusChange} disabled={updating}>
-          <SelectTrigger className="w-full" size="sm">
+          <SelectTrigger className="w-full" size="sm" aria-label="Estado">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -203,7 +203,7 @@ export function TicketCard({ ticket, onOpen }: TicketCardProps) {
             onValueChange={handleProgressStageChange}
             disabled={updating}
           >
-            <SelectTrigger className="w-full" size="sm">
+            <SelectTrigger className="w-full" size="sm" aria-label="Etapa de progreso">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

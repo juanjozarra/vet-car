@@ -80,7 +80,7 @@ If the mechanic moves `progressStage` backward (e.g. Reparando → Esperando rep
 
 - The current-step indicator keeps its existing pulse (`scale: [1, 1.15, 1]`, infinite loop, amber glow) — this is the "circle with pulse effect" the design is built around — but only while the work order is actually active (`PENDING`/`IN_PROGRESS`). It's wrapped in `useReducedMotion()` (not present today) so it collapses to a static ring under reduced-motion preference.
 - The finished "Listo" step (once `COMPLETED`) renders as a solid checkmark, matching the other `done` steps — no pulse — since pulsing communicates "in progress," not "finished."
-- The card list is wrapped in `AnimatePresence mode="popLayout"` so a card entering the grace window, or dropping off after it expires or a new work order appears, animates in/out instead of popping — remaining cards reflow smoothly.
+- The card list uses only the plain entry animation (`enter(...)`) for cards appearing — no exit animation. A real exit (card animating out when it drops off after the grace window) would need the section to stay mounted regardless of list length plus a client-side timer to trigger a refresh at expiry, which wasn't otherwise needed, so it was cut.
 - Progress-bar fill and per-step fade-in reuse the existing `motionTokens.duration`/`easing.fluid`/`easing.smooth` values already used in this component; no new tokens.
 
 ## Testing
