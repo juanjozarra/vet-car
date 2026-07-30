@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { motion, MotionConfig } from 'motion/react'
+import { motion, AnimatePresence, MotionConfig } from 'motion/react'
 import {
   PlusIcon,
   ArrowUpRightIcon,
@@ -23,11 +23,12 @@ type VehicleSummary = {
   hasActiveRepair: boolean
 }
 
-type ActiveRepairSummary = {
+export type ActiveRepairSummary = {
   id: string
   vehicle: string
   workOrder: string
   status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
+  progressStage: 'INSPECTING' | 'REPAIRING' | 'WAITING_PARTS' | null
 }
 
 type AppointmentSummary = {
@@ -45,17 +46,29 @@ interface DashboardContentProps {
   upcomingAppointments: AppointmentSummary[]
 }
 
-const TIMELINE_STEPS = ['Ingresado', 'Inspección', 'Reparando', 'Listo'] as const
+const TIMELINE_STEPS = ['Recibido', 'Inspección', 'Reparando', 'Esperando repuestos', 'Listo'] as const
 
-function timelineCurrentStep(status: ActiveRepairSummary['status']): number {
+export function timelineCurrentStep(
+  status: ActiveRepairSummary['status'],
+  progressStage: ActiveRepairSummary['progressStage']
+): number {
   if (status === 'PENDING') return 0
-  if (status === 'IN_PROGRESS') return 2
-  return 3
+  if (status === 'IN_PROGRESS') {
+    if (progressStage === 'REPAIRING') return 2
+    if (progressStage === 'WAITING_PARTS') return 3
+    return 1
+  }
+  return 4
 }
 
 type TimelineStepState = 'done' | 'current' | 'pending'
 
-function timelineStepState(index: number, currentStep: number): TimelineStepState {
+export function timelineStepState(
+  index: number,
+  currentStep: number,
+  status: ActiveRepairSummary['status']
+): TimelineStepState {
+  if (status === 'COMPLETED') return 'done'
   if (index < currentStep) return 'done'
   if (index === currentStep) return 'current'
   return 'pending'
@@ -277,84 +290,112 @@ export function DashboardContent({ userName, vehicles, activeRepairs, upcomingAp
               <motion.h2 {...enter(0.24)} className={cn(sectionLabel, 'px-1')}>
                 Reparaciones en curso
               </motion.h2>
-              {activeRepairs.map((repair, r) => {
-                const currentStep = timelineCurrentStep(repair.status)
-                const progressPct = (currentStep / (TIMELINE_STEPS.length - 1)) * 100
+              <AnimatePresence mode="popLayout">
+                {activeRepairs.map((repair, r) => {
+                  const exitAnim = {
+                    opacity: 0,
+                    scale: 0.96,
+                    transition: { duration: motionTokens.duration.fast, ease: motionTokens.easing.sharp },
+                  }
 
-                return (
-                  <motion.div key={repair.id} {...enter(0.28 + r * 0.08)} className="bezel">
-                    <div className="bezel-core flex flex-col gap-2 p-6 sm:p-8">
-                      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] pb-5">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="font-display text-lg font-medium tracking-[-0.01em] text-foreground">
-                            {repair.vehicle}
-                          </span>
-                          <span className="text-sm text-muted-foreground">{repair.workOrder}</span>
+                  if (repair.status === 'CANCELLED') {
+                    return (
+                      <motion.div key={repair.id} {...enter(0.28 + r * 0.08)} exit={exitAnim} className="bezel">
+                        <div className="bezel-core flex flex-wrap items-center justify-between gap-3 p-6 sm:p-8">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="font-display text-lg font-medium tracking-[-0.01em] text-foreground">
+                              {repair.vehicle}
+                            </span>
+                            <span className="text-sm text-muted-foreground">{repair.workOrder}</span>
+                          </div>
+                          <Badge variant="danger">
+                            <BadgeDot />
+                            Cancelado
+                          </Badge>
                         </div>
-                        <Badge variant="active">
-                          <BadgeDot className="animate-pulse" />
-                          En progreso
-                        </Badge>
-                      </div>
+                      </motion.div>
+                    )
+                  }
 
-                      <div className="relative py-9">
-                        <div className="absolute top-1/2 right-0 left-0 h-px -translate-y-1/2 bg-white/[0.08]" />
-                        <motion.div
-                          className="absolute top-1/2 left-0 h-px -translate-y-1/2 bg-primary shadow-[0_0_12px_rgba(242,179,80,0.6)]"
-                          initial={{ width: '0%' }}
-                          animate={{ width: `${progressPct}%` }}
-                          transition={{ duration: motionTokens.duration.slow, ease: motionTokens.easing.fluid, delay: 0.5 }}
-                        />
-                        <div className="relative flex items-start justify-between">
-                          {TIMELINE_STEPS.map((label, i) => {
-                            const state = timelineStepState(i, currentStep)
-                            return (
-                              <motion.div
-                                key={label}
-                                initial={{ opacity: 0, scale: 0.7 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{
-                                  duration: motionTokens.duration.fast,
-                                  ease: motionTokens.easing.smooth,
-                                  delay: 0.55 + i * 0.08,
-                                }}
-                                className="relative z-10 flex flex-col items-center gap-2.5"
-                                style={{ width: `${100 / TIMELINE_STEPS.length}%` }}
-                              >
-                                {state === 'done' && (
-                                  <span className="flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground ring-4 ring-card">
-                                    <CheckIcon className="size-3" strokeWidth={2} />
-                                  </span>
-                                )}
-                                {state === 'current' && (
-                                  <motion.span
-                                    animate={{ scale: [1, 1.15, 1] }}
-                                    transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
-                                    className="flex size-7 items-center justify-center rounded-full bg-card ring-1 ring-primary shadow-[0_0_18px_rgba(242,179,80,0.45)]"
-                                  >
-                                    <span className="size-2 rounded-full bg-primary" />
-                                  </motion.span>
-                                )}
-                                {state === 'pending' && (
-                                  <span className="size-6 rounded-full bg-white/[0.05] ring-1 ring-white/[0.1]" />
-                                )}
-                                <span
-                                  className={cn(
-                                    'whitespace-nowrap text-center font-mono text-[0.5625rem] font-medium uppercase tracking-[0.14em] sm:text-[0.625rem]',
-                                    TIMELINE_STEP_LABEL_CLASS[state]
-                                  )}
+                  const currentStep = timelineCurrentStep(repair.status, repair.progressStage)
+                  const progressPct = (currentStep / (TIMELINE_STEPS.length - 1)) * 100
+                  const isDone = repair.status === 'COMPLETED'
+
+                  return (
+                    <motion.div key={repair.id} {...enter(0.28 + r * 0.08)} exit={exitAnim} className="bezel">
+                      <div className="bezel-core flex flex-col gap-2 p-6 sm:p-8">
+                        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] pb-5">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="font-display text-lg font-medium tracking-[-0.01em] text-foreground">
+                              {repair.vehicle}
+                            </span>
+                            <span className="text-sm text-muted-foreground">{repair.workOrder}</span>
+                          </div>
+                          <Badge variant={isDone ? 'ok' : 'active'}>
+                            <BadgeDot className={isDone ? undefined : 'animate-pulse'} />
+                            {isDone ? 'Listo' : 'En progreso'}
+                          </Badge>
+                        </div>
+
+                        <div className="relative py-9">
+                          <div className="absolute top-1/2 right-0 left-0 h-px -translate-y-1/2 bg-white/[0.08]" />
+                          <motion.div
+                            className="absolute top-1/2 left-0 h-px -translate-y-1/2 bg-primary shadow-[0_0_12px_rgba(242,179,80,0.6)]"
+                            initial={{ width: '0%' }}
+                            animate={{ width: `${progressPct}%` }}
+                            transition={{ duration: motionTokens.duration.slow, ease: motionTokens.easing.fluid, delay: 0.5 }}
+                          />
+                          <div className="relative flex items-start justify-between">
+                            {TIMELINE_STEPS.map((label, i) => {
+                              const state = timelineStepState(i, currentStep, repair.status)
+                              return (
+                                <motion.div
+                                  key={label}
+                                  initial={{ opacity: 0, scale: 0.7 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  transition={{
+                                    duration: motionTokens.duration.fast,
+                                    ease: motionTokens.easing.smooth,
+                                    delay: 0.55 + i * 0.08,
+                                  }}
+                                  className="relative z-10 flex flex-col items-center gap-2.5"
+                                  style={{ width: `${100 / TIMELINE_STEPS.length}%` }}
                                 >
-                                  {label}
-                                </span>
-                              </motion.div>
-                            )
-                          })}
+                                  {state === 'done' && (
+                                    <span className="flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground ring-4 ring-card">
+                                      <CheckIcon className="size-3" strokeWidth={2} />
+                                    </span>
+                                  )}
+                                  {state === 'current' && (
+                                    <motion.span
+                                      animate={{ scale: [1, 1.15, 1] }}
+                                      transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+                                      className="flex size-7 items-center justify-center rounded-full bg-card ring-1 ring-primary shadow-[0_0_18px_rgba(242,179,80,0.45)]"
+                                    >
+                                      <span className="size-2 rounded-full bg-primary" />
+                                    </motion.span>
+                                  )}
+                                  {state === 'pending' && (
+                                    <span className="size-6 rounded-full bg-white/[0.05] ring-1 ring-white/[0.1]" />
+                                  )}
+                                  <span
+                                    className={cn(
+                                      'whitespace-nowrap text-center font-mono text-[0.5625rem] font-medium uppercase tracking-[0.14em] sm:text-[0.625rem]',
+                                      TIMELINE_STEP_LABEL_CLASS[state]
+                                    )}
+                                  >
+                                    {label}
+                                  </span>
+                                </motion.div>
+                              )
+                            })}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </motion.div>
-                )
-              })}
+                    </motion.div>
+                  )
+                })}
+              </AnimatePresence>
             </section>
           )}
         </div>
