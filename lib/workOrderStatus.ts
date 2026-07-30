@@ -1,4 +1,4 @@
-import { WorkOrderStatus } from '@prisma/client'
+import { WorkOrderStatus, WorkOrderProgressStage } from '@prisma/client'
 
 export const WORK_ORDER_STATUS_LABELS: Record<WorkOrderStatus, string> = {
   PENDING: 'Pendiente',
@@ -10,6 +10,17 @@ export const WORK_ORDER_STATUS_LABELS: Record<WorkOrderStatus, string> = {
 export const WORK_ORDER_STATUS_OPTIONS = Object.values(WorkOrderStatus).map(value => ({
   value,
   label: WORK_ORDER_STATUS_LABELS[value],
+}))
+
+export const WORK_ORDER_PROGRESS_STAGE_LABELS: Record<WorkOrderProgressStage, string> = {
+  INSPECTING: 'Inspección',
+  REPAIRING: 'Reparando',
+  WAITING_PARTS: 'Esperando repuestos',
+}
+
+export const WORK_ORDER_PROGRESS_STAGE_OPTIONS = Object.values(WorkOrderProgressStage).map(value => ({
+  value,
+  label: WORK_ORDER_PROGRESS_STAGE_LABELS[value],
 }))
 
 // Instrument-pill tint per status — reuses the existing amber/green/neutral
