@@ -13,15 +13,17 @@ import {
   WORK_ORDER_STATUS_OPTIONS,
   WORK_ORDER_STATUS_LABELS,
   WORK_ORDER_STATUS_BADGE_VARIANT,
+  WORK_ORDER_PROGRESS_STAGE_OPTIONS,
 } from '@/lib/workOrderStatus'
 import { SERVICE_ITEM_TYPE_LABELS } from '@/lib/serviceItemType'
-import type { WorkOrderStatus, ServiceItemType } from '@prisma/client'
+import type { WorkOrderStatus, ServiceItemType, WorkOrderProgressStage } from '@prisma/client'
 
 export interface TicketCardData {
   id: string
   title: string
   description: string | null
   status: WorkOrderStatus
+  progressStage: WorkOrderProgressStage | null
   vehicleId: string
   vehicleLabel: string
   vehiclePlate: string | null
@@ -134,6 +136,26 @@ export function TicketCard({ ticket, onOpen }: TicketCardProps) {
     }
   }
 
+  async function handleProgressStageChange(progressStage: string) {
+    setError(null)
+    setUpdating(true)
+    try {
+      const res = await fetch(`/api/workorders/${ticket.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ progressStage }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setError(data.error ?? 'No se pudo actualizar la etapa')
+        return
+      }
+      router.refresh()
+    } finally {
+      setUpdating(false)
+    }
+  }
+
   return (
     <div
       ref={setNodeRef}
@@ -175,6 +197,22 @@ export function TicketCard({ ticket, onOpen }: TicketCardProps) {
             ))}
           </SelectContent>
         </Select>
+        {ticket.status === 'IN_PROGRESS' && (
+          <Select
+            value={ticket.progressStage ?? 'INSPECTING'}
+            onValueChange={handleProgressStageChange}
+            disabled={updating}
+          >
+            <SelectTrigger className="w-full" size="sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {WORK_ORDER_PROGRESS_STAGE_OPTIONS.map(o => (
+                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
     </div>
   )
