@@ -7,7 +7,14 @@ type StatusEffect = (
 ) => Promise<void>
 
 export const ON_STATUS_CHANGE: Partial<Record<WorkOrderStatus, StatusEffect>> = {
+  IN_PROGRESS: async (tx, workOrder) => {
+    if (!workOrder.progressStage) {
+      await tx.workOrder.update({ where: { id: workOrder.id }, data: { progressStage: 'INSPECTING' } })
+    }
+  },
   COMPLETED: async (tx, workOrder, workshopId) => {
+    await tx.workOrder.update({ where: { id: workOrder.id }, data: { closedAt: new Date() } })
+
     if (workOrder.appointmentId) {
       await tx.appointment.update({
         where: { id: workOrder.appointmentId },
@@ -34,6 +41,8 @@ export const ON_STATUS_CHANGE: Partial<Record<WorkOrderStatus, StatusEffect>> = 
     }
   },
   CANCELLED: async (tx, workOrder) => {
+    await tx.workOrder.update({ where: { id: workOrder.id }, data: { closedAt: new Date() } })
+
     if (workOrder.appointmentId) {
       await tx.appointment.update({
         where: { id: workOrder.appointmentId },
