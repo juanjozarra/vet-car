@@ -19,8 +19,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Design System
 This project uses a design system defined in `DESIGN.md`  
 
-# System language
-Spanish (Latin American)
+# Language
+
+Two different languages, do not mix them up:
+
+- **Product UI — Spanish (Latin American).** Everything an end user reads: page copy, labels,
+  buttons, placeholders, validation and error messages, empty states, email templates,
+  enum label maps (`SERVICE_ITEM_TYPE_LABELS`, `WORKSHOP_SPECIALTY_LABELS`, …).
+- **Repository artifacts — English.** Everything a developer reads: commit messages,
+  branch names, PR titles and descriptions, PR review comments, code identifiers,
+  code comments, test names, and Markdown docs (`CLAUDE.md`, `DESIGN.md`, `docs/**`).
+  `DESIGN.md` is the one legacy exception — it is written in Spanish; leave it as is.
+
+PR descriptions follow the format used since PR #1 — a `## Summary` section of bullets
+explaining what changed and why, then a `## Test plan` section with checked/unchecked
+boxes for each verification actually run. See PRs #8 and #10 for the reference shape.
 
 ## Running with Docker
 
