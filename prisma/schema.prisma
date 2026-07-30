@@ -18,6 +18,12 @@ enum WorkOrderStatus {
   CANCELLED
 }
 
+enum WorkOrderProgressStage {
+  INSPECTING
+  REPAIRING
+  WAITING_PARTS
+}
+
 enum ServiceItemType {
   REPAIR
   MAINTENANCE
@@ -180,8 +186,10 @@ model WorkOrder {
   title       String
   description String?         @db.Text
   status      WorkOrderStatus @default(PENDING)
+  progressStage WorkOrderProgressStage?
   startDate   DateTime?
   endDate     DateTime?
+  closedAt    DateTime?
   vehicleId   String
   mechanicId  String
   appointmentId String?     @unique
