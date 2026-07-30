@@ -3,6 +3,7 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { getUserImage } from '@/lib/user'
+import { activeRepairsWhere } from '@/lib/activeRepairs'
 import { DashboardNav } from '@/components/shared/DashboardNav'
 import { DashboardFooter } from '@/components/shared/DashboardFooter'
 import { DashboardContent } from './DashboardContent'
@@ -17,14 +18,13 @@ export default async function OwnerDashboard() {
   const [rawVehicles, rawActiveRepairs, rawAppointments, userImage] = await Promise.all([
     prisma.vehicle.findMany({
       where: { ownerId: userId },
-      include: { workOrders: { where: { status: 'IN_PROGRESS' } } },
+      include: { workOrders: { where: { status: { in: ['PENDING', 'IN_PROGRESS'] } } } },
       orderBy: { createdAt: 'desc' },
     }),
     prisma.workOrder.findMany({
-      where: { vehicle: { ownerId: userId }, status: 'IN_PROGRESS' },
+      where: activeRepairsWhere(userId),
       include: { vehicle: true },
       orderBy: { updatedAt: 'desc' },
-      take: 3,
     }),
     prisma.appointment.findMany({
       where: {
@@ -52,6 +52,7 @@ export default async function OwnerDashboard() {
     vehicle: `${o.vehicle.year} ${o.vehicle.make} ${o.vehicle.model}`,
     workOrder: `Orden de trabajo #${o.id.slice(-6).toUpperCase()}`,
     status: o.status as 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED',
+    progressStage: o.progressStage as 'INSPECTING' | 'REPAIRING' | 'WAITING_PARTS' | null,
   }))
 
   const upcomingAppointments = rawAppointments.map(a => ({
