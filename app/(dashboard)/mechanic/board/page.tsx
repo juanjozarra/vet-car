@@ -74,6 +74,7 @@ export default async function MechanicBoardPage() {
               title: w.title,
               description: w.description,
               status: w.status,
+              progressStage: w.progressStage,
               vehicleId: w.vehicleId,
               vehicleLabel: vehicleLabel(w.vehicle),
               vehiclePlate: w.vehicle.plate,

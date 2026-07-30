@@ -3,6 +3,7 @@ import type { WorkOrder } from '@prisma/client'
 
 function makeTx() {
   return {
+    workOrder: { update: jest.fn() },
     appointment: { update: jest.fn() },
     historyEntry: { findFirst: jest.fn(), create: jest.fn() },
   }
@@ -18,9 +19,27 @@ const workOrder = {
 } as WorkOrder
 
 describe('ON_STATUS_CHANGE table', () => {
-  it('has no entry for PENDING or IN_PROGRESS', () => {
+  it('has no entry for PENDING', () => {
     expect(ON_STATUS_CHANGE.PENDING).toBeUndefined()
-    expect(ON_STATUS_CHANGE.IN_PROGRESS).toBeUndefined()
+  })
+})
+
+describe('ON_STATUS_CHANGE.IN_PROGRESS', () => {
+  beforeEach(() => jest.clearAllMocks())
+
+  it('defaults progressStage to INSPECTING when unset', async () => {
+    const tx = makeTx()
+    await ON_STATUS_CHANGE.IN_PROGRESS!(tx as any, { ...workOrder, progressStage: null }, 'ws1')
+    expect(tx.workOrder.update).toHaveBeenCalledWith({
+      where: { id: 'wo1' },
+      data: { progressStage: 'INSPECTING' },
+    })
+  })
+
+  it('does not override an already-set progressStage', async () => {
+    const tx = makeTx()
+    await ON_STATUS_CHANGE.IN_PROGRESS!(tx as any, { ...workOrder, progressStage: 'REPAIRING' }, 'ws1')
+    expect(tx.workOrder.update).not.toHaveBeenCalled()
   })
 })
 
@@ -74,6 +93,16 @@ describe('ON_STATUS_CHANGE.COMPLETED', () => {
     await ON_STATUS_CHANGE.COMPLETED!(tx as any, workOrder, 'ws1')
     expect(tx.historyEntry.create).not.toHaveBeenCalled()
   })
+
+  it('stamps closedAt on the work order', async () => {
+    const tx = makeTx()
+    tx.historyEntry.findFirst.mockResolvedValue(null)
+    await ON_STATUS_CHANGE.COMPLETED!(tx as any, workOrder, 'ws1')
+    expect(tx.workOrder.update).toHaveBeenCalledWith({
+      where: { id: 'wo1' },
+      data: { closedAt: expect.any(Date) },
+    })
+  })
 })
 
 describe('ON_STATUS_CHANGE.CANCELLED', () => {
@@ -89,5 +118,14 @@ describe('ON_STATUS_CHANGE.CANCELLED', () => {
     const tx = makeTx()
     await ON_STATUS_CHANGE.CANCELLED!(tx as any, workOrder, 'ws1')
     expect(tx.historyEntry.create).not.toHaveBeenCalled()
+  })
+
+  it('stamps closedAt on the work order', async () => {
+    const tx = makeTx()
+    await ON_STATUS_CHANGE.CANCELLED!(tx as any, workOrder, 'ws1')
+    expect(tx.workOrder.update).toHaveBeenCalledWith({
+      where: { id: 'wo1' },
+      data: { closedAt: expect.any(Date) },
+    })
   })
 })

@@ -112,4 +112,20 @@ describe('PATCH /api/workorders/[id]', () => {
       data: { title: 'Nuevo título', mechanicId: 'm2' },
     })
   })
+
+  it('returns 400 for an invalid progressStage value', async () => {
+    mockGetServerSession.mockResolvedValue(mechanicSession)
+    mockWorkOrderFindUnique.mockResolvedValue(existingWorkOrder)
+    const res = await PATCH(makeRequest({ progressStage: 'NOT_A_STAGE' }), { params })
+    expect(res.status).toBe(400)
+  })
+
+  it('updates progressStage', async () => {
+    mockGetServerSession.mockResolvedValue(mechanicSession)
+    mockWorkOrderFindUnique.mockResolvedValue(existingWorkOrder)
+    mockUpdate.mockResolvedValue({ ...existingWorkOrder, progressStage: 'REPAIRING' })
+    const res = await PATCH(makeRequest({ progressStage: 'REPAIRING' }), { params })
+    expect(res.status).toBe(200)
+    expect(mockUpdate).toHaveBeenCalledWith({ where: { id: 'wo1' }, data: { progressStage: 'REPAIRING' } })
+  })
 })

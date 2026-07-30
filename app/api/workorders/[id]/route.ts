@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { WorkOrderStatus } from '@prisma/client'
+import { WorkOrderStatus, WorkOrderProgressStage } from '@prisma/client'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { ON_STATUS_CHANGE } from '@/lib/workOrderStatusEffects'
@@ -23,10 +23,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     return NextResponse.json({ error: 'Work order not found' }, { status: 404 })
   }
 
-  const { status, mechanicId, title, description } = await request.json()
+  const { status, progressStage, mechanicId, title, description } = await request.json()
 
   if (status !== undefined && !Object.values(WorkOrderStatus).includes(status)) {
     return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
+  }
+  if (progressStage !== undefined && !Object.values(WorkOrderProgressStage).includes(progressStage)) {
+    return NextResponse.json({ error: 'Invalid progress stage' }, { status: 400 })
   }
   if (mechanicId !== undefined) {
     const target = await prisma.user.findUnique({ where: { id: mechanicId }, select: { workshopId: true } })
@@ -40,6 +43,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       where: { id },
       data: {
         ...(status !== undefined ? { status } : {}),
+        ...(progressStage !== undefined ? { progressStage } : {}),
         ...(mechanicId !== undefined ? { mechanicId } : {}),
         ...(title !== undefined ? { title } : {}),
         ...(description !== undefined ? { description } : {}),
