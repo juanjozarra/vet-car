@@ -2,8 +2,9 @@
 
 FROM node:22-alpine AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
+RUN corepack enable && corepack prepare pnpm@11.20.0 --activate
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
 
 # Runs `prisma migrate deploy` as a one-shot compose service
 FROM deps AS migrate
@@ -24,7 +25,7 @@ ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
 # container runtime via docker-compose (this ENV doesn't carry into the runner stage)
 ENV RESEND_API_KEY="build-time-placeholder"
 RUN npx prisma generate
-RUN npm run build
+RUN pnpm run build
 
 FROM node:22-alpine AS runner
 WORKDIR /app
