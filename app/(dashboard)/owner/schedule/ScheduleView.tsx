@@ -317,7 +317,9 @@ function groupSlotsByDate(slots: string[]): Record<string, Date[]> {
   return grouped
 }
 
-const TIME_LABEL_FORMATTER = new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit' })
+// Slots are UTC-anchored naive wall-clock times (see lib/availability.ts) — format in UTC
+// so the hour shown matches what the workshop configured, regardless of the browser's TZ.
+const TIME_LABEL_FORMATTER = new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
 
 function SlotSkeleton() {
   return (

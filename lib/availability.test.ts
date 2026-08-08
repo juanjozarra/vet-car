@@ -2,7 +2,9 @@ import { getAvailableSlots } from './availability'
 
 describe('getAvailableSlots', () => {
   // 2024-01-01 is a Monday (dayOfWeek = 1), used as a fixed, deterministic reference point.
-  const monday = new Date(2024, 0, 1, 8, 0)
+  // Built with Date.UTC (not the local constructor) so the test is deterministic regardless
+  // of the machine's timezone, matching getAvailableSlots' UTC-anchored slot generation.
+  const monday = new Date(Date.UTC(2024, 0, 1, 8, 0))
 
   it('returns no slots for a day with no configured hours', () => {
     const slots = getAvailableSlots({
@@ -24,19 +26,19 @@ describe('getAvailableSlots', () => {
       daysAhead: 1,
       minLeadMinutes: 0,
     })
-    expect(slots.map(s => s.getHours())).toEqual([9, 10, 11, 12])
+    expect(slots.map(s => s.getUTCHours())).toEqual([9, 10, 11, 12])
   })
 
   it('excludes already-booked slots', () => {
     const slots = getAvailableSlots({
       hours: [{ dayOfWeek: 1, opensMinute: 540, closesMinute: 780 }],
       slotDurationMinutes: 60,
-      bookedTimes: [new Date(2024, 0, 1, 10, 0)],
+      bookedTimes: [new Date(Date.UTC(2024, 0, 1, 10, 0))],
       now: monday,
       daysAhead: 1,
       minLeadMinutes: 0,
     })
-    expect(slots.map(s => s.getHours())).toEqual([9, 11, 12])
+    expect(slots.map(s => s.getUTCHours())).toEqual([9, 11, 12])
   })
 
   it('excludes slots inside the minimum lead time', () => {
@@ -48,7 +50,7 @@ describe('getAvailableSlots', () => {
       daysAhead: 1,
       minLeadMinutes: 120, // earliest allowed = 10:00
     })
-    expect(slots.map(s => s.getHours())).toEqual([10, 11, 12])
+    expect(slots.map(s => s.getUTCHours())).toEqual([10, 11, 12])
   })
 
   it('returns no slots and does not hang for a non-positive slotDurationMinutes', () => {
@@ -76,7 +78,7 @@ describe('getAvailableSlots', () => {
       minLeadMinutes: 0,
     })
     expect(slots).toHaveLength(2)
-    expect(slots[0].getDay()).toBe(1)
-    expect(slots[1].getDay()).toBe(3)
+    expect(slots[0].getUTCDay()).toBe(1)
+    expect(slots[1].getUTCDay()).toBe(3)
   })
 })
