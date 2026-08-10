@@ -89,7 +89,12 @@ function AutocompleteLocationInput({
       <Input
         id={inputId}
         value={inputValue}
-        onChange={e => setInputValue(e.target.value)}
+        onChange={e => {
+          setInputValue(e.target.value)
+          // Typed text is an address without a place behind it — clear the coordinates so a
+          // form can never save an address that disagrees with the location on screen.
+          onSelect({ address: e.target.value, latitude: null, longitude: null, googlePlaceId: null })
+        }}
         placeholder="Buscá tu taller en Google Maps"
         className="h-11"
       />
@@ -115,7 +120,7 @@ function AutocompleteLocationInput({
 function parseCoordinate(value: string): number | null {
   if (value.trim() === '') return null
   const parsed = Number(value)
-  return Number.isNaN(parsed) ? null : parsed
+  return Number.isFinite(parsed) ? parsed : null
 }
 
 function ManualLocationInput({

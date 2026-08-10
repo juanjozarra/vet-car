@@ -121,8 +121,8 @@ export function WorkshopSettingsForm({
           specialties,
           slotDurationMinutes,
           address: location.address,
-          latitude: hasLocation ? location.latitude : undefined,
-          longitude: hasLocation ? location.longitude : undefined,
+          latitude: location.latitude,
+          longitude: location.longitude,
           googlePlaceId: location.googlePlaceId,
           hours: enabledDays.map(d => ({
             dayOfWeek: d.dayOfWeek,
