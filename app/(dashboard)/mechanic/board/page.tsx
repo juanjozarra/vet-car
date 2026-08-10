@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getUserImage } from '@/lib/user'
+import { boardWorkOrdersWhere, pendingArrivalAppointmentsWhere } from '@/lib/activeRepairs'
 import { DashboardNav } from '@/components/shared/DashboardNav'
 import { DashboardFooter } from '@/components/shared/DashboardFooter'
 import { MECHANIC_NAV_ITEMS } from '../nav-items'
@@ -28,12 +29,12 @@ export default async function MechanicBoardPage() {
 
   const [appointments, workOrders, mechanics, userImage] = await Promise.all([
     prisma.appointment.findMany({
-      where: { workshopId, status: 'SCHEDULED', workOrder: null },
+      where: pendingArrivalAppointmentsWhere(workshopId),
       include: { vehicle: { include: { owner: { select: { name: true } } } } },
       orderBy: { scheduledAt: 'asc' },
     }),
     prisma.workOrder.findMany({
-      where: { mechanic: { workshopId } },
+      where: boardWorkOrdersWhere(workshopId),
       include: {
         vehicle: { select: { nickname: true, year: true, make: true, model: true, plate: true } },
         mechanic: { select: { id: true, name: true, email: true } },
