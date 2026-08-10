@@ -8,8 +8,8 @@ import { hasGoogleMapsKey } from './GoogleMapsProvider'
 
 export interface PlaceLocationValue {
   address: string
-  latitude: number
-  longitude: number
+  latitude: number | null
+  longitude: number | null
   googlePlaceId: string | null
 }
 
@@ -18,6 +18,7 @@ interface PlaceLocationInputProps {
   initialAddress?: string
   initialLatitude?: number | null
   initialLongitude?: number | null
+  inputId?: string
 }
 
 export function PlaceLocationInput({
@@ -25,6 +26,7 @@ export function PlaceLocationInput({
   initialAddress = '',
   initialLatitude = null,
   initialLongitude = null,
+  inputId,
 }: PlaceLocationInputProps) {
   if (!hasGoogleMapsKey) {
     return (
@@ -33,18 +35,21 @@ export function PlaceLocationInput({
         initialAddress={initialAddress}
         initialLatitude={initialLatitude}
         initialLongitude={initialLongitude}
+        inputId={inputId}
       />
     )
   }
-  return <AutocompleteLocationInput onSelect={onSelect} initialAddress={initialAddress} />
+  return <AutocompleteLocationInput onSelect={onSelect} initialAddress={initialAddress} inputId={inputId} />
 }
 
 function AutocompleteLocationInput({
   onSelect,
   initialAddress,
+  inputId,
 }: {
   onSelect: (value: PlaceLocationValue) => void
   initialAddress: string
+  inputId?: string
 }) {
   const places = useMapsLibrary('places')
   const [inputValue, setInputValue] = useState(initialAddress)
@@ -82,6 +87,7 @@ function AutocompleteLocationInput({
   return (
     <div className="relative flex flex-col gap-1.5">
       <Input
+        id={inputId}
         value={inputValue}
         onChange={e => setInputValue(e.target.value)}
         placeholder="Buscá tu taller en Google Maps"
@@ -106,36 +112,48 @@ function AutocompleteLocationInput({
   )
 }
 
+function parseCoordinate(value: string): number | null {
+  if (value.trim() === '') return null
+  const parsed = Number(value)
+  return Number.isNaN(parsed) ? null : parsed
+}
+
 function ManualLocationInput({
   onSelect,
   initialAddress,
   initialLatitude,
   initialLongitude,
+  inputId,
 }: {
   onSelect: (value: PlaceLocationValue) => void
   initialAddress: string
   initialLatitude: number | null
   initialLongitude: number | null
+  inputId?: string
 }) {
   const [address, setAddress] = useState(initialAddress)
   const [latitude, setLatitude] = useState(initialLatitude !== null ? String(initialLatitude) : '')
   const [longitude, setLongitude] = useState(initialLongitude !== null ? String(initialLongitude) : '')
 
-  function emitIfComplete(next: { address: string; latitude: string; longitude: string }) {
-    const lat = Number(next.latitude)
-    const lng = Number(next.longitude)
-    if (next.address && !Number.isNaN(lat) && !Number.isNaN(lng) && next.latitude !== '' && next.longitude !== '') {
-      onSelect({ address: next.address, latitude: lat, longitude: lng, googlePlaceId: null })
-    }
+  // Emit on every edit: an address without coordinates is a valid partial value, and
+  // the consuming form decides whether it has enough to save.
+  function emit(next: { address: string; latitude: string; longitude: string }) {
+    onSelect({
+      address: next.address,
+      latitude: parseCoordinate(next.latitude),
+      longitude: parseCoordinate(next.longitude),
+      googlePlaceId: null,
+    })
   }
 
   return (
     <div className="flex flex-col gap-2">
       <Input
+        id={inputId}
         value={address}
         onChange={e => {
           setAddress(e.target.value)
-          emitIfComplete({ address: e.target.value, latitude, longitude })
+          emit({ address: e.target.value, latitude, longitude })
         }}
         placeholder="Dirección del taller"
         className="h-11"
@@ -145,7 +163,7 @@ function ManualLocationInput({
           value={latitude}
           onChange={e => {
             setLatitude(e.target.value)
-            emitIfComplete({ address, latitude: e.target.value, longitude })
+            emit({ address, latitude: e.target.value, longitude })
           }}
           placeholder="Latitud"
           type="number"
@@ -156,7 +174,7 @@ function ManualLocationInput({
           value={longitude}
           onChange={e => {
             setLongitude(e.target.value)
-            emitIfComplete({ address, latitude, longitude: e.target.value })
+            emit({ address, latitude, longitude: e.target.value })
           }}
           placeholder="Longitud"
           type="number"

@@ -71,11 +71,11 @@ export function WorkshopSettingsForm({
   const [slotDurationMinutes, setSlotDurationMinutes] = useState(initialSlotDurationMinutes)
   const [location, setLocation] = useState<PlaceLocationValue>({
     address: initialAddress,
-    latitude: initialLatitude ?? 0,
-    longitude: initialLongitude ?? 0,
+    latitude: initialLatitude,
+    longitude: initialLongitude,
     googlePlaceId: initialGooglePlaceId,
   })
-  const [hasLocation, setHasLocation] = useState(initialLatitude !== null && initialLongitude !== null)
+  const hasLocation = location.latitude !== null && location.longitude !== null
   const [days, setDays] = useState<DayRow[]>(() =>
     DAY_ORDER.map(dayOfWeek => {
       const existing = initialHours.find(h => h.dayOfWeek === dayOfWeek)
@@ -206,10 +206,7 @@ export function WorkshopSettingsForm({
                     initialAddress={initialAddress}
                     initialLatitude={initialLatitude}
                     initialLongitude={initialLongitude}
-                    onSelect={value => {
-                      setLocation(value)
-                      setHasLocation(true)
-                    }}
+                    onSelect={setLocation}
                   />
                 </GoogleMapsProvider>
                 {!hasLocation && (
