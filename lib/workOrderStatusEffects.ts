@@ -1,4 +1,5 @@
 import { Prisma, WorkOrder, WorkOrderStatus } from '@prisma/client'
+import { WORK_ORDER_PROGRESS_STAGE_ORDER } from '@/lib/workOrderStatus'
 
 type StatusEffect = (
   tx: Prisma.TransactionClient,
@@ -9,7 +10,10 @@ type StatusEffect = (
 export const ON_STATUS_CHANGE: Partial<Record<WorkOrderStatus, StatusEffect>> = {
   IN_PROGRESS: async (tx, workOrder) => {
     if (!workOrder.progressStage) {
-      await tx.workOrder.update({ where: { id: workOrder.id }, data: { progressStage: 'INSPECTING' } })
+      await tx.workOrder.update({
+        where: { id: workOrder.id },
+        data: { progressStage: WORK_ORDER_PROGRESS_STAGE_ORDER[0] },
+      })
     }
   },
   COMPLETED: async (tx, workOrder, workshopId) => {

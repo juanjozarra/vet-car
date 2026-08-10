@@ -14,6 +14,7 @@ import {
   WORK_ORDER_STATUS_LABELS,
   WORK_ORDER_STATUS_BADGE_VARIANT,
   WORK_ORDER_PROGRESS_STAGE_OPTIONS,
+  WORK_ORDER_PROGRESS_STAGE_ORDER,
 } from '@/lib/workOrderStatus'
 import { SERVICE_ITEM_TYPE_LABELS } from '@/lib/serviceItemType'
 import type { WorkOrderStatus, ServiceItemType, WorkOrderProgressStage } from '@prisma/client'
@@ -199,7 +200,7 @@ export function TicketCard({ ticket, onOpen }: TicketCardProps) {
         </Select>
         {ticket.status === 'IN_PROGRESS' && (
           <Select
-            value={ticket.progressStage ?? 'INSPECTING'}
+            value={ticket.progressStage ?? WORK_ORDER_PROGRESS_STAGE_ORDER[0]}
             onValueChange={handleProgressStageChange}
             disabled={updating}
           >

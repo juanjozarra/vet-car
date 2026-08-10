@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getUserImage } from '@/lib/user'
+import { OPEN_WORK_ORDER_STATUSES } from '@/lib/activeRepairs'
 import { DashboardNav } from '@/components/shared/DashboardNav'
 import { DashboardFooter } from '@/components/shared/DashboardFooter'
 import { WORKSHOP_SPECIALTY_LABELS } from '@/lib/workshopSpecialty'
@@ -22,7 +23,7 @@ export default async function MechanicDashboard() {
     }),
     getUserImage(session.user.id),
     prisma.workOrder.count({
-      where: { mechanic: { workshopId: session.user.workshopId }, status: { in: ['PENDING', 'IN_PROGRESS'] } },
+      where: { mechanic: { workshopId: session.user.workshopId }, status: { in: OPEN_WORK_ORDER_STATUSES } },
     }),
   ])
   if (!workshop) redirect('/workshop/setup')

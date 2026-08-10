@@ -3,7 +3,7 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { getUserImage } from '@/lib/user'
-import { activeRepairsWhere } from '@/lib/activeRepairs'
+import { activeRepairsWhere, OPEN_WORK_ORDER_STATUSES } from '@/lib/activeRepairs'
 import { DashboardNav } from '@/components/shared/DashboardNav'
 import { DashboardFooter } from '@/components/shared/DashboardFooter'
 import { DashboardContent } from './DashboardContent'
@@ -18,7 +18,7 @@ export default async function OwnerDashboard() {
   const [rawVehicles, rawActiveRepairs, rawAppointments, userImage] = await Promise.all([
     prisma.vehicle.findMany({
       where: { ownerId: userId },
-      include: { workOrders: { where: { status: { in: ['PENDING', 'IN_PROGRESS'] } } } },
+      include: { workOrders: { where: { status: { in: OPEN_WORK_ORDER_STATUSES } } } },
       orderBy: { createdAt: 'desc' },
     }),
     prisma.workOrder.findMany({
