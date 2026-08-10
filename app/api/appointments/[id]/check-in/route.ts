@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { Prisma } from '@prisma/client'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { OPEN_WORK_ORDER_STATUSES } from '@/lib/activeRepairs'
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions)
@@ -23,6 +24,20 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
   if (appointment.status !== 'SCHEDULED' || appointment.workOrder) {
     return NextResponse.json({ error: 'El turno ya fue registrado o no está programado' }, { status: 409 })
+  }
+
+  // A vehicle can only be received once: block a second check-in while an earlier
+  // ticket for the same vehicle is still open at this workshop.
+  const openWorkOrder = await prisma.workOrder.findFirst({
+    where: {
+      vehicleId: appointment.vehicleId,
+      status: { in: OPEN_WORK_ORDER_STATUSES },
+      mechanic: { workshopId: session.user.workshopId },
+    },
+    select: { id: true },
+  })
+  if (openWorkOrder) {
+    return NextResponse.json({ error: 'Este vehículo ya está en servicio en tu taller' }, { status: 409 })
   }
 
   try {
