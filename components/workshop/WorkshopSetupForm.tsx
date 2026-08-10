@@ -36,7 +36,13 @@ export function WorkshopSetupForm() {
     const phone = (form.elements.namedItem('phone') as HTMLInputElement).value
     const email = (form.elements.namedItem('email') as HTMLInputElement).value
 
-    if (!location.address) {
+    // With a Maps key, typing without picking a suggestion now emits an address with
+    // null coordinates (see PlaceLocationInput) — require a picked place again here,
+    // or the workshop would save invisible to the owner's distance search.
+    const missingLocation = hasGoogleMapsKey
+      ? !location.address || location.latitude === null || location.longitude === null
+      : !location.address
+    if (missingLocation) {
       setError(
         hasGoogleMapsKey
           ? 'Elegí la dirección del taller de la lista de Google Maps.'
