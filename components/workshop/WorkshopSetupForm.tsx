@@ -6,6 +6,8 @@ import { useState } from 'react'
 import { ArrowRightIcon } from '@/components/ui/icons'
 import { AuthShell } from '@/components/shared/AuthShell'
 import { FormErrorBanner } from '@/components/shared/FormErrorBanner'
+import { GoogleMapsProvider } from '@/components/shared/GoogleMapsProvider'
+import { PlaceLocationInput, type PlaceLocationValue } from '@/components/shared/PlaceLocationInput'
 import { Button, ButtonIconIsland } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -16,25 +18,44 @@ const labelClass =
 export function WorkshopSetupForm() {
   const { update } = useSession()
   const router = useRouter()
+  const [location, setLocation] = useState<PlaceLocationValue>({
+    address: '',
+    latitude: null,
+    longitude: null,
+    googlePlaceId: null,
+  })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError('')
+
+    const form = e.currentTarget
+    const name = (form.elements.namedItem('name') as HTMLInputElement).value
+    const phone = (form.elements.namedItem('phone') as HTMLInputElement).value
+    const email = (form.elements.namedItem('email') as HTMLInputElement).value
+
+    if (!location.address) {
+      setError('Elegí la dirección del taller de la lista de Google Maps.')
+      return
+    }
+
     setLoading(true)
 
     try {
-      const form = e.currentTarget
-      const name = (form.elements.namedItem('name') as HTMLInputElement).value
-      const address = (form.elements.namedItem('address') as HTMLInputElement).value
-      const phone = (form.elements.namedItem('phone') as HTMLInputElement).value
-      const email = (form.elements.namedItem('email') as HTMLInputElement).value
-
       const res = await fetch('/api/workshop', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, address, phone, email }),
+        body: JSON.stringify({
+          name,
+          phone,
+          email,
+          address: location.address,
+          latitude: location.latitude ?? undefined,
+          longitude: location.longitude ?? undefined,
+          googlePlaceId: location.googlePlaceId ?? undefined,
+        }),
       })
 
       if (!res.ok) {
@@ -77,8 +98,9 @@ export function WorkshopSetupForm() {
             </div>
             <div className="flex flex-col gap-2.5">
               <Label htmlFor="ws-address" className={labelClass}>Dirección</Label>
-              <Input id="ws-address" name="address" type="text" required
-                placeholder="Av. Corrientes 1234, Ciudad, Prov." />
+              <GoogleMapsProvider>
+                <PlaceLocationInput inputId="ws-address" onSelect={setLocation} />
+              </GoogleMapsProvider>
             </div>
             <div className="flex flex-col gap-2.5">
               <Label htmlFor="ws-phone" className={labelClass}>Teléfono</Label>
