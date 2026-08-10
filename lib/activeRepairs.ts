@@ -23,8 +23,8 @@ export function activeRepairsWhere(ownerId: string): Prisma.WorkOrderWhereInput 
   }
 }
 
-// The board is a live workspace, not an archive: open tickets plus anything closed
-// in the last 24h, so a returning vehicle never shows next to its own old tickets.
+// The board is a live workspace, not an archive: it carries open work plus the last 24h
+// of closed work, instead of every ticket the workshop has ever created.
 export function boardWorkOrdersWhere(workshopId: string): Prisma.WorkOrderWhereInput {
   return {
     mechanic: { workshopId },

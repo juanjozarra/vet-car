@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { ArrowRightIcon } from '@/components/ui/icons'
 import { AuthShell } from '@/components/shared/AuthShell'
 import { FormErrorBanner } from '@/components/shared/FormErrorBanner'
-import { GoogleMapsProvider } from '@/components/shared/GoogleMapsProvider'
+import { GoogleMapsProvider, hasGoogleMapsKey } from '@/components/shared/GoogleMapsProvider'
 import { PlaceLocationInput, type PlaceLocationValue } from '@/components/shared/PlaceLocationInput'
 import { Button, ButtonIconIsland } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -37,7 +37,11 @@ export function WorkshopSetupForm() {
     const email = (form.elements.namedItem('email') as HTMLInputElement).value
 
     if (!location.address) {
-      setError('Elegí la dirección del taller de la lista de Google Maps.')
+      setError(
+        hasGoogleMapsKey
+          ? 'Elegí la dirección del taller de la lista de Google Maps.'
+          : 'Ingresá la dirección del taller.'
+      )
       return
     }
 
@@ -78,7 +82,7 @@ export function WorkshopSetupForm() {
     <AuthShell
       eyebrow="Configuración inicial"
       headline="Poné tu taller en el mapa."
-      sub="Estos son los datos que van a ver los dueños de vehículos cuando busquen un taller. Después vas a poder sumar especialidades, horarios y ubicación exacta."
+      sub="Estos son los datos que van a ver los dueños de vehículos cuando busquen un taller. Después vas a poder sumar especialidades y horarios."
     >
       <div className="bezel">
         <div className="bezel-core flex flex-col gap-7 p-8 sm:p-9">
