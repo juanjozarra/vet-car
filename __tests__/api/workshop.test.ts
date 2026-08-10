@@ -113,7 +113,21 @@ describe('POST /api/workshop', () => {
     const res = await POST(makeRequest('POST', { ...validBody, googlePlaceId: 'place-1' }))
 
     expect(res.status).toBe(409)
-    expect(await res.json()).toEqual({ error: 'Ya hay un taller registrado en esa ubicación' })
+    expect(await res.json()).toEqual({
+      error: 'Ya hay un taller registrado en esa ubicación. Pedile a un administrador que te invite a su equipo.',
+    })
+  })
+
+  it('returns 400 when latitude is given without longitude', async () => {
+    mockGetServerSession.mockResolvedValue({ user: { id: 'u1', role: 'MECHANIC', workshopId: null } })
+    const res = await POST(makeRequest('POST', { ...validBody, latitude: -34.6037 }))
+    expect(res.status).toBe(400)
+  })
+
+  it('returns 400 when latitude is not a number', async () => {
+    mockGetServerSession.mockResolvedValue({ user: { id: 'u1', role: 'MECHANIC', workshopId: null } })
+    const res = await POST(makeRequest('POST', { ...validBody, latitude: 'abc', longitude: -58.3816 }))
+    expect(res.status).toBe(400)
   })
 })
 

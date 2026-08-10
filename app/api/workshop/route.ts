@@ -22,6 +22,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
+    if (latitude !== undefined || longitude !== undefined) {
+      if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+        return NextResponse.json({ error: 'Coordenadas inválidas' }, { status: 400 })
+      }
+    }
+
     const workshop = await prisma.$transaction(async (tx) => {
       const ws = await tx.workshop.create({
         data: {
@@ -44,7 +50,10 @@ export async function POST(request: Request) {
     return NextResponse.json(workshop, { status: 201 })
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
-      return NextResponse.json({ error: 'Ya hay un taller registrado en esa ubicación' }, { status: 409 })
+      return NextResponse.json(
+        { error: 'Ya hay un taller registrado en esa ubicación. Pedile a un administrador que te invite a su equipo.' },
+        { status: 409 }
+      )
     }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
