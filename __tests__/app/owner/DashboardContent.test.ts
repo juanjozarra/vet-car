@@ -1,4 +1,4 @@
-import { timelineCurrentStep, timelineStepState } from '@/app/(dashboard)/owner/DashboardContent'
+import { TIMELINE_STEPS, timelineCurrentStep, timelineStepState } from '@/app/(dashboard)/owner/DashboardContent'
 
 describe('timelineCurrentStep', () => {
   it('returns 0 for PENDING', () => {
@@ -13,12 +13,12 @@ describe('timelineCurrentStep', () => {
     expect(timelineCurrentStep('IN_PROGRESS', 'INSPECTING')).toBe(1)
   })
 
-  it('returns 2 for IN_PROGRESS + REPAIRING', () => {
-    expect(timelineCurrentStep('IN_PROGRESS', 'REPAIRING')).toBe(2)
+  it('returns 2 for IN_PROGRESS + WAITING_PARTS', () => {
+    expect(timelineCurrentStep('IN_PROGRESS', 'WAITING_PARTS')).toBe(2)
   })
 
-  it('returns 3 for IN_PROGRESS + WAITING_PARTS', () => {
-    expect(timelineCurrentStep('IN_PROGRESS', 'WAITING_PARTS')).toBe(3)
+  it('returns 3 for IN_PROGRESS + REPAIRING', () => {
+    expect(timelineCurrentStep('IN_PROGRESS', 'REPAIRING')).toBe(3)
   })
 
   it('returns 4 for COMPLETED', () => {
@@ -42,5 +42,22 @@ describe('timelineStepState', () => {
 
   it('marks steps after currentStep as pending', () => {
     expect(timelineStepState(3, 2, 'IN_PROGRESS')).toBe('pending')
+  })
+})
+
+describe('TIMELINE_STEPS', () => {
+  it('runs Recibido, Inspección, Esperando repuestos, Reparando, Listo', () => {
+    expect(TIMELINE_STEPS).toEqual([
+      'Recibido',
+      'Inspección',
+      'Esperando repuestos',
+      'Reparando',
+      'Listo',
+    ])
+  })
+
+  it('labels each in-progress stage with its own step', () => {
+    expect(TIMELINE_STEPS[timelineCurrentStep('IN_PROGRESS', 'WAITING_PARTS')]).toBe('Esperando repuestos')
+    expect(TIMELINE_STEPS[timelineCurrentStep('IN_PROGRESS', 'REPAIRING')]).toBe('Reparando')
   })
 })
