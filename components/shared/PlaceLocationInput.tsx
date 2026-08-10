@@ -48,7 +48,13 @@ function AutocompleteLocationInput({
 }) {
   const places = useMapsLibrary('places')
   const [inputValue, setInputValue] = useState(initialAddress)
-  const { suggestions, resetSession } = useAutocompleteSuggestions(inputValue)
+  const [committedAddress, setCommittedAddress] = useState(initialAddress)
+  // Only query Places for text typed since the last committed address. Passing '' makes
+  // the hook clear its list without a request, which keeps the dropdown shut on mount
+  // and after a pick — both moments where the field already holds a valid address.
+  const { suggestions, resetSession } = useAutocompleteSuggestions(
+    inputValue === committedAddress ? '' : inputValue
+  )
 
   const handleSuggestionClick = useCallback(
     async (suggestion: google.maps.places.AutocompleteSuggestion) => {
@@ -60,6 +66,7 @@ function AutocompleteLocationInput({
       if (!place.location) return
 
       setInputValue(place.formattedAddress ?? '')
+      setCommittedAddress(place.formattedAddress ?? '')
       resetSession()
 
       onSelect({
