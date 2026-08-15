@@ -4,7 +4,7 @@ import { Prisma } from '@prisma/client'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { OPEN_WORK_ORDER_STATUSES } from '@/lib/activeRepairs'
-import { canAccessVehicleHistory } from '@/lib/vehicleAccess'
+import { canAccessVehicleHistory, type SessionUser } from '@/lib/vehicleAccess'
 import { parseVehicleInput, type ParsedVehicleInput } from '@/lib/vehicleInput'
 
 // A VIN already tied to a registered owner is refused rather than attached:
@@ -15,6 +15,56 @@ const VIN_BELONGS_TO_OWNER =
 
 // Either an existing row to attach to, or the fields to create one with.
 type VehicleTarget = { id: string } | { create: ParsedVehicleInput }
+
+type ResolvedTarget =
+  | { ok: true; target: VehicleTarget }
+  | { ok: false; response: NextResponse }
+
+// Resolving which vehicle the ticket attaches to is the branchiest part of this
+// route, so it lives on its own — same shape as resolveInviteRequest in
+// app/api/invites/[token]/shared.ts: either a value, or the response to return.
+async function resolveVehicleTarget(
+  user: SessionUser,
+  vehicleId: unknown,
+  vehicle: unknown
+): Promise<ResolvedTarget> {
+  const fail = (error: string, status: number): ResolvedTarget => ({
+    ok: false,
+    response: NextResponse.json({ error }, { status }),
+  })
+
+  if (vehicleId != null) {
+    // Same 404 for "no such vehicle" and "not this workshop's vehicle" — a
+    // mechanic must not learn which vehicle ids exist elsewhere.
+    if (typeof vehicleId !== 'string' || !(await canAccessVehicleHistory(user, vehicleId))) {
+      return fail('Vehículo no encontrado', 404)
+    }
+    return { ok: true, target: { id: vehicleId } }
+  }
+
+  if (typeof vehicle !== 'object' || vehicle === null || Array.isArray(vehicle)) {
+    return fail('Datos del vehículo inválidos', 400)
+  }
+
+  const parsed = parseVehicleInput(vehicle as Record<string, unknown>)
+  if ('error' in parsed) {
+    return fail(parsed.error, 400)
+  }
+
+  // A VIN the shop has seen before is reused rather than duplicated.
+  const existing = parsed.vin
+    ? await prisma.vehicle.findUnique({
+        where: { vin: parsed.vin },
+        select: { id: true, ownerId: true },
+      })
+    : null
+
+  if (existing?.ownerId != null) {
+    return fail(VIN_BELONGS_TO_OWNER, 409)
+  }
+
+  return { ok: true, target: existing ? { id: existing.id } : { create: parsed } }
+}
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions)
@@ -39,40 +89,9 @@ export async function POST(request: Request) {
     )
   }
 
-  let target: VehicleTarget
-
-  if (vehicleId != null) {
-    // Same 404 for "no such vehicle" and "not this workshop's vehicle" — a
-    // mechanic must not learn which vehicle ids exist elsewhere.
-    if (
-      typeof vehicleId !== 'string' ||
-      !(await canAccessVehicleHistory(session.user, vehicleId))
-    ) {
-      return NextResponse.json({ error: 'Vehículo no encontrado' }, { status: 404 })
-    }
-    target = { id: vehicleId }
-  } else {
-    if (typeof vehicle !== 'object' || Array.isArray(vehicle)) {
-      return NextResponse.json({ error: 'Datos del vehículo inválidos' }, { status: 400 })
-    }
-    const parsed = parseVehicleInput(vehicle)
-    if ('error' in parsed) {
-      return NextResponse.json({ error: parsed.error }, { status: 400 })
-    }
-
-    // A VIN the shop has seen before is reused rather than duplicated.
-    const existing = parsed.vin
-      ? await prisma.vehicle.findUnique({
-          where: { vin: parsed.vin },
-          select: { id: true, ownerId: true },
-        })
-      : null
-
-    if (existing?.ownerId != null) {
-      return NextResponse.json({ error: VIN_BELONGS_TO_OWNER }, { status: 409 })
-    }
-    target = existing ? { id: existing.id } : { create: parsed }
-  }
+  const resolved = await resolveVehicleTarget(session.user, vehicleId, vehicle)
+  if (!resolved.ok) return resolved.response
+  const { target } = resolved
 
   // The guard check-in uses, so a walk-in cannot put the same vehicle on the
   // board twice. A vehicle being created here cannot have an open ticket yet.
