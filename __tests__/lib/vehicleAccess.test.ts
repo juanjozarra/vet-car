@@ -22,6 +22,14 @@ describe('canAccessVehicleHistory', () => {
     expect(result).toBe(false)
   })
 
+  // The property the whole nullable-ownerId design rests on: a walk-in vehicle
+  // the workshop entered belongs to nobody, so no owner may read its history.
+  it('returns false for an owner when the vehicle has no owner at all', async () => {
+    ;(prisma.vehicle.findUnique as jest.Mock).mockResolvedValue({ ownerId: null })
+    const result = await canAccessVehicleHistory({ id: 'u1', role: 'OWNER', workshopId: null }, 'v1')
+    expect(result).toBe(false)
+  })
+
   it('returns false for an owner when the vehicle does not exist', async () => {
     ;(prisma.vehicle.findUnique as jest.Mock).mockResolvedValue(null)
     const result = await canAccessVehicleHistory({ id: 'u1', role: 'OWNER', workshopId: null }, 'v1')
