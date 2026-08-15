@@ -46,6 +46,7 @@ export default function SelectRolePage() {
     if (!raw) return
     const pending = JSON.parse(raw) as { lockedRole?: Role | null; callbackUrl?: string | null }
     if (pending.lockedRole) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sessionStorage is browser-only, so the registration hand-off cannot be read in a lazy useState initializer during SSR
       setLockedRole(pending.lockedRole)
       setSelected(pending.lockedRole)
     }
