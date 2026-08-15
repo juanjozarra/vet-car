@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { WorkshopSpecialty } from '@prisma/client'
+import { Prisma, WorkshopSpecialty } from '@prisma/client'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
@@ -16,15 +16,29 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { name, address, phone, email } = await request.json()
+    const { name, address, phone, email, latitude, longitude, googlePlaceId } = await request.json()
 
     if (!name || !address || !phone || !email) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
+    if (latitude !== undefined || longitude !== undefined) {
+      if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+        return NextResponse.json({ error: 'Coordenadas inválidas' }, { status: 400 })
+      }
+    }
+
     const workshop = await prisma.$transaction(async (tx) => {
       const ws = await tx.workshop.create({
-        data: { name, address, phone, email },
+        data: {
+          name,
+          address,
+          phone,
+          email,
+          ...(latitude !== undefined ? { latitude } : {}),
+          ...(longitude !== undefined ? { longitude } : {}),
+          ...(googlePlaceId !== undefined ? { googlePlaceId } : {}),
+        },
       })
       await tx.user.update({
         where: { id: session.user.id },
@@ -34,7 +48,13 @@ export async function POST(request: Request) {
     })
 
     return NextResponse.json(workshop, { status: 201 })
-  } catch {
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+      return NextResponse.json(
+        { error: 'Ya hay un taller registrado en esa ubicación. Pedile a un administrador que te invite a su equipo.' },
+        { status: 409 }
+      )
+    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

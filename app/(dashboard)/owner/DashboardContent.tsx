@@ -14,6 +14,10 @@ import { motionTokens } from '@/lib/motionTokens'
 import { Button, ButtonIconIsland } from '@/components/ui/button'
 import { Badge, BadgeDot } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import {
+  WORK_ORDER_PROGRESS_STAGE_ORDER,
+  WORK_ORDER_PROGRESS_STAGE_LABELS,
+} from '@/lib/workOrderStatus'
 
 type VehicleSummary = {
   id: string
@@ -46,7 +50,12 @@ interface DashboardContentProps {
   upcomingAppointments: AppointmentSummary[]
 }
 
-const TIMELINE_STEPS = ['Recibido', 'Inspección', 'Reparando', 'Esperando repuestos', 'Listo'] as const
+// Bookends around the in-progress stages: PENDING is "Recibido", COMPLETED is "Listo".
+export const TIMELINE_STEPS = [
+  'Recibido',
+  ...WORK_ORDER_PROGRESS_STAGE_ORDER.map(stage => WORK_ORDER_PROGRESS_STAGE_LABELS[stage]),
+  'Listo',
+]
 
 export function timelineCurrentStep(
   status: ActiveRepairSummary['status'],
@@ -54,11 +63,11 @@ export function timelineCurrentStep(
 ): number {
   if (status === 'PENDING') return 0
   if (status === 'IN_PROGRESS') {
-    if (progressStage === 'REPAIRING') return 2
-    if (progressStage === 'WAITING_PARTS') return 3
-    return 1
+    const stageIndex = progressStage ? WORK_ORDER_PROGRESS_STAGE_ORDER.indexOf(progressStage) : -1
+    // No stage set yet (or an unknown one) reads as the first in-progress step.
+    return stageIndex === -1 ? 1 : stageIndex + 1
   }
-  return 4
+  return TIMELINE_STEPS.length - 1
 }
 
 type TimelineStepState = 'done' | 'current' | 'pending'

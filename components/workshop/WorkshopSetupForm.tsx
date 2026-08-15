@@ -6,6 +6,8 @@ import { useState } from 'react'
 import { ArrowRightIcon } from '@/components/ui/icons'
 import { AuthShell } from '@/components/shared/AuthShell'
 import { FormErrorBanner } from '@/components/shared/FormErrorBanner'
+import { GoogleMapsProvider, hasGoogleMapsKey } from '@/components/shared/GoogleMapsProvider'
+import { PlaceLocationInput, type PlaceLocationValue } from '@/components/shared/PlaceLocationInput'
 import { Button, ButtonIconIsland } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -16,25 +18,54 @@ const labelClass =
 export function WorkshopSetupForm() {
   const { update } = useSession()
   const router = useRouter()
+  const [location, setLocation] = useState<PlaceLocationValue>({
+    address: '',
+    latitude: null,
+    longitude: null,
+    googlePlaceId: null,
+  })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError('')
+
+    const form = e.currentTarget
+    const name = (form.elements.namedItem('name') as HTMLInputElement).value
+    const phone = (form.elements.namedItem('phone') as HTMLInputElement).value
+    const email = (form.elements.namedItem('email') as HTMLInputElement).value
+
+    // With a Maps key, typing without picking a suggestion now emits an address with
+    // null coordinates (see PlaceLocationInput) — require a picked place again here,
+    // or the workshop would save invisible to the owner's distance search.
+    const missingLocation = hasGoogleMapsKey
+      ? !location.address || location.latitude === null || location.longitude === null
+      : !location.address
+    if (missingLocation) {
+      setError(
+        hasGoogleMapsKey
+          ? 'Elegí la dirección del taller de la lista de Google Maps.'
+          : 'Ingresá la dirección del taller.'
+      )
+      return
+    }
+
     setLoading(true)
 
     try {
-      const form = e.currentTarget
-      const name = (form.elements.namedItem('name') as HTMLInputElement).value
-      const address = (form.elements.namedItem('address') as HTMLInputElement).value
-      const phone = (form.elements.namedItem('phone') as HTMLInputElement).value
-      const email = (form.elements.namedItem('email') as HTMLInputElement).value
-
       const res = await fetch('/api/workshop', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, address, phone, email }),
+        body: JSON.stringify({
+          name,
+          phone,
+          email,
+          address: location.address,
+          latitude: location.latitude ?? undefined,
+          longitude: location.longitude ?? undefined,
+          googlePlaceId: location.googlePlaceId ?? undefined,
+        }),
       })
 
       if (!res.ok) {
@@ -57,7 +88,7 @@ export function WorkshopSetupForm() {
     <AuthShell
       eyebrow="Configuración inicial"
       headline="Poné tu taller en el mapa."
-      sub="Estos son los datos que van a ver los dueños de vehículos cuando busquen un taller. Después vas a poder sumar especialidades, horarios y ubicación exacta."
+      sub="Estos son los datos que van a ver los dueños de vehículos cuando busquen un taller. Después vas a poder sumar especialidades y horarios."
     >
       <div className="bezel">
         <div className="bezel-core flex flex-col gap-7 p-8 sm:p-9">
@@ -77,8 +108,9 @@ export function WorkshopSetupForm() {
             </div>
             <div className="flex flex-col gap-2.5">
               <Label htmlFor="ws-address" className={labelClass}>Dirección</Label>
-              <Input id="ws-address" name="address" type="text" required
-                placeholder="Av. Corrientes 1234, Ciudad, Prov." />
+              <GoogleMapsProvider>
+                <PlaceLocationInput inputId="ws-address" onSelect={setLocation} />
+              </GoogleMapsProvider>
             </div>
             <div className="flex flex-col gap-2.5">
               <Label htmlFor="ws-phone" className={labelClass}>Teléfono</Label>

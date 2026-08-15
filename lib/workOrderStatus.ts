@@ -14,11 +14,21 @@ export const WORK_ORDER_STATUS_OPTIONS = Object.values(WorkOrderStatus).map(valu
 
 export const WORK_ORDER_PROGRESS_STAGE_LABELS: Record<WorkOrderProgressStage, string> = {
   INSPECTING: 'Inspección',
-  REPAIRING: 'Reparando',
   WAITING_PARTS: 'Esperando repuestos',
+  REPAIRING: 'Reparando',
 }
 
-export const WORK_ORDER_PROGRESS_STAGE_OPTIONS = Object.values(WorkOrderProgressStage).map(value => ({
+// The workflow order shown to users: inspect the vehicle, wait for the parts, then do
+// the work. The mechanic's stage dropdown and the owner timeline both read this, so the
+// order lives here only — not in schema.prisma's enum declaration, and not duplicated
+// in the timeline.
+export const WORK_ORDER_PROGRESS_STAGE_ORDER: WorkOrderProgressStage[] = [
+  'INSPECTING',
+  'WAITING_PARTS',
+  'REPAIRING',
+]
+
+export const WORK_ORDER_PROGRESS_STAGE_OPTIONS = WORK_ORDER_PROGRESS_STAGE_ORDER.map(value => ({
   value,
   label: WORK_ORDER_PROGRESS_STAGE_LABELS[value],
 }))

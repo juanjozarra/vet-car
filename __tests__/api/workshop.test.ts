@@ -14,6 +14,7 @@ jest.mock('@/lib/prisma', () => ({
 import { POST, PATCH } from '@/app/api/workshop/route'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 const mockGetServerSession = getServerSession as jest.Mock
 const mockWorkshopCreate = prisma.workshop.create as jest.Mock
@@ -76,6 +77,57 @@ describe('POST /api/workshop', () => {
     })
     const data = await res.json()
     expect(data.id).toBe('ws-1')
+  })
+
+  it('persists the Google Places location when provided', async () => {
+    mockGetServerSession.mockResolvedValue({ user: { id: 'u1', role: 'MECHANIC', workshopId: null } })
+    mockWorkshopCreate.mockResolvedValue({ id: 'ws-1' })
+
+    const res = await POST(makeRequest('POST', {
+      ...validBody,
+      latitude: -34.6037,
+      longitude: -58.3816,
+      googlePlaceId: 'place-1',
+    }))
+
+    expect(res.status).toBe(201)
+    expect(mockWorkshopCreate).toHaveBeenCalledWith({
+      data: {
+        name: 'AutoShop',
+        address: '123 Main St',
+        phone: '555-0100',
+        email: 'shop@example.com',
+        latitude: -34.6037,
+        longitude: -58.3816,
+        googlePlaceId: 'place-1',
+      },
+    })
+  })
+
+  it('returns 409 when another workshop already uses that Google place', async () => {
+    mockGetServerSession.mockResolvedValue({ user: { id: 'u1', role: 'MECHANIC', workshopId: null } })
+    mockWorkshopCreate.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('Unique constraint failed', { code: 'P2002', clientVersion: '7.8.0' })
+    )
+
+    const res = await POST(makeRequest('POST', { ...validBody, googlePlaceId: 'place-1' }))
+
+    expect(res.status).toBe(409)
+    expect(await res.json()).toEqual({
+      error: 'Ya hay un taller registrado en esa ubicación. Pedile a un administrador que te invite a su equipo.',
+    })
+  })
+
+  it('returns 400 when latitude is given without longitude', async () => {
+    mockGetServerSession.mockResolvedValue({ user: { id: 'u1', role: 'MECHANIC', workshopId: null } })
+    const res = await POST(makeRequest('POST', { ...validBody, latitude: -34.6037 }))
+    expect(res.status).toBe(400)
+  })
+
+  it('returns 400 when latitude is not a number', async () => {
+    mockGetServerSession.mockResolvedValue({ user: { id: 'u1', role: 'MECHANIC', workshopId: null } })
+    const res = await POST(makeRequest('POST', { ...validBody, latitude: 'abc', longitude: -58.3816 }))
+    expect(res.status).toBe(400)
   })
 })
 

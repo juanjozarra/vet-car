@@ -3,7 +3,7 @@ jest.mock('@/lib/auth', () => ({ authOptions: {} }))
 jest.mock('@/lib/prisma', () => ({
   prisma: {
     appointment: { findUnique: jest.fn() },
-    workOrder: { create: jest.fn() },
+    workOrder: { create: jest.fn(), findFirst: jest.fn() },
   },
 }))
 
@@ -15,6 +15,7 @@ import { Prisma } from '@prisma/client'
 const mockGetServerSession = getServerSession as jest.Mock
 const mockFindUnique = prisma.appointment.findUnique as jest.Mock
 const mockCreate = prisma.workOrder.create as jest.Mock
+const mockWorkOrderFindFirst = prisma.workOrder.findFirst as jest.Mock
 
 function makeRequest() {
   return new Request('http://localhost/api/appointments/a1/check-in', { method: 'POST' })
@@ -24,7 +25,10 @@ const params = Promise.resolve({ id: 'a1' })
 const mechanicSession = { user: { id: 'm1', role: 'MECHANIC', workshopId: 'ws1' } }
 
 describe('POST /api/appointments/[id]/check-in', () => {
-  beforeEach(() => jest.clearAllMocks())
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockWorkOrderFindFirst.mockResolvedValue(null)
+  })
 
   it('returns 401 when unauthenticated', async () => {
     mockGetServerSession.mockResolvedValue(null)
@@ -83,6 +87,29 @@ describe('POST /api/appointments/[id]/check-in', () => {
     )
     const res = await POST(makeRequest(), { params })
     expect(res.status).toBe(409)
+  })
+
+  it('returns 409 when the vehicle already has an open work order at this workshop', async () => {
+    mockGetServerSession.mockResolvedValue(mechanicSession)
+    mockFindUnique.mockResolvedValue({
+      id: 'a1', workshopId: 'ws1', status: 'SCHEDULED', workOrder: null,
+      title: 'Cambio de aceite', notes: null, vehicleId: 'v1',
+    })
+    mockWorkOrderFindFirst.mockResolvedValue({ id: 'wo-open' })
+
+    const res = await POST(makeRequest(), { params })
+
+    expect(res.status).toBe(409)
+    expect(await res.json()).toEqual({ error: 'Este vehículo ya está en servicio en tu taller' })
+    expect(mockWorkOrderFindFirst).toHaveBeenCalledWith({
+      where: {
+        vehicleId: 'v1',
+        status: { in: ['PENDING', 'IN_PROGRESS'] },
+        mechanic: { workshopId: 'ws1' },
+      },
+      select: { id: true },
+    })
+    expect(mockCreate).not.toHaveBeenCalled()
   })
 
   it('creates a WorkOrder from the appointment and returns 201', async () => {
