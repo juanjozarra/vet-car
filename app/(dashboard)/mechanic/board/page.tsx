@@ -68,7 +68,7 @@ export default async function MechanicBoardPage() {
               title: a.title,
               scheduledAt: a.scheduledAt.toISOString(),
               vehicleLabel: vehicleLabel(a.vehicle),
-              ownerName: a.vehicle.owner.name ?? 'Sin nombre',
+              ownerName: a.vehicle.owner?.name ?? 'Sin nombre',
             }))}
             tickets={workOrders.map(w => ({
               id: w.id,
