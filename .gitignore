@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+# sonarqube scanner working directory
+/.scannerwork
+
 # next.js
 /.next/
 /out/
