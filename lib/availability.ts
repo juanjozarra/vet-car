@@ -51,3 +51,17 @@ export function getAvailableSlots({
 
   return slots
 }
+
+// Slots are UTC-anchored naive wall-clock times (see the comment in getAvailableSlots).
+// Every surface that renders a scheduledAt must format in UTC or it will show an hour
+// the workshop never opened. These live here, beside the anchoring, so a new caller
+// reaches for them instead of building a formatter with the wrong timezone.
+export const SLOT_TIME_FORMATTER = new Intl.DateTimeFormat('es-AR', {
+  hour: '2-digit', minute: '2-digit', timeZone: 'UTC',
+})
+export const SLOT_DAY_FORMATTER = new Intl.DateTimeFormat('es-AR', {
+  day: 'numeric', timeZone: 'UTC',
+})
+export const SLOT_MONTH_FORMATTER = new Intl.DateTimeFormat('es-AR', {
+  month: 'short', timeZone: 'UTC',
+})
