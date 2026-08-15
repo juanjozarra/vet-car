@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getUserImage } from '@/lib/user'
 import { boardWorkOrdersWhere, pendingArrivalAppointmentsWhere } from '@/lib/activeRepairs'
+import { getWorkshopVehicles } from '@/lib/vehicleAccess'
 import { DashboardNav } from '@/components/shared/DashboardNav'
 import { DashboardFooter } from '@/components/shared/DashboardFooter'
 import { MECHANIC_NAV_ITEMS } from '../nav-items'
@@ -27,7 +28,7 @@ export default async function MechanicBoardPage() {
 
   const workshopId = session.user.workshopId
 
-  const [appointments, workOrders, mechanics, userImage] = await Promise.all([
+  const [appointments, workOrders, mechanics, workshopVehicles, userImage] = await Promise.all([
     prisma.appointment.findMany({
       where: pendingArrivalAppointmentsWhere(workshopId),
       include: { vehicle: { include: { owner: { select: { name: true } } } } },
@@ -47,6 +48,7 @@ export default async function MechanicBoardPage() {
       select: { id: true, name: true, email: true },
       orderBy: { createdAt: 'asc' },
     }),
+    getWorkshopVehicles(workshopId),
     getUserImage(session.user.id),
   ])
 
@@ -85,6 +87,12 @@ export default async function MechanicBoardPage() {
               createdAt: w.createdAt.toISOString(),
             }))}
             mechanics={mechanics}
+            workshopVehicles={workshopVehicles.map(v => ({
+              id: v.id,
+              label: vehicleLabel(v),
+              plate: v.plate,
+              vin: v.vin,
+            }))}
           />
         </div>
       </main>
