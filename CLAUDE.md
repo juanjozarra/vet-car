@@ -175,16 +175,22 @@ Practical notes about this setup, learned the hard way:
 - **`sonar auth login` is interactive and cannot be run by an agent** (the CLI says so itself). It opens a browser flow, so it will hang and time out in a non-interactive shell. A human must run it in a real terminal.
 - To publish without the CLI: `npx --yes sonarqube-scanner -Dsonar.host.url=<url> -Dsonar.token=<token> -Dsonar.projectKey=<key>`. The rest of the config is read from `sonar-project.properties`.
 
-## Known gaps
+## Known gaps — see `docs/backlog/`
 
-Modelled or documented, but **not implemented** — do not assume these work:
+Parts of this schema are modelled, labelled and rendered but have **no writer**;
+other behaviour is documented but was never built. **Read
+[`docs/backlog/README.md`](docs/backlog/README.md) before assuming any feature works** —
+several things that look implemented are not, and the board renders UI for at
+least one of them that can never populate.
 
-- **`ServiceItem` has no writer.** The model, the enum, the label map and the board's chip renderer all exist, but no API route or UI ever creates one, so `serviceItems` is always empty. The owner timeline does not aggregate them.
-- **Appointments cannot be cancelled.** `CANCELLED` is read by the availability and booking queries but nothing ever writes it. There is no cancellation route.
-- **Work orders have no status transition rules.** `PATCH /api/workorders/[id]` only checks enum membership, so `CANCELLED → COMPLETED` and `PENDING → COMPLETED` are both accepted, and re-sending the current status re-fires its side effect.
-- **No workshop role management.** `workshopRole` is set only at first-run setup (`ADMIN`) and invite acceptance (`STAFF`). There is no promote, demote, or leave, and an `ADMIN` cannot remove themselves or another `ADMIN`.
-- **No pagination anywhere.** The owner schedule page loads every workshop in the database; the workshop vehicle list and board query are likewise unbounded.
-- **`ScheduleView`'s `dateKey` buckets slots by local calendar day** while labelling them in UTC. Fixing it properly needs a UTC mode in `components/ui/date-picker.tsx`, which renders every cell with local getters.
+That folder is the single source of truth for deferred work, and deliberately not
+duplicated here so the two can't drift. One file per item, each carrying the
+analysis behind it: the evidence already gathered, the options already weighed,
+and the decision still outstanding — enough to pick the item up cold without
+re-investigating it.
+
+Add an entry there whenever you defer something, and delete it when the work
+merges.
 
 ## Environment Setup
 
