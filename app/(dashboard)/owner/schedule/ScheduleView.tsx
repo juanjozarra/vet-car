@@ -26,6 +26,7 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { AdvancedMarker, Map, useMap, useMapsLibrary } from '@vis.gl/react-google-maps'
 import { GoogleMapsProvider, hasGoogleMapsKey } from '@/components/shared/GoogleMapsProvider'
 import { WORKSHOP_SPECIALTY_LABELS, WORKSHOP_SPECIALTY_OPTIONS } from '@/lib/workshopSpecialty'
+import { SLOT_TIME_FORMATTER } from '@/lib/availability'
 
 type Workshop = {
   id: string
@@ -317,10 +318,6 @@ function groupSlotsByDate(slots: string[]): Record<string, Date[]> {
   return grouped
 }
 
-// Slots are UTC-anchored naive wall-clock times (see lib/availability.ts) — format in UTC
-// so the hour shown matches what the workshop configured, regardless of the browser's TZ.
-const TIME_LABEL_FORMATTER = new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
-
 function SlotSkeleton() {
   return (
     <div className="grid grid-cols-3 gap-2 sm:grid-cols-4" aria-hidden="true">
@@ -516,7 +513,7 @@ function BookingModal({
                         : 'bg-white/[0.04] text-foreground ring-1 ring-white/[0.08] ring-inset hover:bg-white/[0.08]'
                     )}
                   >
-                    {TIME_LABEL_FORMATTER.format(slot)}
+                    {SLOT_TIME_FORMATTER.format(slot)}
                   </button>
                 )
               })}

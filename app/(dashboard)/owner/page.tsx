@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { getUserImage } from '@/lib/user'
 import { activeRepairsWhere, OPEN_WORK_ORDER_STATUSES } from '@/lib/activeRepairs'
+import { SLOT_DAY_FORMATTER, SLOT_MONTH_FORMATTER } from '@/lib/availability'
 import { DashboardNav } from '@/components/shared/DashboardNav'
 import { DashboardFooter } from '@/components/shared/DashboardFooter'
 import { DashboardContent } from './DashboardContent'
@@ -57,8 +58,8 @@ export default async function OwnerDashboard() {
 
   const upcomingAppointments = rawAppointments.map(a => ({
     id: a.id,
-    month: a.scheduledAt.toLocaleString('es-AR', { month: 'short' }).toUpperCase(),
-    day: a.scheduledAt.getDate().toString(),
+    month: SLOT_MONTH_FORMATTER.format(a.scheduledAt).toUpperCase(),
+    day: SLOT_DAY_FORMATTER.format(a.scheduledAt),
     title: a.title,
     vehicle: `${a.vehicle.year} ${a.vehicle.make} ${a.vehicle.model}`,
   }))

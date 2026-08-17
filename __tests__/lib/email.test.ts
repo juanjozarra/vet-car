@@ -11,7 +11,7 @@ jest.mock('resend', () => {
 import { sendWorkshopInviteEmail } from '@/lib/email'
 import * as resendModule from 'resend'
 
-const { __mockSend: mockSend } = resendModule as any
+const { __mockSend: mockSend } = resendModule as unknown as { __mockSend: jest.Mock }
 
 describe('sendWorkshopInviteEmail', () => {
   beforeEach(() => jest.clearAllMocks())

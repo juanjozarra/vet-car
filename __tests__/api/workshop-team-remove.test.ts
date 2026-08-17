@@ -3,6 +3,7 @@ jest.mock('@/lib/auth', () => ({ authOptions: {} }))
 jest.mock('@/lib/prisma', () => ({
   prisma: {
     user: { findUnique: jest.fn(), update: jest.fn() },
+    workOrder: { count: jest.fn() },
   },
 }))
 
@@ -13,6 +14,7 @@ import { prisma } from '@/lib/prisma'
 const mockGetServerSession = getServerSession as jest.Mock
 const mockFindUnique = prisma.user.findUnique as jest.Mock
 const mockUpdate = prisma.user.update as jest.Mock
+const mockCount = prisma.workOrder.count as jest.Mock
 
 function makeRequest() {
   return new Request('http://localhost/api/workshop/team/staff1', { method: 'DELETE' })
@@ -23,7 +25,10 @@ const adminSession = {
 }
 
 describe('DELETE /api/workshop/team/[userId]', () => {
-  beforeEach(() => jest.clearAllMocks())
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockCount.mockResolvedValue(0)
+  })
 
   it('returns 401 when unauthenticated', async () => {
     mockGetServerSession.mockResolvedValue(null)
@@ -67,6 +72,22 @@ describe('DELETE /api/workshop/team/[userId]', () => {
     mockFindUnique.mockResolvedValue({ id: 'staff1', workshopId: 'ws1', workshopRole: 'ADMIN' })
     const res = await DELETE(makeRequest(), { params: Promise.resolve({ userId: 'staff1' }) })
     expect(res.status).toBe(400)
+  })
+
+  it('returns 409 and keeps the mechanic when they still hold open work orders', async () => {
+    mockGetServerSession.mockResolvedValue(adminSession)
+    mockFindUnique.mockResolvedValue({ id: 'staff1', workshopId: 'ws1', workshopRole: 'STAFF' })
+    mockCount.mockResolvedValue(2)
+    const res = await DELETE(makeRequest(), { params: Promise.resolve({ userId: 'staff1' }) })
+    expect(res.status).toBe(409)
+    expect(await res.json()).toEqual({
+      error:
+        'Este mecánico tiene 2 tickets abiertos. Reasignalos desde el tablero antes de quitarlo del equipo.',
+    })
+    expect(mockCount).toHaveBeenCalledWith({
+      where: { mechanicId: 'staff1', status: { in: ['PENDING', 'IN_PROGRESS'] } },
+    })
+    expect(mockUpdate).not.toHaveBeenCalled()
   })
 
   it('clears workshopId and workshopRole and returns 204', async () => {
