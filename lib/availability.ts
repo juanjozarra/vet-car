@@ -57,7 +57,12 @@ export function getAvailableSlots({
 // the workshop never opened. These live here, beside the anchoring, so a new caller
 // reaches for them instead of building a formatter with the wrong timezone.
 export const SLOT_TIME_FORMATTER = new Intl.DateTimeFormat('es-AR', {
-  hour: '2-digit', minute: '2-digit', timeZone: 'UTC',
+  hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC',
+})
+// For surfaces that list slots across several days — a bare time there is ambiguous,
+// because the reader cannot tell today's 09:00 from next Tuesday's.
+export const SLOT_DATE_TIME_FORMATTER = new Intl.DateTimeFormat('es-AR', {
+  day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC',
 })
 export const SLOT_DAY_FORMATTER = new Intl.DateTimeFormat('es-AR', {
   day: 'numeric', timeZone: 'UTC',
