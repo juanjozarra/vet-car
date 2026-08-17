@@ -44,8 +44,17 @@ export async function POST(request: Request) {
       inviterName: session.user.name ?? 'Un administrador',
       acceptUrl,
     })
-  } catch {
-    return NextResponse.json({ error: 'No se pudo enviar la invitación' }, { status: 500 })
+  } catch (err) {
+    // Resend's rejection reason is the only thing that explains *why* an invite
+    // failed — an unverified sending domain, a sandbox recipient restriction, a
+    // bad key. Swallowing it left admins with an unactionable "no se pudo enviar",
+    // so log it and pass it through: the caller here is always a workshop ADMIN.
+    const detail = err instanceof Error ? err.message : 'error desconocido'
+    console.error('[workshop/invites] Resend rejected the send:', detail)
+    return NextResponse.json(
+      { error: `No se pudo enviar la invitación: ${detail}` },
+      { status: 500 }
+    )
   }
 
   const invite = await prisma.workshopInvite.upsert({

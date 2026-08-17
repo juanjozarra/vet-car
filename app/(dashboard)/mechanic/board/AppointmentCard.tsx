@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { ClockIcon } from '@/components/ui/icons'
+import { SLOT_DATE_TIME_FORMATTER } from '@/lib/availability'
 
 export interface AppointmentCardData {
   id: string
@@ -12,8 +13,6 @@ export interface AppointmentCardData {
   vehicleLabel: string
   ownerName: string
 }
-
-const TIME_FORMATTER = new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit' })
 
 export function AppointmentCard({ appointment }: { appointment: AppointmentCardData }) {
   const router = useRouter()
@@ -46,7 +45,7 @@ export function AppointmentCard({ appointment }: { appointment: AppointmentCardD
         )}
         <span className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
           <ClockIcon className="size-3.5" />
-          {TIME_FORMATTER.format(new Date(appointment.scheduledAt))}
+          {SLOT_DATE_TIME_FORMATTER.format(new Date(appointment.scheduledAt))}
         </span>
         <div className="flex flex-col gap-0.5">
           <span className="text-sm font-medium text-foreground">{appointment.vehicleLabel}</span>

@@ -21,6 +21,11 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/owner', request.url))
   }
 
+  // Public invite acceptance: the page itself renders a sign-in / create-account
+  // branch for logged-out visitors and validates the token server-side, so the
+  // redirect below must not swallow the link.
+  if (pathname.startsWith('/invite/')) return NextResponse.next()
+
   // Unauthenticated → login
   if (!token) {
     return NextResponse.redirect(new URL('/login', request.url))

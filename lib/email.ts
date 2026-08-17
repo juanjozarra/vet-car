@@ -1,6 +1,5 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
 
 export async function sendWorkshopInviteEmail({
@@ -14,6 +13,12 @@ export async function sendWorkshopInviteEmail({
   inviterName: string
   acceptUrl: string
 }): Promise<void> {
+  // Constructed per call, not at module scope: the Resend constructor throws when
+  // RESEND_API_KEY is absent, and Next evaluates this module while collecting page
+  // data for /api/workshop/invites — which made `pnpm build` fail outright anywhere
+  // the key isn't set at build time. See __tests__/lib/emailModuleInit.test.ts.
+  const resend = new Resend(process.env.RESEND_API_KEY)
+
   const { error } = await resend.emails.send({
     from: FROM_EMAIL,
     to,
