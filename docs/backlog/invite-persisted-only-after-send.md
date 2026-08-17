@@ -69,6 +69,9 @@ leaves that blocked until a domain is verified in Resend.
 ## Related
 
 - PR #15 — the review thread where this surfaced
+- [resend-sending-domain-not-configured.md](resend-sending-domain-not-configured.md)
+  — the configuration failure that exposed this; option B or C here removes the
+  dependency on fixing it
 - [workshop-membership-is-one-way.md](workshop-membership-is-one-way.md) — the
   other blocker on this same flow
 - `CLAUDE.md` → Environment Setup, for the `RESEND_FROM_EMAIL` requirement that

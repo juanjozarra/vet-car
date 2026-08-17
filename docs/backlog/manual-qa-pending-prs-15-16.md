@@ -12,6 +12,11 @@ checklists need a browser and a running app, and were left unticked rather than
 claimed. This entry exists so that owed verification does not evaporate when the
 PRs merge.
 
+**PR #15 has since merged with its invite checks still unrun**, which is exactly
+the evaporation this entry exists to prevent. Merged is not verified: the invite
+sending path has never been exercised even once, because
+[Resend has no verified sending domain](resend-sending-domain-not-configured.md).
+
 Delete this file once the checks below have been run.
 
 ## Evidence already gathered
@@ -41,9 +46,13 @@ item the implementing agent flagged as untested, and it is now closed.
    reassign from the board, then removal succeeds.
 
 Checks 1 and 2 are the ones to watch — the redirect chain traces correctly in
-code but only a real browser confirms it. **Both are currently blocked**: see the
-related entries, because invite email delivery does not work and no invite row is
-persisted when it fails.
+code but only a real browser confirms it. **Both are currently blocked** and
+cannot be attempted: invite email delivery does not work
+([no verified sending domain](resend-sending-domain-not-configured.md)), and
+because the invite row is only written after a successful send, there is no link
+to copy out of the database as a workaround
+([invite-persisted-only-after-send.md](invite-persisted-only-after-send.md)).
+Resolving either one unblocks these two checks.
 
 **From PR #16:**
 
@@ -65,6 +74,7 @@ performed until the invite blockers are resolved.
 
 ## Related
 
+- [resend-sending-domain-not-configured.md](resend-sending-domain-not-configured.md) — blocks checks 1 and 2
+- [invite-persisted-only-after-send.md](invite-persisted-only-after-send.md) — blocks checks 1 and 2; resolving it routes around the one above
 - [workshop-membership-is-one-way.md](workshop-membership-is-one-way.md) — blocks check 2
-- [invite-persisted-only-after-send.md](invite-persisted-only-after-send.md) — blocks checks 1 and 2
 - PRs #15 and #16 — the full test plans, with the automated items already ticked

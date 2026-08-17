@@ -18,6 +18,7 @@ rather than keeping its own list, so the two can't drift apart.
 |---|---|---|
 | [Workshop membership is one-way](workshop-membership-is-one-way.md) | Needs decision | Product call: A, B or C |
 | [Invite is persisted only after a successful send](invite-persisted-only-after-send.md) | Needs decision | Product call — contradicts an approved spec |
+| [Resend has no verified sending domain](resend-sending-domain-not-configured.md) | Needs setup | A domain + DNS access, or route around it |
 | [`ServiceItem` has no writer](serviceitem-has-no-writer.md) | Ready to spec | — |
 | [Appointments cannot be cancelled](appointments-cannot-be-cancelled.md) | Ready to spec | — |
 | [Work orders have no status transition rules](work-order-status-transitions.md) | Needs decision | Which transitions are legal |
@@ -28,6 +29,7 @@ rather than keeping its own list, so the two can't drift apart.
 ## Status vocabulary
 
 - **Needs decision** — understood and analysed; blocked on a human choosing between options.
+- **Needs setup** — no code change required; blocked on configuration or access outside the repo.
 - **Ready to spec** — no open questions; next step is a design spec in `docs/superpowers/specs/`.
 - **Open** — understood, no blocker, not scheduled.
 - **Pending verification** — the work exists; someone has to confirm it behaves.
