@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { OPEN_WORK_ORDER_STATUSES } from '@/lib/activeRepairs'
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ userId: string }> }) {
   const session = await getServerSession(authOptions)
@@ -23,6 +24,21 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ u
   }
   if (target.workshopRole === 'ADMIN') {
     return NextResponse.json({ error: 'No podés quitar a otro administrador' }, { status: 400 })
+  }
+
+  // Removal clears workshopId, and every board/access query finds work orders via
+  // `mechanic: { workshopId }` — so removing a mechanic with open tickets drops those
+  // tickets off the board and makes them un-PATCHable by anyone, permanently.
+  const openTickets = await prisma.workOrder.count({
+    where: { mechanicId: userId, status: { in: OPEN_WORK_ORDER_STATUSES } },
+  })
+  if (openTickets > 0) {
+    return NextResponse.json(
+      {
+        error: `Este mecánico tiene ${openTickets} ${openTickets === 1 ? 'ticket abierto' : 'tickets abiertos'}. Reasignalos desde el tablero antes de quitarlo del equipo.`,
+      },
+      { status: 409 }
+    )
   }
 
   await prisma.user.update({ where: { id: userId }, data: { workshopId: null, workshopRole: null } })

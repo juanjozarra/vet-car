@@ -80,6 +80,16 @@ describe('POST /api/workshop/invites', () => {
     expect(mockUpsert).not.toHaveBeenCalled()
   })
 
+  it('surfaces the provider reason so a failed invite is diagnosable', async () => {
+    mockGetServerSession.mockResolvedValue(adminSession)
+    mockUserFindUnique.mockResolvedValue(null)
+    mockWorkshopFindUnique.mockResolvedValue({ name: 'AutoShop' })
+    mockSend.mockRejectedValue(new Error('The gmail.com domain is not verified'))
+    const res = await POST(makeRequest({ email: 'new@test.com' }))
+    const body = await res.json()
+    expect(body.error).toContain('The gmail.com domain is not verified')
+  })
+
   it('sends the email and upserts the invite for an unregistered email', async () => {
     mockGetServerSession.mockResolvedValue(adminSession)
     mockUserFindUnique.mockResolvedValue(null)
