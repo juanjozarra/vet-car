@@ -49,6 +49,8 @@ For local development outside Docker, start only the DB (`docker compose up -d d
 
 DB credentials (local only): `postgresql://vetcar:vetcar@localhost:5432/vetcar`
 
+If `prisma` cannot reach the database while `docker ps` shows the container healthy, check the **Ports** column. `5432/tcp` means the port is exposed inside the Docker network but **not published to the host** — only `0.0.0.0:5432->5432/tcp` is reachable from Windows. Docker silently skips the port proxy when something else held the port at container start (a second compose project from a worktree, for instance), and a `restart` does not re-establish it: the container must be recreated with `docker compose up -d --force-recreate db`. Note the project name comes from the directory, so run compose from the repo root or pass `-p vet-car`, otherwise you get a second container on a second volume.
+
 ## Commands
 
 ```bash
@@ -73,6 +75,7 @@ you pass `--coverage` explicitly. Anything that consumes coverage (SonarQube) ne
 - `prisma.config.ts` does `import 'dotenv/config'`, which loads **`.env`** — dotenv's default filename, *not* `.env.local`. Next.js reads both, but the Prisma CLI only sees `.env`, so `DATABASE_URL` must be there or every `prisma` command fails.
 - `lib/prisma.ts` uses `PrismaPg` adapter from `@prisma/adapter-pg` for the runtime client
 - Git worktrees carry neither `node_modules` nor the gitignored `.env`. In a fresh worktree, run `pnpm install` and copy `.env` before any build, migration, or scan. After switching between branches with different schemas, re-run `npx prisma generate` — a stale client produces type errors that look like real code bugs.
+- On Windows, `git worktree remove` on a worktree that has `node_modules` fails with **`Filename too long`** (the 260-character path limit). It still unregisters the worktree, so the branch is freed and `git worktree list` looks correct — only the directory survives. Delete it with PowerShell's long-path form: `Remove-Item -LiteralPath "\\?\<full path>" -Recurse -Force`.
 
 ## Project Structure
 
@@ -107,6 +110,9 @@ lib/
   prisma.ts             # Prisma client singleton
   utils.ts              # Shared utility functions
   geo.ts                # Haversine distance calculation
+  historyFilters.ts     # Vehicle history timeline filtering
+  motionTokens.ts       # Shared motion tokens: duration, easing, distance, interaction, colors
+  useAutocompleteSuggestions.ts  # Google Places autocomplete hook
   availability.ts       # Slot computation (shared by the availability and booking APIs)
                         # + the UTC slot formatters every caller must use — see Conventions
   email.ts              # Resend email sending (workshop staff invites)
@@ -158,7 +164,7 @@ User (role: MECHANIC | OWNER; MECHANICs also have workshopRole: ADMIN | STAFF)
 
 Both of these caused real user-visible bugs. Check them before touching the relevant code.
 
-- **Appointment slots are UTC-anchored naive wall-clock times.** `WorkshopHours.opensMinute`/`closesMinute` have no timezone of their own, so `getAvailableSlots` anchors them with `Date.UTC(...)` — stable regardless of where the server runs. **Anything rendering a `scheduledAt` must format in UTC**, using `SLOT_TIME_FORMATTER` / `SLOT_DAY_FORMATTER` / `SLOT_MONTH_FORMATTER` from `lib/availability.ts`. A formatter without `timeZone: 'UTC'` shows an hour the workshop never opened.
+- **Appointment slots are UTC-anchored naive wall-clock times.** `WorkshopHours.opensMinute`/`closesMinute` have no timezone of their own, so `getAvailableSlots` anchors them with `Date.UTC(...)` — stable regardless of where the server runs. **Anything rendering a `scheduledAt` must format in UTC**, using `SLOT_TIME_FORMATTER` / `SLOT_DATE_TIME_FORMATTER` / `SLOT_DAY_FORMATTER` / `SLOT_MONTH_FORMATTER` from `lib/availability.ts`. A formatter without `timeZone: 'UTC'` shows an hour the workshop never opened. Reach for `SLOT_DATE_TIME_FORMATTER` on any surface listing slots across **several days** — a bare time there is ambiguous, which is exactly how the mechanic board shipped showing "09:00" with no way to tell today's turno from next week's.
 - **Never construct an API client at module scope.** `lib/email.ts` builds its `Resend` client *inside* `sendWorkshopInviteEmail`, because the constructor throws when `RESEND_API_KEY` is absent and Next evaluates the module while collecting page data — which made `pnpm build` fail outright anywhere the key isn't set at build time. Same reasoning applies to any future SDK client.
 
 ## Code Quality — SonarQube

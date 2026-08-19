@@ -12,10 +12,13 @@ checklists need a browser and a running app, and were left unticked rather than
 claimed. This entry exists so that owed verification does not evaporate when the
 PRs merge.
 
-**PR #15 has since merged with its invite checks still unrun**, which is exactly
-the evaporation this entry exists to prevent. Merged is not verified: the invite
-sending path has never been exercised even once, because
+**Both PRs have since merged.** #15's invite checks were never run, which is
+exactly the evaporation this entry exists to prevent: the invite sending path has
+not been exercised even once, because
 [Resend has no verified sending domain](resend-sending-domain-not-configured.md).
+#16 was tested locally before merge, but which of its checks were actually
+covered is unrecorded — tick the ones below that were, so the remainder is
+honest. Merged is not verified.
 
 Delete this file once the checks below have been run.
 
