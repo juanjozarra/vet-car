@@ -24,7 +24,7 @@ export default async function MechanicVehiclesPage() {
     label: v.nickname ?? `${v.year} ${v.make} ${v.model}`,
     plate: v.plate,
     vin: v.vin,
-    ownerName: v.owner.name ?? 'Sin nombre',
+    ownerName: v.owner ? (v.owner.name ?? 'Sin nombre') : 'Sin dueño',
   }))
 
   return (

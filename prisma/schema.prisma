@@ -171,11 +171,11 @@ model Vehicle {
   mileage    Int?
   photoUrl   String?
   plateState String?
-  ownerId    String
+  ownerId    String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  owner        User          @relation("VehicleOwner", fields: [ownerId], references: [id])
+  owner        User?         @relation("VehicleOwner", fields: [ownerId], references: [id])
   workOrders   WorkOrder[]
   appointments Appointment[]
   historyEntries HistoryEntry[]
