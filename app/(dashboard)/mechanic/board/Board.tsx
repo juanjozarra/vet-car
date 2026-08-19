@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils'
 import { AppointmentCard, type AppointmentCardData } from './AppointmentCard'
 import { TicketCard, TicketCardBody, type TicketCardData } from './TicketCard'
 import { TicketDialog } from './TicketDialog'
+import { ReceiveVehicleDialog, type WorkshopVehicleOption } from './ReceiveVehicleDialog'
 import { WORK_ORDER_STATUS_OPTIONS, WORK_ORDER_STATUS_DOT_CLASS } from '@/lib/workOrderStatus'
 import type { WorkOrderStatus } from '@prisma/client'
 
@@ -33,6 +34,7 @@ interface BoardProps {
   scheduledAppointments: AppointmentCardData[]
   tickets: TicketCardData[]
   mechanics: Mechanic[]
+  workshopVehicles: WorkshopVehicleOption[]
 }
 
 const columnLabel =
@@ -82,7 +84,7 @@ function StatusColumn({
   )
 }
 
-export function Board({ scheduledAppointments, tickets, mechanics }: BoardProps) {
+export function Board({ scheduledAppointments, tickets, mechanics, workshopVehicles }: BoardProps) {
   const router = useRouter()
   const [ticketList, setTicketList] = useState(tickets)
   const [syncedTickets, setSyncedTickets] = useState(tickets)
@@ -139,9 +141,12 @@ export function Board({ scheduledAppointments, tickets, mechanics }: BoardProps)
             <span className="size-1 rounded-full bg-primary" aria-hidden="true" />
             Tablero
           </span>
-          <h1 className="font-display text-4xl font-medium leading-[1.05] tracking-[-0.03em] text-foreground sm:text-5xl">
-            Turnos y órdenes de trabajo.
-          </h1>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <h1 className="font-display text-4xl font-medium leading-[1.05] tracking-[-0.03em] text-foreground sm:text-5xl">
+              Turnos y órdenes de trabajo.
+            </h1>
+            <ReceiveVehicleDialog vehicles={workshopVehicles} />
+          </div>
         </motion.div>
         <DndContext
           id="mechanic-board"

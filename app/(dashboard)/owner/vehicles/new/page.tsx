@@ -5,6 +5,7 @@ import { getUserImage } from '@/lib/user'
 import { DashboardNav } from '@/components/shared/DashboardNav'
 import { DashboardFooter } from '@/components/shared/DashboardFooter'
 import { NewVehicleForm } from './NewVehicleForm'
+import { ClaimVehicleForm } from './ClaimVehicleForm'
 
 export default async function NewVehiclePage() {
   const session = await getServerSession(authOptions)
@@ -23,6 +24,7 @@ export default async function NewVehiclePage() {
       <main className="flex-1 pt-32 sm:pt-36">
         <div className="mx-auto w-full max-w-[1200px] px-4 sm:px-8">
           <NewVehicleForm />
+          <ClaimVehicleForm />
         </div>
       </main>
       <DashboardFooter />

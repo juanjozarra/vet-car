@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { parseVehicleInput } from '@/lib/vehicleInput'
 import { Prisma } from '@prisma/client'
 
 export async function POST(request: Request) {
@@ -11,29 +12,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { nickname, vin, make, model, year, plate, plateState, mileage } =
-    await request.json()
-
-  if (!make || !model || !year) {
-    return NextResponse.json(
-      { error: 'Make, model, and year are required' },
-      { status: 400 }
-    )
+  const parsed = parseVehicleInput(await request.json())
+  if ('error' in parsed) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 })
   }
 
   try {
     const vehicle = await prisma.vehicle.create({
-      data: {
-        nickname: nickname || null,
-        vin: vin || null,
-        make,
-        model,
-        year: parseInt(year, 10),
-        plate: plate || null,
-        plateState: plateState || null,
-        mileage: mileage ? parseInt(mileage, 10) : null,
-        ownerId: session.user.id,
-      },
+      data: { ...parsed, ownerId: session.user.id },
     })
     return NextResponse.json(vehicle, { status: 201 })
   } catch (error) {
