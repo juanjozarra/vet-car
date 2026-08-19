@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type FormEvent } from 'react'
+import { useState, type SubmitEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence, MotionConfig } from 'motion/react'
 import { motionTokens } from '@/lib/motionTokens'
@@ -99,7 +99,7 @@ export function WorkshopSettingsForm({
     setDays(prev => prev.map(d => (d.dayOfWeek === dayOfWeek ? { ...d, ...patch } : d)))
   }
 
-  async function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: SubmitEvent) {
     e.preventDefault()
     setError(null)
     setSaved(false)

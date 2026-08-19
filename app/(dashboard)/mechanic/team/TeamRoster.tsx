@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type SubmitEvent } from "react";
 import { useRouter } from "next/navigation";
 import { motion, MotionConfig } from "motion/react";
 import { motionTokens } from "@/lib/motionTokens";
@@ -74,7 +74,7 @@ export function TeamRoster({
   const [cancelingId, setCancelingId] = useState<string | null>(null);
   const [rosterError, setRosterError] = useState<string | null>(null);
 
-  async function handleInvite(e: FormEvent) {
+  async function handleInvite(e: SubmitEvent) {
     e.preventDefault();
     setInviteError(null);
     setInviteSubmitting(true);

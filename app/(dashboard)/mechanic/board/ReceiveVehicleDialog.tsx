@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type ChangeEvent, type FormEvent } from 'react'
+import { useState, type ChangeEvent, type SubmitEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Dialog,
@@ -56,11 +56,11 @@ function TabButton({
   active,
   onClick,
   children,
-}: {
+}: Readonly<{
   active: boolean
   onClick: () => void
   children: React.ReactNode
-}) {
+}>) {
   return (
     <button
       type="button"
@@ -78,7 +78,7 @@ function TabButton({
   )
 }
 
-export function ReceiveVehicleDialog({ vehicles }: { vehicles: WorkshopVehicleOption[] }) {
+export function ReceiveVehicleDialog({ vehicles }: Readonly<{ vehicles: WorkshopVehicleOption[] }>) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<Tab>('existing')
@@ -119,7 +119,7 @@ export function ReceiveVehicleDialog({ vehicles }: { vehicles: WorkshopVehicleOp
     return (value: string) => setVehicle(prev => ({ ...prev, [name]: value }))
   }
 
-  async function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: SubmitEvent) {
     e.preventDefault()
     setError(null)
 

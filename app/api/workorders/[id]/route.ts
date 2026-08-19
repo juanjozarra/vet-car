@@ -33,7 +33,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
   if (mechanicId !== undefined) {
     const target = await prisma.user.findUnique({ where: { id: mechanicId }, select: { workshopId: true } })
-    if (!target || target.workshopId !== session.user.workshopId) {
+    if (target?.workshopId !== session.user.workshopId) {
       return NextResponse.json({ error: 'El mecánico debe pertenecer a tu taller' }, { status: 400 })
     }
   }
