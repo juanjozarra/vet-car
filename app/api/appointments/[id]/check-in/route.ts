@@ -19,7 +19,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     where: { id },
     include: { workOrder: { select: { id: true } } },
   })
-  if (!appointment || appointment.workshopId !== session.user.workshopId) {
+  if (appointment?.workshopId !== session.user.workshopId) {
     return NextResponse.json({ error: 'Appointment not found' }, { status: 404 })
   }
   if (appointment.status !== 'SCHEDULED' || appointment.workOrder) {

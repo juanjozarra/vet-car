@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, type ChangeEvent, type FormEvent } from 'react'
+import { useState, useRef, type ChangeEvent, type SubmitEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, MotionConfig } from 'motion/react'
 import { motionTokens } from '@/lib/motionTokens'
@@ -82,7 +82,7 @@ export function ProfileForm({ name, email, phone, address, image }: ProfileFormP
     }
   }
 
-  async function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: SubmitEvent) {
     e.preventDefault()
     setError(null)
     setSubmitting(true)

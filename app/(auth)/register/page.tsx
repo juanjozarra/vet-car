@@ -28,7 +28,7 @@ function RegisterForm() {
   const [showConfirm, setShowConfirm] = useState(false)
   const [acceptedTerms, setAcceptedTerms] = useState(false)
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
     setError('')
 

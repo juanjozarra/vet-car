@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useState, type SubmitEvent, type ReactNode } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion, MotionConfig } from 'motion/react'
@@ -381,7 +381,7 @@ function BookingModal({
   const hasAnyAvailability = Object.keys(slotsByDate).length > 0
   const selectedDaySlots = selectedDate ? slotsByDate[dateKey(selectedDate)] ?? [] : []
 
-  async function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: SubmitEvent) {
     e.preventDefault()
     if (!selectedSlot) {
       setError('Elegí un horario disponible.')
@@ -477,7 +477,7 @@ function BookingModal({
               onSelect={date => { setSelectedDate(date); setSelectedSlot(null) }}
               isDayDisabled={date => (slotsByDate[dateKey(date)] ?? []).length === 0}
               minMonth={next14Days[0]}
-              maxMonth={next14Days[next14Days.length - 1]}
+              maxMonth={next14Days.at(-1)}
               className="w-full"
             />
           </div>

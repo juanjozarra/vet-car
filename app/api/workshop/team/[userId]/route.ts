@@ -19,7 +19,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ u
   }
 
   const target = await prisma.user.findUnique({ where: { id: userId } })
-  if (!target || target.workshopId !== session.user.workshopId) {
+  if (target?.workshopId !== session.user.workshopId) {
     return NextResponse.json({ error: 'Mecánico no encontrado' }, { status: 404 })
   }
   if (target.workshopRole === 'ADMIN') {

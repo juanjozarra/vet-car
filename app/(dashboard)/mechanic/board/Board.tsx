@@ -84,7 +84,7 @@ function StatusColumn({
   )
 }
 
-export function Board({ scheduledAppointments, tickets, mechanics, workshopVehicles }: BoardProps) {
+export function Board({ scheduledAppointments, tickets, mechanics, workshopVehicles }: Readonly<BoardProps>) {
   const router = useRouter()
   const [ticketList, setTicketList] = useState(tickets)
   const [syncedTickets, setSyncedTickets] = useState(tickets)
