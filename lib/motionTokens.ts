@@ -31,3 +31,14 @@ export const motionTokens = {
     hoverBorder: 'rgba(255, 255, 255, 0.18)',
   },
 }
+
+/**
+ * The first-render entrance every view owes its sections: fade-up with blur.
+ * Spread onto the top-level `motion.*` element of each section, staggering
+ * `delay` in reading order. See DESIGN.md § Motion.
+ */
+export const enter = (delay = 0) => ({
+  initial: { opacity: 0, y: motionTokens.distance.md, filter: 'blur(4px)' },
+  animate: { opacity: 1, y: 0, filter: 'blur(0px)' },
+  transition: { duration: 0.6, ease: motionTokens.easing.fluid, delay },
+})

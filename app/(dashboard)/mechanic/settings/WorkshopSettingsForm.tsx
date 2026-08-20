@@ -3,7 +3,7 @@
 import { useState, type SubmitEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence, MotionConfig } from 'motion/react'
-import { motionTokens } from '@/lib/motionTokens'
+import { enter, motionTokens } from '@/lib/motionTokens'
 import { CheckIcon } from '@/components/ui/icons'
 import { Button, ButtonIconIsland } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -50,12 +50,6 @@ interface WorkshopSettingsFormProps {
 const sectionTitle =
   'font-mono text-[0.625rem] font-medium uppercase tracking-[0.18em] text-primary/80'
 const sectionHint = 'text-sm text-muted-foreground'
-
-const enter = (delay: number) => ({
-  initial: { opacity: 0, y: motionTokens.distance.md, filter: 'blur(4px)' },
-  animate: { opacity: 1, y: 0, filter: 'blur(0px)' },
-  transition: { duration: 0.6, ease: motionTokens.easing.fluid, delay },
-})
 
 export function WorkshopSettingsForm({
   initialSpecialties,

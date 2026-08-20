@@ -3,7 +3,7 @@
 import { useState, type SubmitEvent } from "react";
 import { useRouter } from "next/navigation";
 import { motion, MotionConfig } from "motion/react";
-import { motionTokens } from "@/lib/motionTokens";
+import { enter } from "@/lib/motionTokens";
 import { Button, ButtonIconIsland } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -51,12 +51,6 @@ const sectionLabel =
 const DATE_FORMATTER = new Intl.DateTimeFormat("es-AR", {
   day: "numeric",
   month: "short",
-});
-
-const enter = (delay: number) => ({
-  initial: { opacity: 0, y: motionTokens.distance.md, filter: "blur(4px)" },
-  animate: { opacity: 1, y: 0, filter: "blur(0px)" },
-  transition: { duration: 0.6, ease: motionTokens.easing.fluid, delay },
 });
 
 export function TeamRoster({

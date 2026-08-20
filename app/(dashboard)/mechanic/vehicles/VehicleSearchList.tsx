@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { motion, MotionConfig } from 'motion/react'
-import { motionTokens } from '@/lib/motionTokens'
+import { enter } from '@/lib/motionTokens'
 import { SearchIcon, CarIcon, ChevronRightIcon } from '@/components/ui/icons'
 import { Input } from '@/components/ui/input'
 
@@ -18,12 +18,6 @@ interface VehicleSearchListItem {
 interface VehicleSearchListProps {
   vehicles: VehicleSearchListItem[]
 }
-
-const enter = (delay: number) => ({
-  initial: { opacity: 0, y: motionTokens.distance.md, filter: 'blur(4px)' },
-  animate: { opacity: 1, y: 0, filter: 'blur(0px)' },
-  transition: { duration: 0.6, ease: motionTokens.easing.fluid, delay },
-})
 
 export function VehicleSearchList({ vehicles }: VehicleSearchListProps) {
   const [query, setQuery] = useState('')

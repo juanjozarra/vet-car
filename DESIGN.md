@@ -73,7 +73,24 @@ tamaño por `className` (default `size-4`). No usar lucide/FontAwesome directos.
 
 - Curva de masa: `cubic-bezier(0.32,0.72,0,1)` (`ease-fluid` / `easing.fluid`) para
   entradas y layout; `smooth` para micro; nunca `linear`/`ease-in-out` en UI.
-- Entradas: fade-up con blur (`y:16, blur 4–8px → 0`) ~0.6s, stagger ≤ 0.1s.
+- **Entrada de primer render — obligatoria en toda vista nueva.** Cada sección de
+  una vista (hero, filtros, tarjetas, listas, estados vacíos) entra con fade-up y
+  blur usando el helper compartido `enter(delay)` de `lib/motionTokens.ts`:
+
+  ```tsx
+  import { enter, motionTokens } from '@/lib/motionTokens'
+
+  <MotionConfig reducedMotion="user">
+    <motion.section {...enter(0)}>…</motion.section>
+    <motion.div {...enter(0.1)}>…</motion.div>
+  </MotionConfig>
+  ```
+
+  No redefinir el helper localmente — se importa. Los `delay` escalonan en orden
+  de lectura, ≤ 0.1s entre secciones (ítems repetidos: `base + i * 0.03…0.07`).
+  Una vista sin esta entrada se lee como rota al lado del resto de la app; si un
+  `AnimatePresence` envuelve la lista, **no** usar `initial={false}`, que
+  justamente cancela la animación de primer render.
 - Hover en cards: lift `y:-3/-4`; press: `scale .98`.
 - Modales/menús: `AnimatePresence mode="wait"`; overlay `bg-black/65 backdrop-blur-md`.
 - Todo envuelto en `MotionConfig reducedMotion="user"`; solo `transform`/`opacity`/`filter`.

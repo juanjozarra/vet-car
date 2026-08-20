@@ -1,5 +1,9 @@
+'use client'
+
 import Link from 'next/link'
 import type { ComponentProps } from 'react'
+import { motion, MotionConfig } from 'motion/react'
+import { enter } from '@/lib/motionTokens'
 import { DashboardNav } from '@/components/shared/DashboardNav'
 import { DashboardFooter } from '@/components/shared/DashboardFooter'
 import { VehicleHistoryTimeline } from '@/components/shared/VehicleHistoryTimeline'
@@ -19,8 +23,9 @@ export function VehicleDetailView({ vehicle, currentUserId, basePath, nav }: Veh
     <div className="flex flex-col min-h-screen bg-background">
       <DashboardNav {...nav} />
       <main className="flex-1 pt-32 sm:pt-36">
+        <MotionConfig reducedMotion="user">
         <div className="mx-auto flex w-full max-w-[900px] flex-col gap-8 px-4 sm:px-8">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          <motion.div {...enter(0)} className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               {vehicle.photoUrl && (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -53,13 +58,14 @@ export function VehicleDetailView({ vehicle, currentUserId, basePath, nav }: Veh
                 </ButtonIconIsland>
               </Link>
             </Button>
-          </div>
+          </motion.div>
           <VehicleHistoryTimeline
             entries={vehicle.historyEntries}
             currentUserId={currentUserId}
             basePath={basePath}
           />
         </div>
+        </MotionConfig>
       </main>
       <DashboardFooter />
     </div>
