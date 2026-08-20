@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion, MotionConfig } from 'motion/react'
-import { motionTokens } from '@/lib/motionTokens'
+import { enter, motionTokens } from '@/lib/motionTokens'
 import { WrenchIcon, OdometerIcon, SearchIcon, FilterIcon, TrashIcon } from '@/components/ui/icons'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -77,7 +77,7 @@ export function VehicleHistoryTimeline({ entries, currentUserId, basePath }: Veh
 
   if (entries.length === 0) {
     return (
-      <div className="bezel">
+      <motion.div {...enter(0.1)} className="bezel">
         <div className="bezel-core flex flex-col items-center justify-center gap-4 px-6 py-16 text-center">
           <span className="flex size-14 items-center justify-center rounded-full bg-white/[0.04] text-muted-foreground ring-1 ring-white/[0.08]">
             <WrenchIcon className="size-6" />
@@ -87,7 +87,7 @@ export function VehicleHistoryTimeline({ entries, currentUserId, basePath }: Veh
             <span className="text-sm text-muted-foreground">Agregá el primero para empezar el historial.</span>
           </div>
         </div>
-      </div>
+      </motion.div>
     )
   }
 
@@ -96,7 +96,7 @@ export function VehicleHistoryTimeline({ entries, currentUserId, basePath }: Veh
       <div className="flex flex-col gap-4">
         <FormErrorBanner error={error} />
 
-        <div className="bezel">
+        <motion.div {...enter(0.1)} className="bezel">
           <div className="bezel-core flex flex-col gap-3 p-3 lg:flex-row lg:items-center lg:gap-4">
             <div className="relative lg:w-64 lg:shrink-0">
               <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground/60">
@@ -146,16 +146,16 @@ export function VehicleHistoryTimeline({ entries, currentUserId, basePath }: Veh
               {filtered.length} de {entries.length}
             </span>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bezel">
+        <motion.div {...enter(0.18)} className="bezel">
           <div className="bezel-core flex flex-col p-1.5">
             {filtered.length === 0 ? (
               <p className="px-3 py-10 text-center text-sm text-muted-foreground">
                 Ningún registro coincide con los filtros.
               </p>
             ) : (
-              <AnimatePresence mode="popLayout" initial={false}>
+              <AnimatePresence mode="popLayout">
                 {filtered.map((entry, i) => (
                   <motion.div
                     key={entry.id}
@@ -240,7 +240,7 @@ export function VehicleHistoryTimeline({ entries, currentUserId, basePath }: Veh
               </AnimatePresence>
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
     </MotionConfig>
   )

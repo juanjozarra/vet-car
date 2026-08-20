@@ -15,7 +15,7 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core'
-import { motionTokens } from '@/lib/motionTokens'
+import { enter } from '@/lib/motionTokens'
 import { cn } from '@/lib/utils'
 import { AppointmentCard, type AppointmentCardData } from './AppointmentCard'
 import { TicketCard, TicketCardBody, type TicketCardData } from './TicketCard'
@@ -39,12 +39,6 @@ interface BoardProps {
 
 const columnLabel =
   'font-mono text-[0.625rem] font-medium uppercase tracking-[0.18em] text-muted-foreground/70'
-
-const enter = (delay: number) => ({
-  initial: { opacity: 0, y: motionTokens.distance.md, filter: 'blur(4px)' },
-  animate: { opacity: 1, y: 0, filter: 'blur(0px)' },
-  transition: { duration: 0.6, ease: motionTokens.easing.fluid, delay },
-})
 
 function StatusColumn({
   status,
